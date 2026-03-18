@@ -266,6 +266,15 @@ function navigate(view, params = {}) {
   App.currentView = view;
   App.params = params;
   updateActiveNav(view);
+  // Abrir submenú de protocolos automáticamente si se navega a uno
+  if (view === 'protocol-detail' || view === 'protocols') {
+    const menu = document.getElementById('proto-submenu');
+    const arrow = document.getElementById('proto-arrow');
+    if (menu && !menu.classList.contains('open')) {
+      menu.classList.add('open');
+      if (arrow) arrow.style.transform = 'rotate(180deg)';
+    }
+  }
   renderView(view, params);
 }
 
@@ -375,20 +384,27 @@ function buildLayout() {
         <a class="nav-item" data-view="protocols" onclick="navigate('protocols')">
           <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span>Todos los Protocolos
         </a>
-        ${[
-          ['PREXOR','fa-ear-deaf','Ruido Ocupacional'],
-          ['PLANESI','fa-lungs','Exposición a Sílice'],
-          ['TMERT','fa-person-walking','Ergonomía TMERT'],
-          ['PSICOSOCIAL','fa-brain','Riesgos Psicosociales'],
-          ['UV','fa-sun','Radiación UV'],
-          ['MMC','fa-box','Manejo Manual Cargas'],
-          ['HIC','fa-mountain','Hipobaria Intermitente'],
-          ['HUMOS','fa-smog','Humos Metálicos'],
-        ].map(([id,ic,label]) => `
-          <a class="nav-item" data-view="protocol-detail" data-pid="${id}" onclick="navigate('protocol-detail',{id:'${id}'})">
-            <span class="nav-icon"><i class="fas ${ic}"></i></span><span class="truncate text-xs">${label}</span>
-          </a>
-        `).join('')}
+        <div id="proto-submenu-toggle" class="nav-item" style="cursor:pointer" onclick="toggleProtoSubmenu()">
+          <span class="nav-icon"><i class="fas fa-layer-group"></i></span>
+          <span style="flex:1;font-size:12px">Por Protocolo</span>
+          <i id="proto-arrow" class="fas fa-chevron-down" style="font-size:10px;color:rgba(0,180,216,0.5);transition:transform 0.3s;transform:rotate(180deg)"></i>
+        </div>
+        <div id="proto-submenu" class="proto-submenu open">
+          ${[
+            ['PREXOR','fa-ear-deaf','Ruido Ocupacional'],
+            ['PLANESI','fa-lungs','Exposición a Sílice'],
+            ['TMERT','fa-person-walking','Ergonomía TMERT'],
+            ['PSICOSOCIAL','fa-brain','Riesgos Psicosociales'],
+            ['UV','fa-sun','Radiación UV'],
+            ['MMC','fa-box','Manejo Manual Cargas'],
+            ['HIC','fa-mountain','Hipobaria Intermitente'],
+            ['HUMOS','fa-smog','Humos Metálicos'],
+          ].map(([id,ic,label]) => `
+            <a class="nav-item nav-item-proto" data-view="protocol-detail" data-pid="${id}" onclick="navigate('protocol-detail',{id:'${id}'})">
+              <span class="nav-icon"><i class="fas ${ic}"></i></span><span style="white-space:nowrap;overflow:visible">${label}</span>
+            </a>
+          `).join('')}
+        </div>
 
         <div class="nav-section-label mt-1">Análisis y Reportes</div>
         <a class="nav-item" data-view="miper" onclick="navigate('miper')">
@@ -532,6 +548,14 @@ function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   sidebar.classList.toggle('collapsed');
   sidebar.classList.toggle('mobile-open');
+}
+
+function toggleProtoSubmenu() {
+  const menu = document.getElementById('proto-submenu');
+  const arrow = document.getElementById('proto-arrow');
+  if (!menu) return;
+  const isOpen = menu.classList.toggle('open');
+  if (arrow) arrow.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
 }
 
 function setPageTitle(title, subtitle) {

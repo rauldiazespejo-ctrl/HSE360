@@ -12,7 +12,7 @@ export const users: any[] = [
   {
     id: 1,
     rut: '10.234.567-8',
-    nombres: 'Raúl Alejandro',
+    nombres: 'Raúl',
     apellidos: 'Díaz Espejo',
     email: 'raul.diaz@hse360.cl',
     password: 'HSE360admin!',
