@@ -513,6 +513,48 @@ export const protocolsDB: Record<string, any> = {
         prox_evaluacion: '2027-02-10',
         estado: 'vigente', observaciones: 'Cr+6 por debajo del límite legal. Continuar uso EPR obligatorio. Verificar VLE semestral.'
       },
+      {
+        id: 2, worker_id: 5, worker_nombre: 'Pedro Pablo Sánchez Rojas', rut: '11.111.111-1',
+        cargo: 'Soldador de Producción', area: 'Producción', fecha_eval: '2026-02-15',
+        metales_exposicion: ['Fe','Mn','Cr+6','Ni'],
+        muestreo_ambiental_fecha: '2026-01-15',
+        resultado_fe_mgm3: 3.8, resultado_mn_mgm3: 0.16, resultado_cr6_mgm3: 0.041,
+        limite_fe_ds594: 5.0, limite_mn_ds594: 0.2, limite_cr6_ds594: 0.05,
+        espirometria_fecha: '2026-02-15', espirometria_resultado: 'Normal. CVF 95% teórico. VEF1/CVF 79%. Leve caída VEF1.',
+        rx_torax_fecha: '2026-01-10', rx_torax_resultado: 'Sin neumoconiosis. OIT 0/0. Seguimiento.',
+        plombemia_ugl: null, creatinina_mgdl: null, arsenico_urinario_ugL: null,
+        ventilacion_vle: true, epr_entregado: true, epr_prueba_ajuste: true,
+        prox_evaluacion: '2027-02-15',
+        estado: 'vigente', observaciones: 'Cr+6 cercano al LPP (82%). Reforzar uso EPR y verificar eficiencia VLE. Siguiente muestreo semestral.'
+      },
+      {
+        id: 3, worker_id: 4, worker_nombre: 'Ana Patricia López Vega', rut: '8.765.432-1',
+        cargo: 'Soldadora Auxiliar', area: 'Producción', fecha_eval: '2026-01-20',
+        metales_exposicion: ['Fe','Cu','Zn'],
+        muestreo_ambiental_fecha: '2026-01-10',
+        resultado_fe_mgm3: 1.2, resultado_mn_mgm3: null, resultado_cr6_mgm3: null,
+        limite_fe_ds594: 5.0, limite_mn_ds594: 0.2, limite_cr6_ds594: 0.05,
+        espirometria_fecha: '2026-01-20', espirometria_resultado: 'Normal. CVF 102% teórico. VEF1/CVF 84%.',
+        rx_torax_fecha: null, rx_torax_resultado: null,
+        plombemia_ugl: null, creatinina_mgdl: null, arsenico_urinario_ugL: null,
+        ventilacion_vle: true, epr_entregado: true, epr_prueba_ajuste: false,
+        prox_evaluacion: '2027-01-20',
+        estado: 'vigente', observaciones: 'Exposición principalmente a humos Fe/Cu/Zn. Riesgo fiebre por humos. Pendiente prueba de ajuste EPR y Rx tórax OIT preempleo.'
+      },
+      {
+        id: 4, worker_id: 9, worker_nombre: 'Ricardo Andrés Muñoz Silva', rut: '14.321.098-7',
+        cargo: 'Mecánico Industrial', area: 'Mantenimiento', fecha_eval: '2026-03-01',
+        metales_exposicion: ['Pb','Cd'],
+        muestreo_ambiental_fecha: '2026-02-20',
+        resultado_fe_mgm3: null, resultado_mn_mgm3: null, resultado_cr6_mgm3: null,
+        limite_fe_ds594: 5.0, limite_mn_ds594: 0.2, limite_cr6_ds594: 0.05,
+        espirometria_fecha: '2026-03-01', espirometria_resultado: 'Normal. CVF 97% teórico. VEF1/CVF 80%.',
+        rx_torax_fecha: '2025-06-15', rx_torax_resultado: 'Sin hallazgos. OIT 0/0.',
+        plombemia_ugl: 18, creatinina_mgdl: 95, arsenico_urinario_ugL: null,
+        ventilacion_vle: false, epr_entregado: true, epr_prueba_ajuste: true,
+        prox_evaluacion: '2026-09-01',
+        estado: 'por_vencer', observaciones: '⚠️ Sin VLE instalada en área baterías. Plombemia 18 µg/dL (bajo LBE 40). Gestionar instalación VLE urgente. Monitoreo biológico Pb semestral (cancerígeno Cd).'
+      },
     ],
     estadisticas: { total_vigilados: 8, sobre_limite_legal: 0, con_monitoreo_biologico: 5, con_espirometria_vigente: 7, con_rx_torax_vigente: 6, cumplimiento_pct: 45 }
   }

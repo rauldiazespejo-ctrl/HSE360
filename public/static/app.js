@@ -182,25 +182,10 @@ function renderLogin() {
             </button>
           </div>
 
-          <!-- Demo credentials -->
-          <div style="margin-top:24px;padding:16px;background:#f8fafc;border:1px solid #edf0f5;border-radius:12px;">
-            <div style="font-size:11.5px;font-weight:700;color:#475569;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-              <i class="fas fa-circle-info" style="color:#94a3b8;"></i> Accesos de demostración
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px;">
-              ${[
-                ['fa-crown','#f59e0b','Super Admin','raul.diaz@hse360.cl','HSE360admin!'],
-                ['fa-shield-halved','#3b82f6','Prevencionista','claudia.torres@hse360.cl','Prev2026!'],
-                ['fa-stethoscope','#0096c7','Médico','dr.morales@hse360.cl','Med2026!'],
-              ].map(([ic,cl,rol,em,pw]) => `
-                <button onclick="fillLogin('${em}','${pw}')" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:white;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:12px;transition:all 0.2s;text-align:left;" onmouseover="this.style.borderColor='#1a237e';this.style.background='#eff2ff'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='white'">
-                  <span style="display:flex;align-items:center;gap:7px;color:#374151;font-weight:600;">
-                    <i class="fas ${ic}" style="color:${cl};"></i>${rol}
-                  </span>
-                  <span style="font-family:monospace;font-size:11px;color:#64748b;">${em}</span>
-                </button>
-              `).join('')}
-            </div>
+          <!-- Contacto soporte -->
+          <div style="margin-top:24px;padding:14px 16px;background:#f8fafc;border:1px solid #edf0f5;border-radius:12px;text-align:center;">
+            <div style="font-size:12px;color:#64748b;"><i class="fas fa-lock" style="color:#94a3b8;margin-right:6px;"></i>Acceso restringido a personal autorizado</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:6px;">¿Problemas para ingresar? Contacta al administrador del sistema.</div>
           </div>
 
           <!-- Legal -->
@@ -4429,6 +4414,596 @@ function showIRLModal(pid) {
 // ================================================================
 // PROTOCOLO DETALLE — DS 44 actualizado
 // ================================================================
+// ================================================================
+// PROTOCOLO HUMOS METÁLICOS — Vista Especializada
+// Res. Exenta N°606/2023 MINSAL · DS 594 · Circ. SUSESO 3838/2024
+// ================================================================
+function renderHumosDetail(p, proto, pct, content) {
+  const color = '#78350f';
+  const colorLight = '#fef3c7';
+  const evals = proto.evaluaciones || [];
+  const stats = proto.estadisticas || {};
+
+  // Grupos de riesgo por metal
+  const metalesGrupos = [
+    { metal:'Fe / Mn', nombre:'Hierro / Manganeso', icon:'fa-industry', riesgo:'Alto', efecto:'Manganismo, neumoconiosis', lpp_fe:'5.0 mg/m³', lpp_mn:'0.2 mg/m³', color:'#92400e', ocupaciones:'Soldadores, fundidores' },
+    { metal:'Cr+6', nombre:'Cromo Hexavalente', icon:'fa-radiation', riesgo:'Cancerígeno G1 IARC', efecto:'Cáncer pulmonar, perforación septo', lpp:'0.05 mg/m³', color:'#dc2626', ocupaciones:'Soldadores acero inox, cromado' },
+    { metal:'Ni', nombre:'Níquel', icon:'fa-atom', riesgo:'Cancerígeno G1 IARC', efecto:'Cáncer pulmonar/nasal, dermatitis', lpp:'1.0 mg/m³', color:'#b91c1c', ocupaciones:'Soldadura MIG/TIG, galvanoplastia' },
+    { metal:'Pb', nombre:'Plomo', icon:'fa-skull-crossbones', riesgo:'Muy Alto — Neurotóxico', efecto:'Plombemia ≥40µg/dL → restricción laboral', lpp:'0.1 mg/m³', color:'#7c3aed', ocupaciones:'Fundición Pb, baterías, soldadura' },
+    { metal:'Cd', nombre:'Cadmio', icon:'fa-radiation-alt', riesgo:'Cancerígeno G1 IARC', efecto:'Cáncer renal y pulmonar, nefrotoxicidad', lpp:'0.01 mg/m³', color:'#dc2626', ocupaciones:'Galvanoplastia, soldadura latón' },
+    { metal:'As', nombre:'Arsénico', icon:'fa-biohazard', riesgo:'Cancerígeno G1 IARC', efecto:'Cáncer piel/pulmón, neuropatía', lpp:'0.01 mg/m³', color:'#b91c1c', ocupaciones:'Fundición cobre, pesticidas' },
+    { metal:'Cu / Zn', nombre:'Cobre / Zinc', icon:'fa-fire', riesgo:'Medio', efecto:'Fiebre por humos metálicos (metal fume fever)', lpp_cu:'0.2 mg/m³', lpp_zn:'4.0 mg/m³', color:'#d97706', ocupaciones:'Soldadura, galvanoplastia' },
+  ];
+
+  // Evaluaciones con campos específicos HUMOS
+  const evalRows = evals.length > 0 ? evals.map(ev => {
+    const feOk = ev.resultado_fe_mgm3 != null ? ev.resultado_fe_mgm3 <= (ev.limite_fe_ds594||5.0) : null;
+    const mnOk = ev.resultado_mn_mgm3 != null ? ev.resultado_mn_mgm3 <= (ev.limite_mn_ds594||0.2) : null;
+    const cr6Ok = ev.resultado_cr6_mgm3 != null ? ev.resultado_cr6_mgm3 <= (ev.limite_cr6_ds594||0.05) : null;
+    return `
+    <tr>
+      <td>
+        <div class="font-semibold text-sm">${ev.worker_nombre||ev.trabajador_nombre||'—'}</div>
+        <div class="text-xs text-gray-400">${ev.rut||'—'} · ${ev.cargo||'—'}</div>
+        <div class="text-xs mt-0.5">${(ev.metales_exposicion||[]).map(m=>`<span class="badge badge-orange text-xs" style="font-size:9px">${m}</span>`).join(' ')}</div>
+      </td>
+      <td class="text-xs text-gray-600">${formatDate(ev.muestreo_ambiental_fecha||ev.fecha_eval)}</td>
+      <td>
+        ${ev.resultado_fe_mgm3!=null?`<div class="text-xs ${feOk?'text-green-600':'text-red-600 font-bold'}"><i class="fas fa-circle text-xs mr-1"></i>Fe: ${ev.resultado_fe_mgm3} mg/m³ (LPP ${ev.limite_fe_ds594||5.0})</div>`:''}
+        ${ev.resultado_mn_mgm3!=null?`<div class="text-xs ${mnOk?'text-green-600':'text-red-600 font-bold'}"><i class="fas fa-circle text-xs mr-1"></i>Mn: ${ev.resultado_mn_mgm3} mg/m³ (LPP ${ev.limite_mn_ds594||0.2})</div>`:''}
+        ${ev.resultado_cr6_mgm3!=null?`<div class="text-xs ${cr6Ok?'text-green-600':'text-red-600 font-bold'}"><i class="fas fa-circle text-xs mr-1"></i>Cr+6: ${ev.resultado_cr6_mgm3} mg/m³ (LPP ${ev.limite_cr6_ds594||0.05})</div>`:''}
+        ${!ev.resultado_fe_mgm3&&!ev.resultado_mn_mgm3&&!ev.resultado_cr6_mgm3?`<span class="text-xs text-gray-400">Sin datos muestreo</span>`:''}
+      </td>
+      <td>
+        ${ev.espirometria_fecha?`<div class="text-xs text-green-600"><i class="fas fa-check mr-1"></i>${ev.espirometria_resultado||'Realizada'}</div><div class="text-xs text-gray-400">${formatDate(ev.espirometria_fecha)}</div>`:`<span class="badge badge-red text-xs">Pendiente</span>`}
+      </td>
+      <td>
+        ${ev.rx_torax_fecha?`<div class="text-xs text-green-600"><i class="fas fa-check mr-1"></i>${ev.rx_torax_resultado||'Sin hallazgos'}</div><div class="text-xs text-gray-400">${formatDate(ev.rx_torax_fecha)}</div>`:`<span class="badge badge-red text-xs">Pendiente</span>`}
+      </td>
+      <td>
+        <div class="text-xs">${ev.ventilacion_vle?'<span class="badge badge-green text-xs">VLE ✓</span>':'<span class="badge badge-red text-xs">Sin VLE</span>'}</div>
+        <div class="text-xs mt-1">${ev.epr_entregado?'<span class="badge badge-green text-xs">EPR ✓</span>':'<span class="badge badge-red text-xs">Sin EPR</span>'}</div>
+        ${ev.epr_prueba_ajuste?'<div class="text-xs mt-1"><span class="badge badge-green text-xs">Ajuste ✓</span></div>':''}
+      </td>
+      <td>${estadoBadgeGeneric(ev.estado)}</td>
+      <td class="text-xs text-gray-500">${formatDate(ev.prox_evaluacion)}</td>
+    </tr>`;
+  }).join('') : `
+    <tr><td colspan="8" class="text-center py-10 text-gray-400">
+      <i class="fas fa-smog text-4xl text-amber-200 mb-3 block"></i>
+      <div class="font-semibold text-sm">Sin evaluaciones registradas</div>
+      <div class="text-xs mt-1 mb-3">Registra la primera evaluación de trabajadores expuestos a metales/humos</div>
+      <button class="btn btn-primary text-xs" onclick="showHumosEvalModal()"><i class="fas fa-plus mr-1"></i>Primera Evaluación</button>
+    </td></tr>`;
+
+  content.innerHTML = `
+    <!-- Volver -->
+    <div class="flex items-center gap-3 mb-4">
+      <button class="btn btn-secondary text-sm" onclick="navigate('protocols')">
+        <i class="fas fa-arrow-left mr-1"></i>Volver a Protocolos
+      </button>
+    </div>
+
+    <!-- Header HUMOS -->
+    <div class="card mb-5 overflow-hidden">
+      <div class="p-5 text-white" style="background:linear-gradient(135deg,#92400e,#78350f)">
+        <div class="flex items-start gap-4">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:rgba(255,255,255,0.15)">
+            <i class="fas fa-smog text-3xl"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-2xl font-black">HUMOS — Metales, Metaloides y Humos de Soldadura</div>
+            <p class="text-sm opacity-90 mt-1">Protocolo de Vigilancia Ocupacional por Exposición a Metales y Metaloides — Res. Exenta N°606/2023 MINSAL. Aplica a soldadores, fundidores, trabajadores expuestos a Fe, Mn, Cr+6, Ni, Pb, Cd, As, Cu, Zn.</p>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span class="badge text-xs" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.3)"><i class="fas fa-gavel mr-1"></i>Res. Exenta N°606/2023 MINSAL</span>
+              <span class="badge text-xs" style="background:rgba(255,255,255,0.2);color:white"><i class="fas fa-radiation mr-1"></i>Circ. SUSESO 3838/2024 Cancerígenos</span>
+              <span class="badge text-xs" style="background:rgba(255,255,255,0.2);color:white"><i class="fas fa-file-signature mr-1"></i>IRL obligatorio DS 44 Art.15</span>
+            </div>
+          </div>
+          <div class="text-center flex-shrink-0">
+            <div class="text-4xl font-black">${pct}%</div>
+            <div class="text-xs opacity-80">cumplimiento</div>
+            <div class="w-20 h-1.5 bg-white/20 rounded-full mt-2 mx-auto">
+              <div class="h-full rounded-full bg-amber-300" style="width:${pct}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Alerta cancerígenos -->
+      <div class="flex items-start gap-3 p-4 border-t-0" style="background:#fef2f2;border:1px solid #fecaca;">
+        <i class="fas fa-radiation text-red-600 mt-0.5 flex-shrink-0"></i>
+        <div class="text-xs text-red-800">
+          <strong>⚠️ Contiene cancerígenos Grupo 1 IARC:</strong> Cr+6 (Cromo hexavalente), Ni (Níquel), Cd (Cadmio), As (Arsénico).
+          Aplica Circ. SUSESO N°3838/2024 — Protocolo específico para metales cancerígenos con vigilancia de salud reforzada y monitoreo biológico semestral.
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+      ${kpiCard('Trabajadores Vigilados', stats.total_vigilados||evals.length||'—', 'En programa de vigilancia', 'fa-hard-hat', 'from-amber-700 to-amber-900', 'Res. Exenta N°606/2023')}
+      ${kpiCard('Sobre Límite Legal', stats.sobre_limite_legal||0, 'Superan LPP DS 594', 'fa-radiation', 'from-red-600 to-red-800', 'Acción inmediata requerida')}
+      ${kpiCard('Con Monitoreo Biológico', stats.con_monitoreo_biologico||0, 'Exámenes laboratorio', 'fa-vials', 'from-purple-600 to-purple-800', 'Plombemia · Cd urinario · As urinario')}
+      ${kpiCard('Espirometrías Vigentes', stats.con_espirometria_vigente||0, 'Función pulmonar al día', 'fa-lungs', 'from-sky-600 to-sky-800', 'Anual obligatorio')}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+      <!-- Panel izquierdo -->
+      <div class="space-y-4">
+
+        <!-- Estadísticas -->
+        <div class="card p-4">
+          <h3 class="font-bold text-gray-700 mb-3"><i class="fas fa-chart-pie mr-2" style="color:${color}"></i>Estado Implementación</h3>
+          <div class="text-4xl font-black text-center mb-3" style="color:${color}">${pct}%</div>
+          <div class="progress-bar mb-3"><div class="progress-fill" style="width:${pct}%;background:${color}"></div></div>
+          <div class="space-y-1.5 text-xs">
+            <div class="flex justify-between"><span class="text-gray-500">Total vigilados</span><span class="font-bold">${stats.total_vigilados||evals.length||'—'}</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Sobre límite DS 594</span><span class="font-bold text-red-600">${stats.sobre_limite_legal||0}</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Monitoreo biológico</span><span class="font-bold text-purple-600">${stats.con_monitoreo_biologico||0}</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Espirometría vigente</span><span class="font-bold text-sky-600">${stats.con_espirometria_vigente||0}</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Rx tórax OIT vigente</span><span class="font-bold text-green-600">${stats.con_rx_torax_vigente||0}</span></div>
+          </div>
+        </div>
+
+        <!-- IRL HUMOS -->
+        <div class="card p-4" style="border-left:4px solid #78350f">
+          <div class="flex items-start gap-2">
+            <i class="fas fa-file-signature mt-0.5" style="color:#78350f"></i>
+            <div>
+              <div class="text-xs font-bold" style="color:#78350f">IRL — DS 44 Art.15 · Humos Metálicos</div>
+              <div class="text-xs mt-1 text-gray-600">Exposición a metales/metaloides y humos de soldadura. Riesgos: fiebre por humos, silicosis metálica, cáncer pulmonar (Cr+6, As, Cd), neurotoxicidad (Mn, Pb). Medidas: EPR adecuado, ventilación local exhaustora (VLE), controles ingenieriles.</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary w-full justify-center mt-3 text-xs" onclick="showIRLModal('HUMOS')" style="border-color:#78350f;color:#78350f">
+            <i class="fas fa-file-signature mr-1"></i>Generar IRL Humos Metálicos
+          </button>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="card p-4">
+          <h3 class="font-bold text-gray-700 mb-3"><i class="fas fa-bolt mr-2 text-yellow-500"></i>Acciones Rápidas</h3>
+          <div class="flex flex-col gap-2">
+            <button class="btn btn-primary justify-start text-xs" onclick="showHumosEvalModal()" style="background:#78350f;border-color:#78350f">
+              <i class="fas fa-plus mr-1"></i>Nueva Evaluación Trabajador
+            </button>
+            <button class="btn btn-secondary justify-start text-xs" onclick="showHumosMuestreoModal()">
+              <i class="fas fa-vials mr-1"></i>Registrar Muestreo Ambiental
+            </button>
+            <button class="btn btn-secondary justify-start text-xs" onclick="navigate('epp')">
+              <i class="fas fa-hard-hat mr-1"></i>Gestionar EPR / Respiradores
+            </button>
+            <button class="btn btn-secondary justify-start text-xs" onclick="navigate('workers')">
+              <i class="fas fa-users mr-1"></i>Ver Trabajadores Expuestos
+            </button>
+            <button class="btn btn-secondary justify-start text-xs" onclick="navigate('protocols');setTimeout(()=>switchProtocolView('gantt'),200)">
+              <i class="fas fa-chart-gantt mr-1" style="color:#1a237e"></i>Carta Gantt Anual
+            </button>
+            <button class="btn btn-secondary justify-start text-xs" onclick="showToast('Generando informe PDF Humos Metálicos...','info')">
+              <i class="fas fa-file-pdf text-red-500 mr-1"></i>Informe PDF Protocolo
+            </button>
+          </div>
+        </div>
+
+        <!-- LPP Límites DS 594 -->
+        <div class="card p-4">
+          <h3 class="font-bold text-gray-700 mb-3 text-sm"><i class="fas fa-ruler mr-2 text-amber-700"></i>Límites Permisibles DS 594</h3>
+          <div class="space-y-2 text-xs">
+            ${[
+              {m:'Fe (Hierro)',l:'5.0 mg/m³',t:'TWA (fracción inhalable)'},
+              {m:'Mn (Manganeso)',l:'0.2 mg/m³',t:'TWA'},
+              {m:'Cr+6 (Cancerígeno)',l:'0.05 mg/m³',t:'TWA — IARC G1'},
+              {m:'Ni (Cancerígeno)',l:'1.0 mg/m³',t:'TWA — IARC G1'},
+              {m:'Pb (Plomo)',l:'0.1 mg/m³',t:'TWA (sangre: 40 µg/dL)'},
+              {m:'Cd (Cancerígeno)',l:'0.01 mg/m³',t:'TWA — IARC G1'},
+              {m:'As (Cancerígeno)',l:'0.01 mg/m³',t:'TWA — IARC G1'},
+              {m:'Cu (Cobre)',l:'0.2 mg/m³',t:'TWA'},
+              {m:'Zn (Zinc)',l:'4.0 mg/m³',t:'TWA (fiebre humos)'},
+            ].map(({m,l,t})=>`
+              <div class="flex justify-between items-center py-1 border-b border-gray-100">
+                <span class="text-gray-700 font-medium">${m}</span>
+                <div class="text-right"><div class="font-mono font-bold text-amber-800">${l}</div><div class="text-gray-400 text-xs">${t}</div></div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="text-xs text-gray-400 mt-2">Fuente: DS N°594/1999 MINSAL, Tabla Anexo N°1</div>
+        </div>
+      </div>
+
+      <!-- Panel derecho -->
+      <div class="lg:col-span-2 space-y-4">
+
+        <!-- Grupos de riesgo por metal -->
+        <div class="card p-4">
+          <h3 class="font-bold text-gray-700 mb-3 text-sm"><i class="fas fa-layer-group mr-2 text-amber-700"></i>Metales / Grupos de Riesgo</h3>
+          <div class="grid grid-cols-1 gap-2">
+            ${metalesGrupos.map(g=>`
+              <div class="p-3 rounded-xl border flex items-start gap-3" style="background:${g.riesgo.includes('Cancerígeno')||g.riesgo.includes('Muy Alto')?'#fff1f2':'#fffbeb'};border-color:${g.riesgo.includes('Cancerígeno')||g.riesgo.includes('Muy Alto')?'#fecaca':'#fde68a'}">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${g.color}20">
+                  <i class="fas ${g.icon} text-sm" style="color:${g.color}"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-bold text-sm" style="color:${g.color}">${g.metal}</span>
+                    <span class="text-xs text-gray-500">— ${g.nombre}</span>
+                    <span class="badge text-xs" style="background:${g.riesgo.includes('Cancerígeno')?'#fee2e2':g.riesgo.includes('Muy Alto')?'#ede9fe':'#fef3c7'};color:${g.riesgo.includes('Cancerígeno')||g.riesgo.includes('Muy Alto')?'#991b1b':'#92400e'}">${g.riesgo}</span>
+                  </div>
+                  <div class="text-xs text-gray-600 mt-0.5"><i class="fas fa-exclamation-circle mr-1 text-orange-400"></i>${g.efecto}</div>
+                  <div class="text-xs text-gray-400 mt-0.5"><i class="fas fa-user-helmet-safety mr-1"></i>${g.ocupaciones}</div>
+                </div>
+                <div class="text-right flex-shrink-0">
+                  <div class="font-mono text-xs font-bold" style="color:${g.color}">${g.lpp||g.lpp_fe||'—'}</div>
+                  <div class="text-xs text-gray-400">LPP DS594</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Vigilancia de Salud Requerida -->
+        <div class="card p-4">
+          <h3 class="font-bold text-gray-700 mb-3 text-sm"><i class="fas fa-stethoscope mr-2 text-amber-700"></i>Vigilancia de Salud Requerida — Res. Exenta N°606/2023</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            ${[
+              {icon:'fa-lungs',color:'#0284c7',titulo:'Espirometría',desc:'CVF, VEF1, VEF1/CVF — Función pulmonar',freq:'Preempleo + Anual',norma:'Res. N°606 Cap.5'},
+              {icon:'fa-x-ray',color:'#6d28d9',titulo:'Rx Tórax OIT',desc:'Clasificación neumoconiosis OIT — Polvo metálico/fibrogénico',freq:'Cada 2 años (normal) / Anual (alterado)',norma:'Res. N°606 Cap.5'},
+              {icon:'fa-vials',color:'#7c3aed',titulo:'Monitoreo Biológico Pb',desc:'Plombemia ≥40 µg/dL → restricción laboral inmediata',freq:'Semestral para expuestos Pb',norma:'Res. N°606 Anexo'},
+              {icon:'fa-flask',color:'#dc2626',titulo:'Cd Urinario',desc:'Creatinina + Cd urinario µg/g creatinina',freq:'Semestral (cancerígeno)',norma:'Circ. SUSESO 3838/2024'},
+              {icon:'fa-microscope',color:'#dc2626',titulo:'As Urinario Inorgánico',desc:'Arsénico inorgánico urinario µg/L',freq:'Semestral (cancerígeno)',norma:'Circ. SUSESO 3838/2024'},
+              {icon:'fa-user-doctor',color:'#059669',titulo:'Examen Médico Periódico',desc:'Anamnesis ocupacional + examen físico completo',freq:'Preempleo + Anual',norma:'Res. N°606 Cap.5'},
+            ].map(v=>`
+              <div class="p-3 rounded-xl border border-gray-200 bg-white">
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${v.color}15">
+                    <i class="fas ${v.icon} text-sm" style="color:${v.color}"></i>
+                  </div>
+                  <div class="font-semibold text-sm text-gray-800">${v.titulo}</div>
+                </div>
+                <div class="text-xs text-gray-600">${v.desc}</div>
+                <div class="mt-2 flex items-center justify-between">
+                  <span class="text-xs text-amber-700 font-medium"><i class="fas fa-clock mr-1"></i>${v.freq}</span>
+                  <span class="text-xs text-gray-400">${v.norma}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Carta Gantt HUMOS -->
+        <div class="card p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-gray-700 text-sm"><i class="fas fa-chart-gantt mr-2" style="color:#1a237e"></i>Carta Gantt — ${new Date().getFullYear()}</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs border-collapse" style="min-width:600px">
+              <thead>
+                <tr>
+                  <th class="text-left p-2 bg-gray-50 font-semibold text-gray-500 rounded-tl-lg" style="width:35%">Actividad</th>
+                  <th class="p-2 bg-gray-50 text-center font-semibold text-gray-500 text-xs" style="width:10%">Responsable</th>
+                  <th class="p-2 bg-gray-50 text-center font-semibold text-gray-500 text-xs" style="width:10%">Período</th>
+                  ${['E','F','M','A','M','J','J','A','S','O','N','D'].map(m=>`<th class="p-1 bg-gray-50 text-center text-gray-400 font-semibold">${m}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${p.ganttActividades.map((act,i) => {
+                  const estado = i<3?'comp':i<5?'cur':'pend';
+                  const sc = estado==='comp'?color:estado==='cur'?'#d97706':'#94a3b8';
+                  const getA = (per) => {
+                    const lp = per.toLowerCase();
+                    if(lp.includes('mensual')) return [0,1,2,3,4,5,6,7,8,9,10,11];
+                    if(lp.includes('2 veces')) return [0,6];
+                    if(lp.includes('3 veces')) return [0,4,8];
+                    if(lp.includes('anual')||lp.includes('1 vez')) return [5];
+                    return [i%12];
+                  };
+                  const activos = new Set(getA(act.periodo));
+                  return `<tr class="${i%2===0?'bg-white':'bg-gray-50/50'}">
+                    <td class="p-2 font-medium text-gray-700 text-xs">${act.n}. ${act.actividad}</td>
+                    <td class="p-2 text-center text-gray-500 text-xs">${act.por}</td>
+                    <td class="p-2 text-center text-gray-500 text-xs">${act.periodo}</td>
+                    ${[...Array(12)].map((_,m)=>`<td class="p-0.5 text-center">${activos.has(m)?`<div class="w-4 h-4 rounded mx-auto" style="background:${sc}30;border:1px solid ${sc}60"><div class="w-2 h-2 rounded-full mx-auto mt-0.5" style="background:${sc}"></div></div>`:''}</td>`).join('')}
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-3 text-xs text-gray-400 flex gap-4">
+            <span><span class="inline-block w-2 h-2 rounded-full mr-1" style="background:${color}"></span>Completado</span>
+            <span><span class="inline-block w-2 h-2 rounded-full bg-yellow-500 mr-1"></span>En ejecución</span>
+            <span><span class="inline-block w-2 h-2 rounded-full bg-gray-300 mr-1"></span>Pendiente</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Evaluaciones de Trabajadores HUMOS (tabla completa) -->
+    <div class="card p-4 mb-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-gray-700"><i class="fas fa-clipboard-check mr-2 text-amber-700"></i>Evaluaciones de Trabajadores Expuestos</h3>
+        <button class="btn btn-primary text-xs py-1.5" onclick="showHumosEvalModal()" style="background:#78350f;border-color:#78350f">
+          <i class="fas fa-plus mr-1"></i>Nueva Evaluación
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="data-table text-xs">
+          <thead><tr>
+            <th>Trabajador / Metal(es)</th>
+            <th>Muestreo Ambiental</th>
+            <th>Resultados vs LPP DS594</th>
+            <th>Espirometría</th>
+            <th>Rx Tórax OIT</th>
+            <th>VLE / EPR</th>
+            <th>Estado</th>
+            <th>Próx. Eval.</th>
+          </tr></thead>
+          <tbody>${evalRows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Requisitos Empresa -->
+    <div class="card p-4 mb-5">
+      <h3 class="font-bold text-gray-700 mb-4"><i class="fas fa-list-check mr-2 text-amber-700"></i>Requisitos Empresa — Res. Exenta N°606/2023 + Circ. SUSESO 3838/2024</h3>
+      <div class="overflow-x-auto">
+        <table class="data-table text-xs">
+          <thead><tr>
+            <th>#</th><th>Categoría</th><th>Requisito</th><th>Periodicidad</th><th>Norma</th><th>Obligatorio</th>
+          </tr></thead>
+          <tbody>
+            ${(proto.requisitos_empresa||[]).map(r=>`
+              <tr>
+                <td class="text-center font-bold text-amber-800">${r.id}</td>
+                <td><span class="badge badge-orange text-xs">${r.categoria}</span></td>
+                <td class="font-medium">${r.requisito}</td>
+                <td class="text-gray-500">${r.periodicidad}</td>
+                <td class="font-mono text-xs text-gray-500">${r.norma}</td>
+                <td class="text-center">${r.obligatorio?'<span class="badge badge-red text-xs">Obligatorio</span>':'<span class="badge badge-gray text-xs">Recomendado</span>'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pasos Implementación -->
+    <div class="card p-4">
+      <h3 class="font-bold text-gray-700 mb-4"><i class="fas fa-stairs mr-2 text-amber-700"></i>Fases de Implementación</h3>
+      <div class="space-y-3">
+        ${p.pasos.map(fase=>`
+          <div class="border border-amber-200 rounded-xl overflow-hidden">
+            <div class="px-4 py-3 font-bold text-sm text-white flex items-center gap-2" style="background:linear-gradient(135deg,#92400e,#78350f)">
+              <span class="w-7 h-7 rounded-lg flex items-center justify-center text-amber-900 font-black" style="background:rgba(255,255,255,0.9);font-size:13px">${fase.n}</span>
+              ${fase.fase}
+            </div>
+            <div class="divide-y divide-amber-50">
+              ${fase.items.map(item=>`
+                <div class="px-4 py-2.5 flex items-start gap-3 hover:bg-amber-50/50 transition-colors">
+                  <span class="text-xs font-mono font-bold text-amber-700 mt-0.5 flex-shrink-0 w-8">${item.id}</span>
+                  <div class="flex-1">
+                    <div class="text-sm font-medium text-gray-800">${item.item}</div>
+                    <div class="text-xs text-gray-500 mt-0.5"><i class="fas fa-file-alt mr-1"></i>${item.evidencia}</div>
+                  </div>
+                  <span class="text-xs font-mono text-amber-700 flex-shrink-0 text-right" style="max-width:160px">${item.marco}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ── Modal Nueva Evaluación HUMOS ───────────────────────────────────
+function showHumosEvalModal() {
+  showModal('Nueva Evaluación — Protocolo HUMOS Metálicos', `
+    <div class="space-y-4">
+      <div class="p-3 rounded-lg text-xs" style="background:#fef3c7;border:1px solid #fde68a;color:#78350f">
+        <i class="fas fa-smog mr-1"></i><strong>Protocolo HUMOS</strong> — Res. Exenta N°606/2023 MINSAL · DS 594 · IRL obligatorio DS 44 Art.15
+      </div>
+      <div class="form-section">
+        <div class="form-section-title"><i class="fas fa-user mr-2"></i>Datos del Trabajador</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="col-span-2"><label class="form-label">Trabajador *</label>
+            <input id="he-trab" class="form-input" placeholder="Nombre completo del trabajador"></div>
+          <div><label class="form-label">RUT</label>
+            <input id="he-rut" class="form-input" placeholder="12.345.678-9"></div>
+          <div><label class="form-label">Cargo</label>
+            <input id="he-cargo" class="form-input" placeholder="Soldador, Fundidor..."></div>
+          <div><label class="form-label">Área</label>
+            <select id="he-area" class="form-input">
+              <option>Producción</option><option>Taller Soldadura</option>
+              <option>Fundición</option><option>Mantenimiento</option>
+              <option>Galvanoplastia</option><option>Otro</option>
+            </select></div>
+          <div><label class="form-label">GES (Grupo Exposición Similar)</label>
+            <input id="he-ges" class="form-input" placeholder="GES-SOL-01, GES-FUN-01..."></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title"><i class="fas fa-radiation mr-2 text-red-600"></i>Metales de Exposición</div>
+        <div class="grid grid-cols-3 gap-2">
+          ${['Fe (Hierro)','Mn (Manganeso)','Cr+6 (CANCERÍGENO)','Ni (CANCERÍGENO)','Pb (Plomo)','Cd (CANCERÍGENO)','As (CANCERÍGENO)','Cu (Cobre)','Zn (Zinc)'].map(m=>`
+            <label class="flex items-center gap-2 text-xs p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-amber-50">
+              <input type="checkbox" name="he-metales" value="${m.split(' ')[0]}" class="w-3 h-3">
+              <span class="${m.includes('CANCERÍGENO')?'text-red-600 font-bold':'text-gray-700'}">${m}</span>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title"><i class="fas fa-vials mr-2"></i>Muestreo Ambiental</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="form-label">Fecha Muestreo</label>
+            <input id="he-fecham" type="date" class="form-input" value="${new Date().toISOString().split('T')[0]}"></div>
+          <div><label class="form-label">Resultado Fe (mg/m³)</label>
+            <input id="he-fe" type="number" step="0.01" class="form-input" placeholder="LPP: 5.0"></div>
+          <div><label class="form-label">Resultado Mn (mg/m³)</label>
+            <input id="he-mn" type="number" step="0.001" class="form-input" placeholder="LPP: 0.2"></div>
+          <div><label class="form-label">Resultado Cr+6 (mg/m³)</label>
+            <input id="he-cr6" type="number" step="0.001" class="form-input" placeholder="LPP: 0.05"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title"><i class="fas fa-lungs mr-2"></i>Vigilancia de Salud</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="form-label">Fecha Espirometría</label>
+            <input id="he-espi-fecha" type="date" class="form-input"></div>
+          <div><label class="form-label">Resultado Espirometría</label>
+            <input id="he-espi-res" class="form-input" placeholder="Normal / Alterada..."></div>
+          <div><label class="form-label">Fecha Rx Tórax OIT</label>
+            <input id="he-rx-fecha" type="date" class="form-input"></div>
+          <div><label class="form-label">Resultado Rx Tórax OIT</label>
+            <input id="he-rx-res" class="form-input" placeholder="OIT 0/0, Sin hallazgos..."></div>
+          <div class="col-span-2"><label class="form-label">Monitoreo Biológico (Pb/Cd/As)</label>
+            <input id="he-bio" class="form-input" placeholder="Plombemia: 15 µg/dL, As urinario: 35 µg/L..."></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title"><i class="fas fa-hard-hat mr-2"></i>Controles</div>
+        <div class="grid grid-cols-3 gap-2">
+          <label class="flex items-center gap-2 text-xs p-2 border border-gray-200 rounded-lg cursor-pointer">
+            <input type="checkbox" id="he-vle"> <span>VLE instalada y operativa</span>
+          </label>
+          <label class="flex items-center gap-2 text-xs p-2 border border-gray-200 rounded-lg cursor-pointer">
+            <input type="checkbox" id="he-epr"> <span>EPR entregado y con prueba ajuste</span>
+          </label>
+          <label class="flex items-center gap-2 text-xs p-2 border border-gray-200 rounded-lg cursor-pointer">
+            <input type="checkbox" id="he-irl"> <span>IRL entregado (DS 44 Art.15)</span>
+          </label>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="form-label">Próxima Evaluación</label>
+          <input id="he-prox" type="date" class="form-input"></div>
+        <div><label class="form-label">Estado</label>
+          <select id="he-estado" class="form-input">
+            <option value="vigente">Vigente</option>
+            <option value="por_vencer">Por vencer</option>
+            <option value="vencido">Vencido</option>
+            <option value="restringido">Restringido (sobre límite)</option>
+          </select></div>
+      </div>
+      <div><label class="form-label">Observaciones</label>
+        <textarea id="he-obs" class="form-input" rows="2" placeholder="Observaciones clínicas, recomendaciones..."></textarea></div>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveHumosEval()" style="background:#78350f;border-color:#78350f"><i class="fas fa-save mr-1"></i>Guardar Evaluación</button>
+  `, 'lg');
+}
+
+async function saveHumosEval() {
+  const trab = document.getElementById('he-trab').value.trim();
+  if (!trab) { showToast('El nombre del trabajador es obligatorio', 'error'); return; }
+  const metalesChecked = [...document.querySelectorAll('input[name="he-metales"]:checked')].map(i=>i.value);
+  const body = {
+    worker_nombre: trab,
+    trabajador_nombre: trab,
+    rut: document.getElementById('he-rut').value.trim(),
+    cargo: document.getElementById('he-cargo').value.trim(),
+    area: document.getElementById('he-area').value,
+    ges: document.getElementById('he-ges').value.trim(),
+    metales_exposicion: metalesChecked,
+    muestreo_ambiental_fecha: document.getElementById('he-fecham').value,
+    resultado_fe_mgm3: parseFloat(document.getElementById('he-fe').value)||null,
+    resultado_mn_mgm3: parseFloat(document.getElementById('he-mn').value)||null,
+    resultado_cr6_mgm3: parseFloat(document.getElementById('he-cr6').value)||null,
+    limite_fe_ds594: 5.0, limite_mn_ds594: 0.2, limite_cr6_ds594: 0.05,
+    espirometria_fecha: document.getElementById('he-espi-fecha').value||null,
+    espirometria_resultado: document.getElementById('he-espi-res').value.trim(),
+    rx_torax_fecha: document.getElementById('he-rx-fecha').value||null,
+    rx_torax_resultado: document.getElementById('he-rx-res').value.trim(),
+    monitoreo_biologico: document.getElementById('he-bio').value.trim(),
+    ventilacion_vle: document.getElementById('he-vle').checked,
+    epr_entregado: document.getElementById('he-epr').checked,
+    epr_prueba_ajuste: document.getElementById('he-epr').checked,
+    irl_entregado: document.getElementById('he-irl').checked,
+    prox_evaluacion: document.getElementById('he-prox').value||null,
+    estado: document.getElementById('he-estado').value,
+    observaciones: document.getElementById('he-obs').value.trim(),
+    fecha_eval: new Date().toISOString().split('T')[0]
+  };
+  try {
+    await API.post('/protocols/HUMOS/evaluaciones', body);
+    showToast('Evaluación HUMOS registrada correctamente', 'success');
+    closeModal();
+    navigate('protocol-detail', { id:'HUMOS' });
+  } catch { showToast('Error al guardar evaluación', 'error'); }
+}
+
+// ── Modal Muestreo Ambiental HUMOS ─────────────────────────────────
+function showHumosMuestreoModal() {
+  showModal('Registrar Muestreo Ambiental de Metales', `
+    <div class="space-y-4">
+      <div class="info-box" style="background:#fef3c7;border-color:#fde68a">
+        <p class="text-xs text-amber-800"><i class="fas fa-flask mr-1"></i><strong>Muestreo cuantitativo</strong> por laboratorio acreditado SEREMI — NCh 3358 · DS 594 Art.61</p>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Datos del Muestreo</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="form-label">Fecha de Muestreo *</label>
+            <input id="ms-fecha" type="date" class="form-input" value="${new Date().toISOString().split('T')[0]}"></div>
+          <div><label class="form-label">Laboratorio</label>
+            <input id="ms-lab" class="form-input" placeholder="ACHS, IST, Mutual, Lab. acreditado..."></div>
+          <div><label class="form-label">GES / Puesto Muestreado</label>
+            <input id="ms-ges" class="form-input" placeholder="GES-SOL-01 · Soldador de Producción"></div>
+          <div><label class="form-label">Fracción Analizada</label>
+            <select id="ms-fraccion" class="form-input">
+              <option>Inhalable</option><option>Respirable</option><option>Inhalable + Respirable</option>
+            </select></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Resultados (mg/m³)</div>
+        <div class="grid grid-cols-2 gap-3">
+          ${[
+            {id:'fe',nombre:'Fe (Hierro)',lpp:'5.0'},
+            {id:'mn',nombre:'Mn (Manganeso)',lpp:'0.2'},
+            {id:'cr6',nombre:'Cr+6 — Cancerígeno',lpp:'0.05'},
+            {id:'ni',nombre:'Ni — Cancerígeno',lpp:'1.0'},
+            {id:'pb',nombre:'Pb (Plomo)',lpp:'0.1'},
+            {id:'cd',nombre:'Cd — Cancerígeno',lpp:'0.01'},
+            {id:'as',nombre:'As — Cancerígeno',lpp:'0.01'},
+            {id:'cu',nombre:'Cu (Cobre)',lpp:'0.2'},
+          ].map(m=>`
+            <div>
+              <label class="form-label text-xs">${m.nombre} <span class="text-gray-400">(LPP: ${m.lpp})</span></label>
+              <input id="ms-${m.id}" type="number" step="0.001" class="form-input" placeholder="mg/m³">
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div><label class="form-label">N° Informe / Código</label>
+        <input id="ms-cod" class="form-input" placeholder="INF-2026-001"></div>
+      <div><label class="form-label">Observaciones</label>
+        <textarea id="ms-obs" class="form-input" rows="2" placeholder="Condiciones del muestreo, anomalías..."></textarea></div>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveMuestreoHumos()" style="background:#78350f;border-color:#78350f"><i class="fas fa-save mr-1"></i>Guardar Muestreo</button>
+  `, 'lg');
+}
+
+async function saveMuestreoHumos() {
+  const fecha = document.getElementById('ms-fecha').value;
+  if (!fecha) { showToast('La fecha del muestreo es obligatoria', 'error'); return; }
+  const metales = {};
+  ['fe','mn','cr6','ni','pb','cd','as','cu'].forEach(m => {
+    const v = parseFloat(document.getElementById('ms-'+m)?.value);
+    if (!isNaN(v)) metales[m] = v;
+  });
+  // Verificar si algún resultado supera el LPP
+  const lpp = {fe:5.0,mn:0.2,cr6:0.05,ni:1.0,pb:0.1,cd:0.01,as:0.01,cu:0.2};
+  const sobre_lpp = Object.entries(metales).filter(([k,v])=>v>lpp[k]).map(([k])=>k.toUpperCase());
+  if (sobre_lpp.length > 0) {
+    showToast(`⚠️ Resultados sobre LPP: ${sobre_lpp.join(', ')} — Acción correctiva requerida`, 'error');
+  } else {
+    showToast('Muestreo ambiental registrado. Todos los resultados bajo LPP.', 'success');
+  }
+  closeModal();
+}
+
 async function renderProtocolDetail(id) {
   const p = PROTOCOL_META[id];
   if (!p) { navigate('protocols'); return; }
@@ -4437,6 +5012,9 @@ async function renderProtocolDetail(id) {
   const res = await API.get('/protocols/' + id).catch(()=>({data:{data:{}}}));
   const proto = res.data?.data || {};
   const pct = proto.cumplimiento_pct || ({PREXOR:72,PLANESI:55,TMERT:88,PSICOSOCIAL:65,UV:91,MMC:80,HIC:60,HUMOS:45}[id] || 0);
+
+  // ── Vista especializada para HUMOS ──────────────────────────────
+  if (id === 'HUMOS') { renderHumosDetail(p, proto, pct, content); return; }
 
   content.innerHTML = `
     <!-- Volver -->
