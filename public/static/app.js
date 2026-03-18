@@ -124,6 +124,27 @@ function renderLogin() {
         <div class="mt-4 text-center text-xs text-gray-400">
           © 2026 HSE 360 · Cumplimiento Ley 19.628
         </div>
+
+        <div class="mt-5 pt-4 border-t border-gray-100 flex flex-col items-center gap-1">
+          <div class="text-xs text-gray-400 mb-1">Desarrollado por</div>
+          <div class="nexusforge-badge">
+            <svg width="22" height="22" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="nf-grad-login" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#6366f1"/>
+                  <stop offset="100%" stop-color="#0ea5e9"/>
+                </linearGradient>
+              </defs>
+              <rect width="40" height="40" rx="9" fill="url(#nf-grad-login)"/>
+              <path d="M8 28 L8 12 L16 12 L24 24 L24 12 L32 12 L32 28 L24 28 L16 16 L16 28 Z" fill="white" opacity="0.95"/>
+              <circle cx="32" cy="28" r="4" fill="#22d3ee" opacity="0.9"/>
+            </svg>
+            <div class="nexusforge-text">
+              <span class="nf-name">NexusForge</span>
+              <span class="nf-tagline">Software &amp; Apps</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -323,6 +344,20 @@ function buildLayout() {
           <i class="fas fa-right-from-bracket"></i> Cerrar Sesión
         </button>
         <div class="text-center mt-2 text-xs" style="color:rgba(255,255,255,0.25)">v2.0 · HSE 360 · 2026</div>
+        <div class="nexusforge-sidebar-footer" onclick="navigate('reports')" title="NexusForge — Desarrollos y Arquitectura de Software & Apps">
+          <svg width="16" height="16" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="nf-grad-sb" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+            <rect width="40" height="40" rx="9" fill="url(#nf-grad-sb)"/>
+            <path d="M8 28 L8 12 L16 12 L24 24 L24 12 L32 12 L32 28 L24 28 L16 16 L16 28 Z" fill="white" opacity="0.95"/>
+            <circle cx="32" cy="28" r="4" fill="#22d3ee" opacity="0.9"/>
+          </svg>
+          <span class="nf-sb-text">NexusForge</span>
+        </div>
       </div>
     </aside>
 
@@ -1231,6 +1266,25 @@ async function renderDashboard() {
           <button class="btn btn-secondary justify-start text-sm" onclick="navigate('users')"><i class="fas fa-user-shield text-amber-600"></i> Gestionar Usuarios</button>
           ` : ''}
         </div>
+      </div>
+    </div>
+
+    <!-- NexusForge mini brand footer -->
+    <div class="mt-5 flex items-center justify-between px-1 pb-1">
+      <div class="text-xs text-gray-400">HSE 360 v2.0 · Sistema de Gestión Integral de Seguridad y Salud · Chile 2026</div>
+      <div class="nexusforge-badge-mini" onclick="navigate('reports')" title="NexusForge — Desarrollos y Arquitectura de Software & Apps">
+        <svg width="18" height="18" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="nf-grad-dash" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#6366f1"/>
+              <stop offset="100%" stop-color="#0ea5e9"/>
+            </linearGradient>
+          </defs>
+          <rect width="40" height="40" rx="9" fill="url(#nf-grad-dash)"/>
+          <path d="M8 28 L8 12 L16 12 L24 24 L24 12 L32 12 L32 28 L24 28 L16 16 L16 28 Z" fill="white" opacity="0.95"/>
+          <circle cx="32" cy="28" r="4" fill="#22d3ee" opacity="0.9"/>
+        </svg>
+        <span class="nf-mini-text">Desarrollado por <strong>NexusForge</strong></span>
       </div>
     </div>
   `;
@@ -3273,6 +3327,40 @@ async function renderReports() {
         <div>• <strong>DS 594</strong>: Condiciones sanitarias y ambientales</div>
         <div>• <strong>DS 40 Art. 21</strong>: ODI - Obligación de informar</div>
         <div>• <strong>Protocolos MINSAL</strong>: Vigilancia de salud</div>
+      </div>
+    </div>
+
+    <!-- Banner NexusForge destacado -->
+    <div class="nexusforge-banner mt-6">
+      <div class="nf-banner-glow"></div>
+      <div class="nf-banner-inner">
+        <div class="nf-banner-left">
+          <svg width="52" height="52" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="nf-banner-svg">
+            <defs>
+              <linearGradient id="nf-grad-banner" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#0ea5e9"/>
+              </linearGradient>
+            </defs>
+            <rect width="40" height="40" rx="9" fill="url(#nf-grad-banner)"/>
+            <path d="M8 28 L8 12 L16 12 L24 24 L24 12 L32 12 L32 28 L24 28 L16 16 L16 28 Z" fill="white" opacity="0.95"/>
+            <circle cx="32" cy="28" r="4" fill="#22d3ee" opacity="0.9"/>
+          </svg>
+          <div>
+            <div class="nf-banner-title">NexusForge</div>
+            <div class="nf-banner-sub">Desarrollos y Arquitectura de Software &amp; Apps</div>
+          </div>
+        </div>
+        <div class="nf-banner-right">
+          <div class="nf-banner-chips">
+            <span class="nf-chip"><i class="fas fa-code mr-1"></i>Hono Framework</span>
+            <span class="nf-chip"><i class="fas fa-cloud mr-1"></i>Cloudflare Workers</span>
+            <span class="nf-chip"><i class="fas fa-database mr-1"></i>D1 SQLite</span>
+            <span class="nf-chip"><i class="fas fa-shield-halved mr-1"></i>Edge Security</span>
+            <span class="nf-chip"><i class="fas fa-bolt mr-1"></i>Edge Computing</span>
+          </div>
+          <div class="nf-banner-meta">HSE 360 v2.0 · Plataforma Integral de Seguridad y Salud · Chile 2026</div>
+        </div>
       </div>
     </div>
   `;
