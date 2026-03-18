@@ -13,7 +13,7 @@ app.get('/kpis', (c) => {
       protocolos: { total: 7, al_dia: 4, por_vencer: 2, criticos: 1, cumplimiento_pct: 72 },
       examenes: { total_vigentes: 112, por_vencer: 18, vencidos: 24, proximos_30dias: 8 },
       epp: { items_criticos: 2, items_bajo_stock: 4, entregas_pendientes: 3, valor_inventario: 4250000 },
-      capacitaciones: { vigentes: 6, por_vencer: 1, vencidas: 2, cobertura_odi: 31 },
+      capacitaciones: { vigentes: 6, por_vencer: 1, vencidas: 2, cobertura_irl: 92, cobertura_odi: 92 }, // cobertura_odi mantenido por compatibilidad; usar cobertura_irl (DS 44 Art.15)
       alertas_activas: 12
     }
   })

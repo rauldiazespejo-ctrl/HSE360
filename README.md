@@ -1,8 +1,8 @@
-# SaludTrabajo Chile 🏥
+# HSE 360 — Plataforma Integral de Seguridad, Salud y Medio Ambiente
 
 ## Sistema Integral de Salud Ocupacional y Prevención de Riesgos
 
-Plataforma web SaaS para la gestión completa de salud ocupacional, cumplimiento de Protocolos MINSAL y prevención de riesgos laborales bajo la **Ley 16.744** chilena.
+Plataforma web SaaS para la gestión completa de salud ocupacional, cumplimiento de Protocolos MINSAL y prevención de riesgos laborales bajo la **Ley 16.744** y el **D.S. N°44** (vigente 01/02/2025).
 
 ---
 
@@ -12,13 +12,26 @@ Plataforma web SaaS para la gestión completa de salud ocupacional, cumplimiento
 
 ---
 
+## ⚖️ Marco Normativo Actualizado — DS 44 (01/02/2025)
+
+| Cambio normativo | Antes (derogado) | Ahora (DS 44 vigente) |
+|---|---|---|
+| Información de riesgos al trabajador | ODI — Obligación de Informar (D.S. N°40 Art.21) | **IRL — Informe de Riesgos Laborales (DS 44 Art.15)** |
+| Instrumento psicosocial | ISTAS21 | **CEAL-SM/SUSESO** |
+| Firma del documento | Firma simple | **Firma ológrafa + huella digital** |
+| Marco de gestión | D.S. N°40 / D.S. N°54 (1969) | **D.S. N°44 (2024)** |
+
+> **IRL (Informe de Riesgos Laborales):** reemplaza a la ODI (D.S. N°40/1969) desde el 1 de febrero de 2025. Debe entregarse a cada trabajador con firma ológrafa y huella digital, informando los riesgos específicos de su puesto, las medidas preventivas y los EPP requeridos.
+
+---
+
 ## ✅ Funcionalidades Implementadas (MVP)
 
 ### 🏠 Dashboard Ejecutivo
 - KPIs en tiempo real: Tasa de accidentabilidad, siniestralidad, protocolos, exámenes, EPP
+- Cobertura IRL (DS 44) en KPI de capacitaciones
 - Gráficos interactivos: Accidentabilidad mensual comparativa y cumplimiento de protocolos
 - Alertas prioritarias en pantalla principal
-- Acciones rápidas de navegación
 
 ### 👥 Gestión de Trabajadores
 - Ficha integral con datos personales, cargo, área, mutualidad
@@ -26,50 +39,51 @@ Plataforma web SaaS para la gestión completa de salud ocupacional, cumplimiento
 - Vista detallada con historial de exámenes
 - Indicadores de protocolos activos y exámenes pendientes
 
-### 📋 Protocolos MINSAL (7 protocolos)
-- **PREXOR**: Exposición a ruido, NSE, audiometrías, uso EPA
-- **PLANESI**: Exposición a sílice, concentración, radiografías OIT, EPR
-- **TMERT**: Evaluación ergonómica, riesgo EESS, pausas activas
-- **Psicosocial**: CEAL-SM/SUSESO ISTAS21, dimensiones, planes de intervención
-- **Radiación UV**: Índices UV, EPP fotoproteción, capacitaciones
-- **MMC**: Manejo Manual de Cargas, Ley 20.949
-- **Trastornos de Voz**: Vigilancia vocal profesional
+### 📋 Protocolos MINSAL — 7 protocolos — DS 44
+
+| Protocolo | Riesgo | Norma principal | IRL requerido |
+|-----------|--------|-----------------|---------------|
+| PREXOR | Ruido ocupacional ≥ 82 dB(A) | DS 594 Art.74-83 | Sí, Art.15 DS 44 |
+| PLANESI | Polvo de sílice | DS 594 Art.61-67 | Sí, Art.15 DS 44 |
+| TMERT | Trastornos músculo-esqueléticos | Circ. MINSAL 3E/170 | Sí, Art.15 DS 44 |
+| PSICOSOCIAL | Riesgos psicosociales (CEAL-SM/SUSESO) | Circ. MINSAL 3E/187 | Sí, Art.15 DS 44 |
+| UV | Radiación ultravioleta solar | Ley 20.096 · DS 594 | Sí, Art.15 DS 44 |
+| MMC | Manejo manual de cargas | DS 63/2005 MINTRAB | Sí, Art.15 DS 44 |
+| VOZ | Trastornos de voz ocupacionales | Circ. MINSAL 3E/186 | Sí, Art.15 DS 44 |
+
+#### Funcionalidades por protocolo:
+- **Tarjetas** con % cumplimiento, estado y acceso rápido
+- **Carta Gantt interactiva DS 44**: cronograma anual con mes actual destacado, estados por actividad (Realizado / En curso / Atrasado / Pendiente), filtro por protocolo, exportar Excel/PDF
+- **Paso a Paso DS 44**: guía por fases con evidencias, marco legal, selector de cumplimiento por ítem y fecha
+- **IRL modal**: formulario completo con firma ológrafa + huella digital conforme DS 44 Art.15
+- Vista de detalle con mini Carta Gantt integrada
+
+### 📚 Capacitaciones — IRL (DS 44)
+- **IRL (Informe de Riesgos Laborales)** — reemplaza ODI (D.S. N°40/1969) desde 01/02/2025
+- Registro de sesiones IRL con cobertura por trabajadores
+- Tipo "IRL (DS 44)" en el formulario de nueva capacitación
+- KPI de cobertura IRL en dashboard y reportes
+- Registro por tipo de protocolo con vigencia y estado
 
 ### ⚠️ DIAT / DIEP
-- Registro de accidentes del trabajo (DIAT) y enfermedades profesionales (DIEP)
+- Registro de accidentes del trabajo y enfermedades profesionales
 - KPIs: Tasa accidentabilidad, siniestralidad, mortalidad
-- Análisis de causas inmediatas y básicas (metodología árbol de causas)
-- Acciones correctivas y seguimiento
+- Análisis de causas y acciones correctivas
 
 ### 🦺 Control de EPP
 - Inventario con stock actual vs. mínimo, alertas críticas
 - Registro de entregas con control de firma digital
-- Categorías: Auditivo, Respiratorio, UV, Cabeza, Manos, Pies, Alta Visibilidad
-- Normas técnicas asociadas (ANSI, NIOSH, EN)
-
-### 📚 Capacitaciones
-- ODI (Obligación de Informar) con % de cobertura
-- Registro por tipo de protocolo con vigencia y estado
-- Relator, duración, aprobados/reprobados
-- Control de documentos adjuntos
-
-### 🔔 Alertas y Notificaciones
-- 12 alertas activas: Críticas, Altas, Medias
-- Tipos: Examen vencido, protocolo crítico, stock crítico, capacitación vencida, firma pendiente
-- Filtrado por prioridad
-- Marcado como leída
+- Normas técnicas asociadas
 
 ### 📊 Matriz MIPER
 - Identificación de peligros por área y puesto
-- Clasificación por tipo de riesgo (Físico, Químico, Ergonómico, Psicosocial, Mecánico)
 - Niveles: Trivial, Tolerable, Moderado, Importante, Intolerable
-- Medidas de control y vinculación con protocolos
-- Matriz visual Probabilidad × Severidad
+- Vinculación con protocolos MINSAL
 
 ### 📈 Reportería
-- Informes disponibles: Accidentabilidad, Protocolos MINSAL, Exámenes, EPP, Capacitaciones, Ficha Individual
-- Exportación PDF y Excel (integración en Fase 2)
-- Panel de Arquitectura y Plan de Desarrollo integrado
+- Informes: Accidentabilidad, Protocolos MINSAL, Exámenes, EPP, IRL (DS 44), Ficha Individual
+- KPI cobertura IRL en resumen ejecutivo
+- Base legal actualizada: DS 44 Art.15 en lugar de DS 40 Art.21
 
 ---
 
@@ -85,8 +99,9 @@ Plataforma web SaaS para la gestión completa de salud ocupacional, cumplimiento
 | `GET /api/accidents/stats` | Estadísticas de accidentabilidad |
 | `GET /api/epp` | Inventario EPP |
 | `GET /api/epp/entregas` | Registro de entregas EPP |
-| `GET /api/capacitations` | Lista capacitaciones |
-| `GET /api/dashboard/kpis` | KPIs ejecutivos |
+| `GET /api/capacitations` | Lista capacitaciones (tipo IRL, DS 44) |
+| `GET /api/capacitations/stats` | Stats con `cobertura_irl_pct` |
+| `GET /api/dashboard/kpis` | KPIs ejecutivos (incluye `cobertura_irl`) |
 | `GET /api/dashboard/chart-accidentes` | Datos gráfico accidentes |
 | `GET /api/dashboard/chart-protocolos` | Datos gráfico protocolos |
 | `GET /api/alerts` | Alertas activas |
@@ -95,61 +110,52 @@ Plataforma web SaaS para la gestión completa de salud ocupacional, cumplimiento
 
 ## 🏗️ Arquitectura y Stack
 
-### MVP (Actual)
-- **Backend**: Hono + TypeScript (Cloudflare Workers)
-- **Frontend**: SPA Vanilla JS + TailwindCSS + Chart.js
-- **Build**: Vite + @hono/vite-build
+- **Backend**: Hono 4.x + TypeScript (Cloudflare Workers)
+- **Frontend**: SPA Vanilla JS + TailwindCSS CDN + Chart.js
+- **Build**: Vite 6 + @hono/vite-cloudflare-pages
 - **Deploy**: Cloudflare Pages
-
-### Producción (Fase 2-3)
-- **Frontend**: React + TypeScript + TailwindCSS
-- **Backend**: Node.js + Hono + PostgreSQL
-- **ORM**: Prisma
-- **Auth**: JWT + BCrypt (roles: SuperAdmin, Prevencionista, Médico, RRHH, Trabajador)
-- **Infra**: Cloudflare Workers + D1 + R2
-- **Cumplimiento**: Ley 19.628 (cifrado datos sensibles)
+- **Auth**: JWT simulado (roles: SuperAdmin, Prevencionista, Médico, RRHH, Trabajador)
 
 ---
 
 ## 📅 Plan de Desarrollo
 
-### Fase 1 - MVP (Meses 1-3) ← ACTUAL
-- [x] Dashboard ejecutivo con KPIs
+### Fase 1 — MVP ← ACTUAL ✅
+- [x] Dashboard ejecutivo con KPIs (DS 44 cobertura IRL)
 - [x] Gestión de trabajadores con ficha integral
-- [x] 7 Protocolos MINSAL
+- [x] 7 Protocolos MINSAL con Carta Gantt DS 44 y Paso a Paso
+- [x] IRL (DS 44 Art.15) — reemplaza ODI — en todos los módulos
+- [x] CEAL-SM/SUSESO (reemplaza ISTAS21) en módulo psicosocial
 - [x] Registro DIAT/DIEP
 - [x] Control EPP con firma
-- [x] Capacitaciones y ODI
+- [x] Capacitaciones IRL con cobertura
 - [x] Alertas automáticas
 - [x] Matriz MIPER
-- [ ] Autenticación por roles
-- [ ] Generación real de PDF DIAT/DIEP
 
-### Fase 2 (Meses 4-8)
-- [ ] Firma digital trabajadores
+### Fase 2
+- [ ] Firma digital real de IRL (biométrica + ológrafa)
 - [ ] Módulo CEAL-SM encuestas online
-- [ ] Importación masiva Excel
+- [ ] Importación masiva Excel (Carta Gantt y Paso a Paso)
 - [ ] App móvil (React Native)
 - [ ] Notificaciones email/SMS automatizadas
 
-### Fase 3 - SaaS (Meses 9-18)
+### Fase 3 — SaaS
 - [ ] Multiempresa
-- [ ] API pública REST
-- [ ] Integración directa mutualidades (ACHS, IST, Mutual, ISL)
+- [ ] Integración directa OAL (ACHS, IST, Mutual, ISL)
 - [ ] BI y analítica avanzada
-- [ ] Módulo Ley 21.561 (40 horas)
-- [ ] Cumplimiento estricto Ley 19.628
+- [ ] Cumplimiento Ley 19.628
 
 ---
 
 ## ⚖️ Cumplimiento Legal
+- **D.S. N°44** (2024): Marco de prevención de riesgos — vigente 01/02/2025
 - **Ley 16.744**: Seguro Social contra Accidentes del Trabajo y Enfermedades Profesionales
-- **DS 594**: Condiciones sanitarias y ambientales básicas en los lugares de trabajo
+- **DS 594**: Condiciones sanitarias y ambientales básicas
 - **Ley 20.949**: Manejo manual de cargas
 - **Ley 20.096**: Radiación UV
-- **Ley 19.628**: Protección de datos personales y sensibles
+- **Ley 21.645**: Acoso laboral y sexual (módulo psicosocial)
 
 ---
 
 ## Última Actualización
-Marzo 2024 · Stack: Hono 4.x + TypeScript + TailwindCSS · Estado: ✅ MVP Funcional
+Marzo 2026 · Stack: Hono 4.x + TypeScript + TailwindCSS · Estado: ✅ MVP DS 44 Actualizado
