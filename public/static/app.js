@@ -1732,7 +1732,7 @@ function showAddWorkerModal() {
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
     <button class="btn btn-primary" onclick="saveWorker()"><i class="fas fa-save mr-1"></i>Registrar Trabajador</button>
-  `);
+  `, 'lg');
 }
 
 async function showEditWorkerModal(id) {
@@ -1845,6 +1845,11 @@ async function renderEPP() {
       ${kpiCard('Stock Bajo', stats.items_bajo_stock, 'Por debajo del mínimo', 'fa-triangle-exclamation', 'from-orange-500 to-orange-700', 'Programar reposición')}
       ${kpiCard('Firmas Pendientes', stats.entregas_pendientes_firma, 'Entregas sin firma digital', 'fa-signature', 'from-purple-600 to-purple-800', 'Requieren confirmación')}
     </div>
+    ${stats.valor_inventario ? `<div class="card p-3 mb-4 flex items-center gap-3 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200">
+      <i class="fas fa-dollar-sign text-emerald-600 text-xl w-8 text-center"></i>
+      <div><div class="text-xs text-emerald-600 font-medium uppercase tracking-wide">Valor Total Inventario EPP</div>
+      <div class="text-xl font-bold text-emerald-800">$${stats.valor_inventario.toLocaleString('es-CL')}</div></div>
+    </div>` : ''}
 
     <!-- Tabs -->
     <div class="card overflow-hidden">
@@ -1880,24 +1885,32 @@ async function renderEPP() {
 
       <!-- Entregas -->
       <div id="panel-entregas" class="p-4 hidden">
+        <div class="mb-3 flex justify-between items-center">
+          <span class="text-sm text-gray-500">${entregas.length} entrega(s) registrada(s)</span>
+        </div>
         <div class="overflow-x-auto">
           <table class="data-table">
             <thead><tr>
-              <th>Trabajador</th><th>EPP Entregado</th><th>Cantidad</th>
-              <th>Fecha Entrega</th><th>Próxima Renovación</th><th>Firma Digital</th><th>Estado</th>
+              <th>Trabajador</th><th>EPP Entregado</th><th>Cant.</th>
+              <th>Fecha Entrega</th><th>Próxima Renovación</th><th>Protocolo</th><th>Firma Digital</th><th>Estado</th>
             </tr></thead>
             <tbody>
-              ${entregas.map(e => `
-                <tr>
-                  <td><div class="font-medium text-sm">${e.trabajador_nombre}</div><div class="text-xs text-gray-400">${e.trabajador_rut}</div></td>
-                  <td class="font-medium text-sm">${e.epp_nombre}</td>
+              ${entregas.length === 0 ? `<tr><td colspan="8" class="text-center text-gray-400 py-8"><i class="fas fa-inbox text-3xl mb-2 block"></i>Sin entregas registradas</td></tr>` :
+              entregas.map(e => `
+                <tr class="${e.dias_para_renovacion !== null && e.dias_para_renovacion <= 30 && !e.firma_digital ? 'bg-yellow-50' : ''}">
+                  <td><div class="font-medium text-sm">${e.trabajador_nombre || '—'}</div><div class="text-xs text-gray-400">${e.trabajador_rut || ''}</div></td>
+                  <td><div class="font-medium text-sm">${e.epp_nombre || '—'}</div>${e.protocolo ? `<div class="text-xs text-gray-400">${e.protocolo}</div>` : ''}</td>
                   <td class="text-center font-bold">${e.cantidad}</td>
                   <td class="text-xs text-gray-500">${formatDate(e.fecha_entrega)}</td>
-                  <td class="text-xs ${e.dias_para_renovacion <= 30 ? 'text-red-600 font-bold' : 'text-gray-500'}">${formatDate(e.proxima_renovacion)}</td>
+                  <td class="text-xs ${e.dias_para_renovacion !== null && e.dias_para_renovacion <= 30 ? 'text-red-600 font-bold' : 'text-gray-500'}">
+                    ${e.proxima_renovacion ? formatDate(e.proxima_renovacion) : '—'}
+                    ${e.dias_para_renovacion !== null && e.dias_para_renovacion <= 30 ? `<div class="text-xs text-red-500">${e.dias_para_renovacion <= 0 ? 'Vencido' : e.dias_para_renovacion + ' días'}</div>` : ''}
+                  </td>
+                  <td>${e.protocolo ? `<span class="badge badge-purple text-xs">${e.protocolo}</span>` : '—'}</td>
                   <td>
                     ${e.firma_digital
                       ? '<span class="badge badge-green text-xs"><i class="fas fa-check mr-1"></i>Firmado</span>'
-                      : `<button class="btn btn-primary py-1 px-2 text-xs" onclick="registrarFirma(${e.id})"><i class="fas fa-signature mr-1"></i>Firmar</button>`}
+                      : `<button class="btn btn-warning py-1 px-2 text-xs" onclick="registrarFirma(${e.id})"><i class="fas fa-signature mr-1"></i>Firmar</button>`}
                   </td>
                   <td>${estadoBadgeGeneric(e.estado_registro)}</td>
                 </tr>
@@ -1912,26 +1925,30 @@ async function renderEPP() {
 }
 
 function renderEPPRows(items) {
+  if (!items || items.length === 0) return `<tr><td colspan="9" class="text-center text-gray-400 py-8"><i class="fas fa-box-open text-3xl mb-2 block"></i>Sin ítems EPP registrados</td></tr>`;
   return items.map(item => `
-    <tr>
+    <tr class="${item.estado_stock === 'critico' ? 'bg-red-50' : item.estado_stock === 'bajo' ? 'bg-orange-50' : ''}">
       <td>
         <div class="font-semibold text-sm">${item.nombre}</div>
-        <div class="text-xs text-gray-400">${item.descripcion || ''}</div>
+        <div class="text-xs text-gray-400 font-mono">${item.codigo || ''}</div>
       </td>
       <td><span class="badge badge-blue text-xs">${item.categoria}</span></td>
-      <td class="text-sm text-gray-600">${item.marca} / ${item.modelo}</td>
+      <td class="text-sm text-gray-600">${item.marca || '—'} / ${item.modelo || '—'}</td>
       <td>
         <div class="flex items-center gap-2">
-          <span class="text-lg font-bold ${item.stock_actual <= item.stock_minimo ? 'text-red-600' : item.stock_actual <= item.stock_minimo * 1.5 ? 'text-yellow-600' : 'font-bold'}" style="${item.stock_actual > item.stock_minimo * 1.5 ? 'color:#0096c7' : ''}">${item.stock_actual}</span>
-          <span class="text-xs text-gray-400">uds</span>
+          <span class="text-lg font-bold ${item.stock_actual <= 0 ? 'text-red-600' : item.stock_actual < item.stock_minimo ? 'text-orange-600' : 'text-blue-600'}">${item.stock_actual}</span>
+          <span class="text-xs text-gray-400">${item.unidad || 'uds'}</span>
         </div>
       </td>
-      <td class="text-sm text-gray-500">${item.stock_minimo} uds</td>
+      <td class="text-sm text-gray-500">${item.stock_minimo} ${item.unidad || 'uds'}</td>
       <td class="text-xs font-mono text-gray-500">${item.norma_tecnica || '—'}</td>
-      <td class="text-xs ${item.dias_vencimiento <= 60 ? 'text-red-600 font-bold' : 'text-gray-500'}">${formatDate(item.fecha_vencimiento_lote)}</td>
+      <td class="text-xs ${item.fecha_vencimiento_lote && (() => { const d = Math.round((new Date(item.fecha_vencimiento_lote) - new Date()) / (1000*60*60*24)); return d <= 60; })() ? 'text-red-600 font-bold' : 'text-gray-500'}">${item.fecha_vencimiento_lote ? formatDate(item.fecha_vencimiento_lote) : '—'}</td>
       <td>${stockBadge(item.stock_actual, item.stock_minimo)}</td>
       <td>
         <div class="flex gap-1">
+          <button class="btn btn-secondary py-1 px-2 text-xs" onclick="showEPPDetail(${item.id})" title="Ver detalle">
+            <i class="fas fa-eye"></i>
+          </button>
           <button class="btn btn-primary py-1 px-2 text-xs" onclick="showEntregaEPPModal(${item.id})" title="Registrar entrega">
             <i class="fas fa-hand-holding"></i>
           </button>
@@ -1965,14 +1982,76 @@ function switchTab(tab, module) {
   if (btn) btn.classList.add('active');
 }
 
+function showEPPDetail(id) {
+  const item = (window._allEPP || []).find(e => e.id === id);
+  if (!item) { showToast('EPP no encontrado', 'error'); return; }
+  const stockColor = item.stock_actual <= 0 ? 'text-red-600' : item.stock_actual < item.stock_minimo ? 'text-orange-600' : 'text-green-600';
+  const valorTotal = (item.stock_actual * (item.costo_unitario || 0)).toLocaleString('es-CL');
+  showModal(`Ficha EPP — ${item.nombre}`, `
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="col-span-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <div class="flex items-start gap-3">
+            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <i class="fas fa-hard-hat text-blue-600 text-xl"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-gray-800 text-base">${item.nombre}</div>
+              <div class="text-sm text-gray-500 mt-0.5">${item.marca || '—'} / ${item.modelo || '—'}</div>
+              <div class="mt-1"><span class="badge badge-blue text-xs">${item.categoria}</span>
+              ${item.protocolo_asociado ? `<span class="badge badge-purple text-xs ml-1">${item.protocolo_asociado}</span>` : ''}</div>
+            </div>
+          </div>
+        </div>
+        <!-- Stock info -->
+        <div class="p-3 bg-white rounded-xl border border-gray-200">
+          <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Stock Actual</div>
+          <div class="text-2xl font-bold ${stockColor}">${item.stock_actual}</div>
+          <div class="text-xs text-gray-400">${item.unidad || 'unidades'}</div>
+        </div>
+        <div class="p-3 bg-white rounded-xl border border-gray-200">
+          <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Stock Mínimo</div>
+          <div class="text-2xl font-bold text-gray-700">${item.stock_minimo}</div>
+          <div class="text-xs text-gray-400">${item.unidad || 'unidades'}</div>
+        </div>
+        <!-- Detalles -->
+        <div class="col-span-2">
+          <table class="w-full text-sm">
+            <tr class="border-b border-gray-100"><td class="py-2 text-gray-500 w-40">Código</td><td class="py-2 font-mono font-semibold text-gray-700">${item.codigo || '—'}</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 text-gray-500">Norma Técnica</td><td class="py-2 text-gray-700">${item.norma_tecnica || '—'}</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 text-gray-500">Ubicación</td><td class="py-2 text-gray-700">${item.ubicacion || '—'}</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 text-gray-500">Vencimiento Lote</td><td class="py-2 text-gray-700">${item.fecha_vencimiento_lote ? formatDate(item.fecha_vencimiento_lote) : '—'}</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 text-gray-500">Costo Unitario</td><td class="py-2 text-gray-700">$${(item.costo_unitario||0).toLocaleString('es-CL')}</td></tr>
+            <tr class="border-b border-gray-100"><td class="py-2 text-gray-500">Valor Total Stock</td><td class="py-2 font-semibold text-green-700">$${valorTotal}</td></tr>
+            ${item.nrr_db ? `<tr class="border-b border-gray-100"><td class="py-2 text-gray-500">NRR dB</td><td class="py-2 text-gray-700">${item.nrr_db} dB</td></tr>` : ''}
+            <tr><td class="py-2 text-gray-500">Estado</td><td class="py-2">${stockBadge(item.stock_actual, item.stock_minimo)}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
+    <button class="btn btn-primary" onclick="closeModal(); showEntregaEPPModal(${id})"><i class="fas fa-hand-holding mr-1"></i>Registrar Entrega</button>
+  `, 'lg');
+}
+
 function showEntregaEPPModal(eppId) {
+  const epp = (window._allEPP || []).find(e => e.id === eppId);
+  const eppNombre = epp ? epp.nombre : 'EPP #' + eppId;
+  const stockDisp = epp ? epp.stock_actual : '?';
   showModal('Registrar Entrega de EPP', `
     <div class="space-y-4">
+      <div class="info-box">
+        <p class="text-sm font-semibold text-blue-800"><i class="fas fa-hard-hat mr-2"></i>${eppNombre}</p>
+        <p class="text-xs text-blue-600 mt-1">Stock disponible: <strong>${stockDisp}</strong> unidades</p>
+      </div>
       <div class="form-section">
         <div class="form-section-title"><i class="fas fa-hand-holding mr-2"></i>Datos de la Entrega</div>
         <div class="grid grid-cols-2 gap-3">
-          <div class="col-span-2"><label class="form-label">Trabajador (RUT o Nombre) *</label>
-            <input id="ent-trab" class="form-input" placeholder="Buscar trabajador..."></div>
+          <div class="col-span-2"><label class="form-label">Trabajador (Nombre completo) *</label>
+            <input id="ent-trab" class="form-input" placeholder="Nombre del trabajador receptor"></div>
+          <div class="col-span-2"><label class="form-label">RUT del Trabajador</label>
+            <input id="ent-rut" class="form-input" placeholder="12.345.678-9"></div>
           <div><label class="form-label">Cantidad *</label>
             <input id="ent-cant" type="number" min="1" class="form-input" placeholder="1" value="1"></div>
           <div><label class="form-label">Fecha de Entrega *</label>
@@ -1983,23 +2062,42 @@ function showEntregaEPPModal(eppId) {
             <textarea id="ent-obs" class="form-input" rows="2" placeholder="Instrucciones de uso, estado del EPP..."></textarea></div>
         </div>
       </div>
-      <div class="info-box">
-        <p class="text-xs text-green-800"><i class="fas fa-info-circle mr-1"></i>
+      <div class="info-box-yellow">
+        <p class="text-xs text-yellow-800"><i class="fas fa-info-circle mr-1"></i>
         La entrega quedará registrada. Se solicitará firma digital al trabajador al momento de la entrega física. DS 594 Art. 53 y Ley 16.744 Art. 68.</p>
       </div>
     </div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
     <button class="btn btn-primary" onclick="saveEntregaEPP(${eppId})"><i class="fas fa-save mr-1"></i>Registrar Entrega</button>
-  `);
+  `, 'lg');
 }
 
 async function saveEntregaEPP(eppId) {
+  const trab = document.getElementById('ent-trab').value.trim();
   const cant = parseInt(document.getElementById('ent-cant').value);
+  if (!trab) { showToast('Indica el trabajador', 'error'); return; }
   if (!cant || cant < 1) { showToast('Ingresa una cantidad válida', 'error'); return; }
-  showToast('Entrega registrada exitosamente', 'success');
-  closeModal();
-  navigate('epp');
+  const epp = (window._allEPP || []).find(e => e.id === eppId);
+  if (epp && cant > epp.stock_actual) { showToast(`Stock insuficiente. Disponible: ${epp.stock_actual}`, 'error'); return; }
+  const body = {
+    epp_id: eppId,
+    epp_nombre: epp ? epp.nombre : 'EPP #' + eppId,
+    trabajador_nombre: trab,
+    trabajador_rut: document.getElementById('ent-rut').value.trim(),
+    cantidad: cant,
+    fecha_entrega: document.getElementById('ent-fecha').value,
+    proxima_renovacion: document.getElementById('ent-renovacion').value || null,
+    observaciones: document.getElementById('ent-obs').value.trim(),
+    protocolo: epp ? epp.protocolo_asociado : null,
+    firma_digital: false,
+    estado_registro: 'vigente'
+  };
+  try {
+    await API.post('/epp/entregas', body);
+    showToast('Entrega de EPP registrada. Stock actualizado.', 'success');
+    closeModal(); navigate('epp');
+  } catch { showToast('Error al registrar entrega', 'error'); }
 }
 
 function registrarFirma(entregaId) {
@@ -2020,8 +2118,18 @@ function registrarFirma(entregaId) {
     </div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-    <button class="btn btn-success" onclick="closeModal();showToast('Firma registrada exitosamente','success')"><i class="fas fa-check mr-1"></i>Confirmar Firma</button>
+    <button class="btn btn-success" onclick="confirmarFirmaDigital(${entregaId})"><i class="fas fa-check mr-1"></i>Confirmar Firma</button>
   `);
+}
+
+async function confirmarFirmaDigital(entregaId) {
+  const nombre = document.getElementById('firma-nombre')?.value?.trim();
+  if (!nombre) { showToast('Ingresa el nombre del trabajador para confirmar', 'error'); return; }
+  try {
+    await API.put(`/epp/entregas/${entregaId}`, { firma_digital: true, firmado_por: nombre, fecha_firma: new Date().toISOString() });
+    showToast('Firma registrada exitosamente', 'success');
+    closeModal(); navigate('epp');
+  } catch { showToast('Error al registrar firma', 'error'); }
 }
 
 function showAddEPPModal() {
@@ -2034,10 +2142,12 @@ function showAddEPPModal() {
             <input id="nepp-nombre" class="form-input" placeholder="Ej: Casco de Seguridad Clase E"></div>
           <div><label class="form-label">Categoría *</label>
             <select id="nepp-cat" class="form-input">
-              <option>Protección Cabeza</option><option>Protección Auditiva</option>
-              <option>Protección Visual</option><option>Protección Respiratoria</option>
-              <option>Protección Manos</option><option>Protección Pies</option>
-              <option>Protección Caídas</option><option>Ropa de Trabajo</option>
+              <option>Auditivo</option><option>Respiratorio</option>
+              <option>Visual</option><option>Visual/Soldadura</option>
+              <option>Cabeza</option><option>Manos</option>
+              <option>Pies</option><option>Radiación UV</option>
+              <option>Alta Visibilidad</option><option>Arnés/Altura</option>
+              <option>Ropa de Trabajo</option>
             </select></div>
           <div><label class="form-label">Marca</label>
             <input id="nepp-marca" class="form-input" placeholder="3M, MSA, Honeywell..."></div>
@@ -2051,13 +2161,22 @@ function showAddEPPModal() {
             <input id="nepp-norma" class="form-input" placeholder="NCh, ISO, EN..."></div>
           <div><label class="form-label">Vencimiento del Lote</label>
             <input id="nepp-venc" type="date" class="form-input"></div>
+          <div><label class="form-label">Costo Unitario ($)</label>
+            <input id="nepp-costo" type="number" min="0" class="form-input" placeholder="0"></div>
+          <div><label class="form-label">Protocolo Asociado</label>
+            <select id="nepp-proto" class="form-input">
+              <option value="">Sin protocolo</option>
+              ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'].map(p=>`<option value="${p}">${p}</option>`).join('')}
+            </select></div>
+          <div class="col-span-2"><label class="form-label">Ubicación</label>
+            <input id="nepp-ubic" class="form-input" placeholder="Bodega EPP — Estante..."></div>
         </div>
       </div>
     </div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
     <button class="btn btn-primary" onclick="saveAddEPP()"><i class="fas fa-save mr-1"></i>Guardar</button>
-  `);
+  `, 'lg');
 }
 
 async function saveAddEPP() {
@@ -2071,7 +2190,10 @@ async function saveAddEPP() {
     stock_actual: parseInt(document.getElementById('nepp-stock').value)||0,
     stock_minimo: parseInt(document.getElementById('nepp-min').value)||5,
     norma_tecnica: document.getElementById('nepp-norma').value.trim(),
-    fecha_vencimiento_lote: document.getElementById('nepp-venc').value || null
+    fecha_vencimiento_lote: document.getElementById('nepp-venc').value || null,
+    costo_unitario: parseInt(document.getElementById('nepp-costo').value)||0,
+    protocolo_asociado: document.getElementById('nepp-proto').value || null,
+    ubicacion: document.getElementById('nepp-ubic').value.trim()
   };
   try {
     await API.post('/epp', body);
@@ -2089,6 +2211,10 @@ function showEditEPPModal(id) {
         <div class="grid grid-cols-2 gap-3">
           <div class="col-span-2"><label class="form-label">Nombre</label>
             <input id="eepp-nombre" class="form-input" value="${item.nombre}"></div>
+          <div><label class="form-label">Marca</label>
+            <input id="eepp-marca" class="form-input" value="${item.marca||''}"></div>
+          <div><label class="form-label">Modelo</label>
+            <input id="eepp-modelo" class="form-input" value="${item.modelo||''}"></div>
           <div><label class="form-label">Stock Actual</label>
             <input id="eepp-stock" type="number" class="form-input" value="${item.stock_actual}"></div>
           <div><label class="form-label">Stock Mínimo</label>
@@ -2097,22 +2223,36 @@ function showEditEPPModal(id) {
             <input id="eepp-norma" class="form-input" value="${item.norma_tecnica || ''}"></div>
           <div><label class="form-label">Vencimiento Lote</label>
             <input id="eepp-venc" type="date" class="form-input" value="${item.fecha_vencimiento_lote || ''}"></div>
+          <div><label class="form-label">Costo Unitario ($)</label>
+            <input id="eepp-costo" type="number" class="form-input" value="${item.costo_unitario||0}"></div>
+          <div><label class="form-label">Protocolo Asociado</label>
+            <select id="eepp-proto" class="form-input">
+              <option value="">Sin protocolo</option>
+              ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'].map(p=>`<option value="${p}" ${item.protocolo_asociado===p?'selected':''}>${p}</option>`).join('')}
+            </select></div>
+          <div class="col-span-2"><label class="form-label">Ubicación</label>
+            <input id="eepp-ubic" class="form-input" value="${item.ubicacion||''}"></div>
         </div>
       </div>
     </div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
     <button class="btn btn-primary" onclick="saveEditEPP(${id})"><i class="fas fa-save mr-1"></i>Guardar</button>
-  `);
+  `, 'lg');
 }
 
 async function saveEditEPP(id) {
   const body = {
     nombre: document.getElementById('eepp-nombre').value.trim(),
+    marca: document.getElementById('eepp-marca').value.trim(),
+    modelo: document.getElementById('eepp-modelo').value.trim(),
     stock_actual: parseInt(document.getElementById('eepp-stock').value)||0,
     stock_minimo: parseInt(document.getElementById('eepp-min').value)||5,
     norma_tecnica: document.getElementById('eepp-norma').value.trim(),
-    fecha_vencimiento_lote: document.getElementById('eepp-venc').value || null
+    fecha_vencimiento_lote: document.getElementById('eepp-venc').value || null,
+    costo_unitario: parseInt(document.getElementById('eepp-costo').value)||0,
+    protocolo_asociado: document.getElementById('eepp-proto').value || null,
+    ubicacion: document.getElementById('eepp-ubic').value.trim()
   };
   try {
     await API.put(`/epp/${id}`, body);
@@ -2322,7 +2462,7 @@ function showNewCapModal() {
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
     <button class="btn btn-primary" onclick="saveNewCap()"><i class="fas fa-save mr-1"></i>Registrar</button>
-  `);
+  `, 'lg');
 }
 
 async function saveNewCap() {
@@ -2624,7 +2764,7 @@ function showNewAccidentModal() {
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
     <button class="btn btn-danger" onclick="saveAccident()"><i class="fas fa-save mr-1"></i>Registrar Denuncia</button>
-  `);
+  `, 'lg');
 }
 
 async function saveAccident() {
@@ -3087,7 +3227,7 @@ function showNewMIPERModal() {
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
     <button class="btn btn-primary" onclick="saveNewMIPER()"><i class="fas fa-save mr-1"></i>Guardar Peligro</button>
-  `);
+  `, 'lg');
   calcNR();
 }
 
@@ -3187,7 +3327,7 @@ async function showEditMIPERModal(id) {
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
     <button class="btn btn-primary" onclick="updateMIPER(${id})"><i class="fas fa-save mr-1"></i>Guardar Cambios</button>
-  `);
+  `, 'lg');
 }
 
 async function updateMIPER(id) {
@@ -4283,7 +4423,7 @@ function showIRLModal(pid) {
     <button class="btn btn-primary" onclick="closeModal();showToast('IRL registrado exitosamente para ${p.titulo}','success')">
       <i class="fas fa-save mr-1"></i>Registrar IRL Firmado
     </button>
-  `);
+  `, 'lg');
 }
 
 // ================================================================
@@ -4628,7 +4768,7 @@ async function showEditAccidentabilidadModal() {
         <i class="fas fa-save mr-1"></i>Guardar Todo
       </button>
     </div>
-  `);
+  `, 'lg');
 }
 
 async function saveEditAccidentabilidad(ids) {
@@ -4703,6 +4843,9 @@ async function showEditAccidentModal(id) {
       <div><label class="form-label">Estado</label>
         <select id="ea2-estado" class="form-input">
           <option value="abierto" ${a.estado_denuncia==='abierto'?'selected':''}>Abierto</option>
+          <option value="enviada" ${a.estado_denuncia==='enviada'?'selected':''}>Enviada</option>
+          <option value="en_proceso" ${a.estado_denuncia==='en_proceso'?'selected':''}>En Proceso</option>
+          <option value="en_vigilancia" ${a.estado_denuncia==='en_vigilancia'?'selected':''}>En Vigilancia</option>
           <option value="cerrado" ${a.estado_denuncia==='cerrado'?'selected':''}>Cerrado</option>
         </select></div>
       <div class="col-span-2"><label class="form-label">Descripción del accidente</label>
@@ -5131,14 +5274,14 @@ async function generateReport(type, format) {
 // ================================================================
 // MODAL HELPERS
 // ================================================================
-function showModal(title, body, footer = '') {
+function showModal(title, body, footer = '', size = '') {
   const existing = document.getElementById('hse-modal');
   if (existing) existing.remove();
   const modal = document.createElement('div');
   modal.id = 'hse-modal';
   modal.className = 'modal-overlay fade-in';
   modal.innerHTML = `
-    <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-box ${size === 'lg' ? 'modal-box-lg' : ''}" onclick="event.stopPropagation()">
       <div class="modal-header">
         <h3 class="font-bold text-gray-800 text-base pr-4">${title}</h3>
         <button onclick="closeModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 flex-shrink-0">
@@ -5211,7 +5354,8 @@ function estadoBadgeGeneric(estado) {
     vigente: 'badge-green', vencido: 'badge-red', vencida: 'badge-red',
     por_vencer: 'badge-orange', pendiente: 'badge-yellow', programada: 'badge-blue',
     abierto: 'badge-orange', cerrado: 'badge-green', completado: 'badge-green',
-    en_proceso: 'badge-blue', sin_firma: 'badge-gray', firmado: 'badge-green',
+    en_proceso: 'badge-blue', en_vigilancia: 'badge-purple', enviada: 'badge-blue',
+    sin_firma: 'badge-gray', firmado: 'badge-green',
     normal: 'badge-green', alterado: 'badge-red',
   };
   const label = (estado || '').replace(/_/g,' ');
