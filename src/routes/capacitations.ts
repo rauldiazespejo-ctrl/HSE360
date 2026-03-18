@@ -2,53 +2,54 @@ import { Hono } from 'hono'
 
 const app = new Hono()
 
-const capacitations = [
-  { id: 1, nombre: 'ODI - Obligación de Informar', tipo: 'ODI', fecha: '2024-01-15', duracion_horas: 4, relator: 'Roberto Fuentes', trabajadores_capacitados: 45, total_empresa: 145, aprobados: 43, reprobados: 2, vigencia_meses: 12, proxima_fecha: '2025-01-15', estado: 'vigente', documentos: ['lista_asistencia.pdf', 'contenidos.pdf'] },
-  { id: 2, nombre: 'Uso y Mantención de EPP', tipo: 'EPP', fecha: '2024-02-20', duracion_horas: 2, relator: 'ACHS - Prevencionista', trabajadores_capacitados: 38, total_empresa: 50, aprobados: 38, reprobados: 0, vigencia_meses: 12, proxima_fecha: '2025-02-20', estado: 'vigente', documentos: ['lista_asistencia.pdf'] },
-  { id: 3, nombre: 'Radiación UV - Prevención y Protección', tipo: 'UV', fecha: '2023-12-05', duracion_horas: 1, relator: 'IST - Mutualidad', trabajadores_capacitados: 22, total_empresa: 25, aprobados: 22, reprobados: 0, vigencia_meses: 12, proxima_fecha: '2024-12-05', estado: 'por_vencer', documentos: ['lista_asistencia.pdf', 'material_capacitacion.pdf'] },
-  { id: 4, nombre: 'PREXOR - Riesgo por Ruido', tipo: 'PREXOR', fecha: '2023-08-10', duracion_horas: 3, relator: 'ACHS - Fonaudióloga', trabajadores_capacitados: 15, total_empresa: 18, aprobados: 15, reprobados: 0, vigencia_meses: 12, proxima_fecha: '2024-08-10', estado: 'vencido', documentos: ['lista_asistencia.pdf'] },
-  { id: 5, nombre: 'Manejo Manual de Cargas', tipo: 'MMC', fecha: '2024-03-08', duracion_horas: 2, relator: 'Terapeuta Ocupacional', trabajadores_capacitados: 20, total_empresa: 20, aprobados: 19, reprobados: 1, vigencia_meses: 24, proxima_fecha: '2026-03-08', estado: 'vigente', documentos: ['lista_asistencia.pdf', 'ejercicios_pausas.pdf'] },
-  { id: 6, nombre: 'PLANESI - Riesgo por Sílice', tipo: 'PLANESI', fecha: '2023-07-20', duracion_horas: 4, relator: 'ACHS - Higienista', trabajadores_capacitados: 8, total_empresa: 10, aprobados: 8, reprobados: 0, vigencia_meses: 12, proxima_fecha: '2024-07-20', estado: 'vencido', documentos: ['lista_asistencia.pdf'] },
-  { id: 7, nombre: 'Primeros Auxilios', tipo: 'PA', fecha: '2024-04-15', duracion_horas: 8, relator: 'Cruz Roja Chile', trabajadores_capacitados: 12, total_empresa: 145, aprobados: 12, reprobados: 0, vigencia_meses: 24, proxima_fecha: '2026-04-15', estado: 'vigente', documentos: ['lista_asistencia.pdf', 'certificados.pdf'] },
-  { id: 8, nombre: 'Comité Paritario - CPHS Inducción', tipo: 'CPHS', fecha: '2024-01-08', duracion_horas: 2, relator: 'CPHS Empresa', trabajadores_capacitados: 6, total_empresa: 6, aprobados: 6, reprobados: 0, vigencia_meses: 12, proxima_fecha: '2025-01-08', estado: 'vigente', documentos: ['acta_constitucion.pdf'] },
+export let capsDB: any[] = [
+  { id: 1, nombre: 'ODI — Obligación de Informar (Producción)', tipo: 'ODI', fecha: '2026-01-15', duracion_horas: 4, relator: 'Roberto Fuentes — Prevencionista', institucion: 'Empresa', trabajadores_convocados: 52, trabajadores_capacitados: 48, aprobados: 47, reprobados: 1, vigencia_meses: 12, proxima_fecha: '2027-01-15', estado: 'vigente', contenidos: ['Identificación de riesgos por puesto', 'Medidas preventivas y de protección', 'EPP asignado y uso correcto', 'Derechos y obligaciones Ley 16.744', 'Procedimientos de emergencia'], documentos: ['lista_asistencia_odi_prod_ene2026.pdf', 'programa_contenidos.pdf'], areas_cubiertas: ['Producción'], observaciones: '' },
+  { id: 2, nombre: 'PREXOR — Riesgo por Ruido y Conservación Auditiva', tipo: 'PREXOR', fecha: '2026-01-20', duracion_horas: 3, relator: 'Fonoaudióloga P. Aranda — ACHS', institucion: 'ACHS', trabajadores_convocados: 18, trabajadores_capacitados: 18, aprobados: 18, reprobados: 0, vigencia_meses: 12, proxima_fecha: '2027-01-20', estado: 'vigente', contenidos: ['Efectos del ruido en la salud', 'Clasificación NSE I-IV', 'Uso correcto de EPA (tapones y orejeras)', 'Audiometría: qué es y cómo prepararse', 'Derechos en vigilancia de salud'], documentos: ['lista_asistencia_prexor_ene2026.pdf'], areas_cubiertas: ['Producción','Mantenimiento'], observaciones: '' },
+  { id: 3, nombre: 'PLANESI — Riesgo por Sílice y Silicosis', tipo: 'PLANESI', fecha: '2025-07-15', duracion_horas: 4, relator: 'Higienista Industrial C. Moreno — ACHS', institucion: 'ACHS', trabajadores_convocados: 10, trabajadores_capacitados: 9, aprobados: 9, reprobados: 0, vigencia_meses: 12, proxima_fecha: '2026-07-15', estado: 'por_vencer', contenidos: ['¿Qué es la sílice y dónde está?', 'Silicosis: mecanismo, síntomas y etapas', 'Límite permisible y evaluación ambiental', 'Uso correcto de EPR (respiradores P100)', 'Fit Test: importancia del sellado', 'Radiografía OIT: qué evalúa'], documentos: ['lista_asistencia_planesi_jul2025.pdf'], areas_cubiertas: ['Mantenimiento','Producción'], observaciones: '⚠️ Próxima en julio 2026. Programar con ACHS.' },
+  { id: 4, nombre: 'TMERT — Ergonomía y Pausas Activas', tipo: 'TMERT', fecha: '2026-02-10', duracion_horas: 2, relator: 'Terapeuta Ocupacional M. Vidal', institucion: 'IST', trabajadores_convocados: 25, trabajadores_capacitados: 24, aprobados: 24, reprobados: 0, vigencia_meses: 12, proxima_fecha: '2027-02-10', estado: 'vigente', contenidos: ['¿Qué son los TME?', 'Factores de riesgo: repetición, fuerza, postura', 'Lista de Chequeo TMERT — cómo interpretarla', 'Pausas activas: ejercicios prácticos', 'Uso de herramientas ergonómicas'], documentos: ['lista_asistencia_tmert_feb2026.pdf', 'ejercicios_pausas_activas.pdf'], areas_cubiertas: ['Producción','Logística','Administración'], observaciones: '' },
+  { id: 5, nombre: 'Radiación UV — Prevención y Protección Solar', tipo: 'UV', fecha: '2025-09-05', duracion_horas: 1.5, relator: 'Dr. P. Estrada — Dermatólogo IST', institucion: 'IST', trabajadores_convocados: 20, trabajadores_capacitados: 19, aprobados: 19, reprobados: 0, vigencia_meses: 12, proxima_fecha: '2026-09-05', estado: 'vigente', contenidos: ['Efectos UV en la piel: eritema, melanoma', 'Índice UV: cómo leer la escala', 'EPP fotoproteción: FPS50+, legionario, lentes UV', 'Aplicación correcta del protector solar', 'Restricción horaria 11-16h'], documentos: ['lista_asistencia_uv_sep2025.pdf'], areas_cubiertas: ['Logística','Producción','Exterior'], observaciones: '' },
+  { id: 6, nombre: 'MMC — Manejo Manual de Cargas Ley 20.949', tipo: 'MMC', fecha: '2026-02-20', duracion_horas: 2, relator: 'Claudia Torres — Prevencionista', institucion: 'Empresa', trabajadores_convocados: 18, trabajadores_capacitados: 18, aprobados: 18, reprobados: 0, vigencia_meses: 24, proxima_fecha: '2028-02-20', estado: 'vigente', contenidos: ['Ley 20.949: límites y obligaciones', 'Técnica correcta de levantamiento', 'Índice de Levantamiento NIOSH', 'Límites por género y edad', 'Ayudas mecánicas disponibles en la empresa'], documentos: ['lista_asistencia_mmc_feb2026.pdf'], areas_cubiertas: ['Logística','Producción'], observaciones: '' },
+  { id: 7, nombre: 'CEAL-SM — Riesgos Psicosociales y Autocuidado', tipo: 'PSICOSOCIAL', fecha: '2026-01-08', duracion_horas: 2, relator: 'Psicóloga Laboral K. Fuentes — IST', institucion: 'IST', trabajadores_convocados: 145, trabajadores_capacitados: 132, aprobados: 132, reprobados: 0, vigencia_meses: 24, proxima_fecha: '2028-01-08', estado: 'vigente', contenidos: ['¿Qué son los riesgos psicosociales?', '12 dimensiones CEAL-SM', 'Ley 21.645: acoso laboral y sexual', 'Canal de denuncia: cómo usarlo', 'Técnicas de autocuidado y manejo del estrés'], documentos: ['lista_asistencia_psicosoc_ene2026.pdf'], areas_cubiertas: ['Todas las áreas'], observaciones: '' },
+  { id: 8, nombre: 'Primeros Auxilios y RCP Básico', tipo: 'PRIMEROS_AUXILIOS', fecha: '2026-02-28', duracion_horas: 8, relator: 'Instructores Cruz Roja Chile', institucion: 'Cruz Roja Chile', trabajadores_convocados: 15, trabajadores_capacitados: 15, aprobados: 15, reprobados: 0, vigencia_meses: 24, proxima_fecha: '2028-02-28', estado: 'vigente', contenidos: ['RCP adulto y DEA', 'Manejo de heridas y hemorragias', 'Fracturas y luxaciones', 'Quemaduras', 'Atragantamiento (maniobra Heimlich)', 'Práctica con maniquí certificada'], documentos: ['lista_asistencia_pa_feb2026.pdf', 'certificados_individuales.pdf'], areas_cubiertas: ['Brigada Emergencia'], observaciones: '' },
 ]
 
-const asistencia = [
-  { id: 1, capacitacion_id: 1, worker_id: 1, worker_nombre: 'Carlos González', asistio: true, aprobado: true, nota: null },
-  { id: 2, capacitacion_id: 1, worker_id: 2, worker_nombre: 'María Rodríguez', asistio: true, aprobado: true, nota: null },
-  { id: 3, capacitacion_id: 1, worker_id: 3, worker_nombre: 'Jorge Martínez', asistio: true, aprobado: true, nota: null },
-  { id: 4, capacitacion_id: 1, worker_id: 4, worker_nombre: 'Ana López', asistio: false, aprobado: false, nota: 'Con reposo médico' },
-  { id: 5, capacitacion_id: 1, worker_id: 5, worker_nombre: 'Pedro Sánchez', asistio: true, aprobado: true, nota: null },
-]
-
-// GET /api/capacitations
 app.get('/', (c) => {
   const { tipo, estado } = c.req.query()
-  let filtered = [...capacitations]
-  if (tipo && tipo !== 'all') filtered = filtered.filter(cap => cap.tipo === tipo)
-  if (estado && estado !== 'all') filtered = filtered.filter(cap => cap.estado === estado)
+  let filtered = [...capsDB]
+  if (tipo && tipo !== 'all') filtered = filtered.filter(c => c.tipo === tipo)
+  if (estado && estado !== 'all') filtered = filtered.filter(c => c.estado === estado)
   return c.json({ success: true, data: filtered, total: filtered.length })
 })
 
-// GET /api/capacitations/stats
 app.get('/stats', (c) => {
-  const vencidas = capacitations.filter(c => c.estado === 'vencido').length
-  const por_vencer = capacitations.filter(c => c.estado === 'por_vencer').length
-  const vigentes = capacitations.filter(c => c.estado === 'vigente').length
-  const cobertura_odi = capacitations.find(c => c.tipo === 'ODI')
-  return c.json({
-    success: true,
-    data: { total: capacitations.length, vigentes, por_vencer, vencidas, cobertura_odi_pct: cobertura_odi ? Math.round((cobertura_odi.trabajadores_capacitados/cobertura_odi.total_empresa)*100) : 0 }
-  })
+  const vencidas = capsDB.filter(c => c.estado === 'vencido').length
+  const por_vencer = capsDB.filter(c => c.estado === 'por_vencer').length
+  const vigentes = capsDB.filter(c => c.estado === 'vigente').length
+  const odi = capsDB.find(c => c.tipo === 'ODI')
+  return c.json({ success: true, data: { total: capsDB.length, vigentes, por_vencer, vencidas, cobertura_odi_pct: odi ? Math.round((odi.trabajadores_capacitados/odi.trabajadores_convocados)*100) : 0 } })
 })
 
-// GET /api/capacitations/:id
 app.get('/:id', (c) => {
   const id = parseInt(c.req.param('id'))
-  const cap = capacitations.find(c => c.id === id)
+  const cap = capsDB.find(c => c.id === id)
   if (!cap) return c.json({ success: false, error: 'Capacitación no encontrada' }, 404)
-  const capAsistencia = asistencia.filter(a => a.capacitacion_id === id)
-  return c.json({ success: true, data: { ...cap, asistencia: capAsistencia } })
+  return c.json({ success: true, data: cap })
+})
+
+app.post('/', async (c) => {
+  const body = await c.req.json()
+  const newCap = { id: capsDB.length + 1, estado: 'vigente', documentos: [], ...body }
+  capsDB.push(newCap)
+  return c.json({ success: true, data: newCap, message: 'Capacitación registrada' }, 201)
+})
+
+app.put('/:id', async (c) => {
+  const id = parseInt(c.req.param('id'))
+  const idx = capsDB.findIndex(c => c.id === id)
+  if (idx === -1) return c.json({ success: false, error: 'No encontrada' }, 404)
+  const body = await c.req.json()
+  capsDB[idx] = { ...capsDB[idx], ...body }
+  return c.json({ success: true, data: capsDB[idx] })
 })
 
 export default app

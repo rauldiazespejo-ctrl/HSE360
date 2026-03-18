@@ -2,115 +2,473 @@ import { Hono } from 'hono'
 
 const app = new Hono()
 
-// Datos de protocolos MINSAL
-const protocols = [
-  {
+// ============================================================
+// DATOS TÉCNICOS REALES — PROTOCOLOS MINSAL CHILE
+// Fuente: MINSAL, SUSESO, DS 594, Leyes vigentes
+// ============================================================
+
+export const protocolsDB: Record<string, any> = {
+
+  PREXOR: {
     id: 'PREXOR',
-    nombre: 'PREXOR - Exposición Ocupacional a Ruido',
-    descripcion: 'Protocolo de Exposición Ocupacional a Ruido (PREXOR)',
-    autoridad: 'MINSAL / SUSESO',
-    base_legal: 'DS 594, Circular 3E/009',
+    nombre: 'PREXOR — Exposición Ocupacional a Ruido',
+    norma_tecnica: 'NT N°125 — Decreto Exento N°1.029 (26/11/2011)',
+    base_legal: ['DS 594/1999 Art. 74-82', 'Ley 16.744', 'Circular 3E/009 MINSAL'],
+    objetivo: 'Establecer directrices para la vigilancia de la salud de trabajadores expuestos a ruido, con el fin de prevenir la hipoacusia sensorioneural de origen laboral (NIHL).',
     color: 'blue',
     icon: 'fa-ear-deaf',
-    evaluaciones: [
-      { id: 1, worker_id: 1, worker_nombre: 'Carlos González', fecha_eval: '2024-01-15', nivel_exposicion: '92 dB(A)', resultado: 'Alto Riesgo', nse: 'NSE III', prox_audiometria: '2025-01-15', uso_epa: true, tipo_epa: 'Protectores de copa + tapones', mapa_ruido: true, estado: 'activo' },
-      { id: 2, worker_id: 3, worker_nombre: 'Jorge Martínez', fecha_eval: '2024-02-20', nivel_exposicion: '87 dB(A)', resultado: 'Riesgo Moderado', nse: 'NSE II', prox_audiometria: '2025-02-20', uso_epa: true, tipo_epa: 'Tapones auditivos', mapa_ruido: true, estado: 'activo' },
-      { id: 3, worker_id: 5, worker_nombre: 'Pedro Sánchez', fecha_eval: '2023-11-10', nivel_exposicion: '95 dB(A)', resultado: 'Alto Riesgo', nse: 'NSE III', prox_audiometria: '2024-05-10', uso_epa: true, tipo_epa: 'Protectores de copa', mapa_ruido: true, estado: 'requiere_atencion' },
+    // CRITERIOS TÉCNICOS OFICIALES
+    criterios_tecnicos: {
+      criterio_accion: { nivel: 82, unidad: 'dB(A)', descripcion: 'Nivel a partir del cual se activan medidas preventivas obligatorias' },
+      limite_permisible: { nivel: 85, unidad: 'dB(A)', jornada: '8 horas', descripcion: 'Nivel máximo permitido para jornada de 8 horas (DS 594 Art. 75)' },
+      nivel_maximo_instanta: { nivel: 140, unidad: 'dB(C)', descripcion: 'Nivel máximo de presión sonora de pico instantáneo (impacto)' },
+      nse_clasificacion: [
+        { nse: 'NSE I', rango: '< 82 dB(A)', riesgo: 'Sin riesgo', accion: 'No requiere intervención', color: 'green', audiometria: 'No obligatoria' },
+        { nse: 'NSE II', rango: '82 - < 85 dB(A)', riesgo: 'Moderado', accion: 'Uso de EPA recomendado + capacitación', color: 'yellow', audiometria: 'Al inicio y cada 2 años' },
+        { nse: 'NSE III', rango: '85 - < 90 dB(A)', riesgo: 'Alto', accion: 'Uso obligatorio EPA + audiometría anual', color: 'orange', audiometria: 'Ingreso + anual' },
+        { nse: 'NSE IV', rango: '≥ 90 dB(A)', riesgo: 'Muy Alto', accion: 'Medidas de control inmediatas + rediseño del puesto', color: 'red', audiometria: 'Ingreso + semestral' },
+      ]
+    },
+    requisitos_empresa: [
+      { id: 1, categoria: 'Evaluación Ambiental', requisito: 'Medición de ruido (dosimetría o sonometría) por laboratorio acreditado ISP', periodicidad: 'Cuando se supera el criterio de acción o hay cambios en el proceso', obligatorio: true, norma: 'DS 594 Art. 76' },
+      { id: 2, categoria: 'Evaluación Ambiental', requisito: 'Elaboración del Mapa de Ruido de la empresa', periodicidad: 'Cada vez que se realizan mediciones o cambios de infraestructura', obligatorio: true, norma: 'NT 125 sección 4.2' },
+      { id: 3, categoria: 'Vigilancia de Salud', requisito: 'Audiometría de Ingreso (tonal liminar)', periodicidad: 'Dentro de los 60 días de iniciada la exposición a ≥82 dB(A)', obligatorio: true, norma: 'NT 125 sección 5.2.1' },
+      { id: 4, categoria: 'Vigilancia de Salud', requisito: 'Audiometría de Seguimiento', periodicidad: 'Anual (NSE III-IV) / Cada 2 años (NSE II)', obligatorio: true, norma: 'NT 125 sección 5.2.2' },
+      { id: 5, categoria: 'Control de Exposición', requisito: 'Dotación y control de EPA (Equipos de Protección Auditiva)', periodicidad: 'Permanente. Registro de entrega obligatorio', obligatorio: true, norma: 'DS 594 Art. 53' },
+      { id: 6, categoria: 'Control de Exposición', requisito: 'Programa de controles de ingeniería (aislamiento, amortiguación, rediseño)', periodicidad: 'Cuando medidas administrativas son insuficientes', obligatorio: true, norma: 'NT 125 sección 6' },
+      { id: 7, categoria: 'Capacitación', requisito: 'Capacitación sobre riesgos por ruido, uso de EPA y audiometrías', periodicidad: 'Anual para trabajadores expuestos a ≥82 dB(A)', obligatorio: true, norma: 'DS 594 Art. 21' },
+      { id: 8, categoria: 'Documentación', requisito: 'Elaborar y mantener actualizado el Programa de Vigilancia PREXOR', periodicidad: 'Revisión anual', obligatorio: true, norma: 'NT 125 sección 3' },
     ],
-    estadisticas: { total_expuestos: 12, alto_riesgo: 4, riesgo_moderado: 6, bajo_riesgo: 2, con_audiometria_vigente: 8, audiometrias_vencidas: 4 }
+    tipos_audiometria: [
+      { tipo: 'Ingreso', descripcion: 'Primera audiometría, establece línea de base auditiva', plazo: 'Primeros 60 días de exposición ≥82 dB(A)' },
+      { tipo: 'Seguimiento', descripcion: 'Monitoreo periódico del estado auditivo', plazo: 'NSE II: cada 2 años / NSE III: anual / NSE IV: semestral' },
+      { tipo: 'Confirmación', descripcion: 'Ante sospecha de pérdida auditiva o cambio significativo (≥15 dB en cualquier frecuencia)', plazo: 'Dentro de 30 días de detectado el cambio' },
+      { tipo: 'Fin de Exposición', descripcion: 'Al retiro del trabajador del puesto de riesgo', plazo: 'Al momento del retiro' },
+    ],
+    tipos_epa: [
+      { tipo: 'Tapones auriculares desechables', nrr_min: 25, recomendado_para: 'NSE II', norma: 'ANSI S3.19' },
+      { tipo: 'Tapones auriculares reutilizables', nrr_min: 25, recomendado_para: 'NSE II-III', norma: 'ANSI S3.19' },
+      { tipo: 'Orejeras (protectores de copa)', nrr_min: 27, recomendado_para: 'NSE III', norma: 'ANSI S3.19' },
+      { tipo: 'Sistema doble (tapón + orejera)', nrr_min: 34, recomendado_para: 'NSE IV (>100 dB)', norma: 'ANSI S3.19' },
+    ],
+    evaluaciones: [
+      {
+        id: 1, worker_id: 1, worker_nombre: 'Carlos González Muñoz', rut: '12.345.678-9',
+        cargo: 'Operador de Maquinaria', area: 'Producción', fecha_eval: '2026-01-15',
+        nivel_ruido_db: 92, nse: 'NSE III', metodo_medicion: 'Dosimetría',
+        laboratorio: 'ACHS — Centro de Higiene Ocupacional', n_informe: 'INF-HIG-2026-001',
+        uso_epa: true, tipo_epa: 'Orejera 3M Peltor H9A (NRR 27)', epa_adecuado: true,
+        audiometria_ingreso: '2025-03-15', audiometria_seguimiento: '2026-01-15',
+        resultado_audiometria: 'NIHL bilateral leve (Notch 4 kHz)', prox_audiometria: '2027-01-15',
+        mapa_ruido_actualizado: true, controles_ingenieria: 'Cabina insonorizada parcial en línea 1',
+        plan_accion: 'Completar cabina insonorizada, rotar trabajadores', estado: 'activo',
+        observaciones: 'Trabajador con NIHL bilateral leve. Seguimiento anual según NT125.'
+      },
+      {
+        id: 2, worker_id: 3, worker_nombre: 'Jorge Martínez Pérez', rut: '9.876.543-1',
+        cargo: 'Mecánico Industrial', area: 'Mantenimiento', fecha_eval: '2026-02-10',
+        nivel_ruido_db: 87, nse: 'NSE III', metodo_medicion: 'Sonometría',
+        laboratorio: 'IST — Dpto. Higiene Industrial', n_informe: 'INF-HIG-2026-003',
+        uso_epa: true, tipo_epa: 'Tapones 3M 1100 (NRR 29)', epa_adecuado: true,
+        audiometria_ingreso: '2022-09-20', audiometria_seguimiento: '2026-02-10',
+        resultado_audiometria: 'Audición normal bilateral', prox_audiometria: '2027-02-10',
+        mapa_ruido_actualizado: true, controles_ingenieria: 'No aplica (exposición intermitente)',
+        plan_accion: 'Mantener EPA, continuar vigilancia anual', estado: 'activo',
+        observaciones: ''
+      },
+      {
+        id: 3, worker_id: 5, worker_nombre: 'Pedro Sánchez Rojas', rut: '11.111.111-1',
+        cargo: 'Soldador', area: 'Producción', fecha_eval: '2025-06-01',
+        nivel_ruido_db: 95, nse: 'NSE IV', metodo_medicion: 'Dosimetría',
+        laboratorio: 'ACHS — Centro de Higiene Ocupacional', n_informe: 'INF-HIG-2025-022',
+        uso_epa: true, tipo_epa: 'Sistema doble: tapón + orejera', epa_adecuado: true,
+        audiometria_ingreso: '2023-05-14', audiometria_seguimiento: '2025-06-01',
+        resultado_audiometria: 'NIHL moderado bilateral (Notch 4-6 kHz)', prox_audiometria: '2026-06-01',
+        mapa_ruido_actualizado: false, controles_ingenieria: 'Pendiente evaluación rediseño puesto',
+        plan_accion: 'URGENTE: Rediseño puesto, evaluación cambio de función', estado: 'critico',
+        observaciones: 'Audiometría de seguimiento VENCIDA. NSE IV requiere audiometría semestral.'
+      },
+    ],
+    estadisticas: {
+      total_expuestos: 18, nse_i: 3, nse_ii: 6, nse_iii: 7, nse_iv: 2,
+      con_audiometria_vigente: 11, audiometrias_vencidas: 5, audiometrias_proximas_60d: 3,
+      con_epa_conforme: 15, con_nihl_detectado: 4, mapa_ruido_actualizado: true,
+      cumplimiento_pct: 68
+    }
   },
-  {
+
+  PLANESI: {
     id: 'PLANESI',
-    nombre: 'PLANESI - Exposición Ocupacional a Sílice',
-    descripcion: 'Plan Nacional de Erradicación de la Silicosis',
-    autoridad: 'MINSAL',
-    base_legal: 'DS 594 Art. 62, Decreto Ley 3500',
-    color: 'yellow',
+    nombre: 'PLANESI — Plan Nacional de Erradicación de la Silicosis',
+    norma_tecnica: 'Protocolo de Vigilancia MINSAL (versión vigente 2015+)',
+    base_legal: ['DS 594/1999 Art. 62-72 (Polvo)','Ley 16.744','Decreto 109/68','Circular B51/38 MINSAL'],
+    objetivo: 'Eliminar la silicosis como enfermedad profesional en Chile mediante vigilancia ambiental y médica de trabajadores expuestos a sílice cristalina.',
+    color: 'amber',
     icon: 'fa-lungs',
-    evaluaciones: [
-      { id: 1, worker_id: 3, worker_nombre: 'Jorge Martínez', fecha_eval: '2024-01-08', tipo_eval: 'Cuantitativa', concentracion_silice: '0.08 mg/m³', limite_permisible: '0.1 mg/m³', resultado: 'Bajo Límite', prox_radiografia: '2025-01-08', uso_epr: true, tipo_epr: 'Respirador P100', estado: 'vigente' },
-      { id: 2, worker_id: 5, worker_nombre: 'Pedro Sánchez', fecha_eval: '2023-10-15', tipo_eval: 'Cuantitativa', concentracion_silice: '0.12 mg/m³', limite_permisible: '0.1 mg/m³', resultado: 'Sobre Límite', prox_radiografia: '2024-04-15', uso_epr: true, tipo_epr: 'Respirador NIOSH P100', estado: 'critico' },
+    criterios_tecnicos: {
+      limite_permisible: { valor: 0.1, unidad: 'mg/m³', jornada: '8h', descripcion: 'LPP de sílice cristalina respirable (fracción cuarzo) — DS 594 Art. 66' },
+      niveles_riesgo: [
+        { nivel: 1, rango: '< 0.025 mg/m³ (< 25% LPP)', riesgo: 'Muy bajo', evaluacion_ambiental: 'Cada 5 años', rx_torax: 'Ingreso + cada 4 años', color: 'green' },
+        { nivel: 2, rango: '0.025 – 0.05 mg/m³ (25–50% LPP)', riesgo: 'Bajo', evaluacion_ambiental: 'Cada 3 años', rx_torax: 'Ingreso + cada 3 años', color: 'lime' },
+        { nivel: 3, rango: '0.05 – 0.1 mg/m³ (50–100% LPP)', riesgo: 'Moderado', evaluacion_ambiental: 'Cada 2 años', rx_torax: 'Ingreso + cada 2 años', color: 'yellow' },
+        { nivel: 4, rango: '> 0.1 mg/m³ (> 100% LPP)', riesgo: 'Alto / Sobre límite', evaluacion_ambiental: 'Anual hasta controlar', rx_torax: 'Ingreso + anual', color: 'red' },
+      ],
+      clasificacion_oit: [
+        { categoria: '0/0', descripcion: 'Sin opacidades neumoconiósicas', accion: 'Continuar vigilancia' },
+        { categoria: '0/1', descripcion: 'Límite inferior de categoría 1', accion: 'Mayor seguimiento' },
+        { categoria: '1/0 a 1/2', descripcion: 'Opacidades pequeñas escasas a numerosas', accion: 'Control médico cada 6 meses' },
+        { categoria: '2/1 a 2/3', descripcion: 'Opacidades pequeñas numerosas a muy numerosas', accion: 'Cambio de puesto + notificación MINSAL' },
+        { categoria: '3/2 a 3/+', descripcion: 'Opacidades muy numerosas con coalescencia', accion: 'Retiro inmediato + DIEP' },
+        { categoria: 'A/B/C (PMF)', descripcion: 'Fibrosis Masiva Progresiva', accion: 'Retiro inmediato + DIEP + atención especializada' },
+      ]
+    },
+    requisitos_empresa: [
+      { id: 1, categoria: 'Identificación', requisito: 'Identificar todos los puestos de trabajo con exposición a sílice cristalina', periodicidad: 'Al inicio + cada cambio de proceso', obligatorio: true, norma: 'DS 594 Art. 63' },
+      { id: 2, categoria: 'Evaluación Ambiental Cualitativa', requisito: 'Evaluación cualitativa inicial de exposición (lista de tareas con riesgo)', periodicidad: 'Al inicio del programa o ante cambios', obligatorio: true, norma: 'Protocolo PLANESI sección 3' },
+      { id: 3, categoria: 'Evaluación Ambiental Cuantitativa', requisito: 'Muestreo ambiental de sílice por laboratorio acreditado ISP (método gravimétrico)', periodicidad: 'Según nivel de riesgo (1 a 5 años)', obligatorio: true, norma: 'DS 594 Art. 66' },
+      { id: 4, categoria: 'Vigilancia de Salud', requisito: 'Examen médico ocupacional de ingreso + cuestionario de síntomas respiratorios', periodicidad: 'Antes de iniciar exposición', obligatorio: true, norma: 'Protocolo PLANESI sección 4.1' },
+      { id: 5, categoria: 'Vigilancia de Salud', requisito: 'Radiografía de tórax con técnica OIT (posteroanterior)', periodicidad: 'Según nivel de riesgo (1 a 4 años). Lectura por médico certificado OIT', obligatorio: true, norma: 'Protocolo PLANESI sección 4.2' },
+      { id: 6, categoria: 'Vigilancia de Salud', requisito: 'Espirometría (FVC, FEV1, relación FEV1/FVC)', periodicidad: 'Ingreso y según evolución clínica', obligatorio: true, norma: 'Protocolo PLANESI sección 4.3' },
+      { id: 7, categoria: 'Control de Exposición', requisito: 'Equipos de Protección Respiratoria (EPR) certificados NIOSH cuando no hay control en la fuente', periodicidad: 'Permanente. Verificar sellado (fit test anual)', obligatorio: true, norma: 'DS 594 Art. 53' },
+      { id: 8, categoria: 'Control de Exposición', requisito: 'Controles de ingeniería: ventilación local, supresión de polvo con agua, métodos húmedos', periodicidad: 'Implementar antes que EPR', obligatorio: true, norma: 'Jerarquía controles DS 594' },
+      { id: 9, categoria: 'Capacitación', requisito: 'Capacitación sobre riesgos sílice, uso de EPR y reconocimiento de síntomas', periodicidad: 'Anual', obligatorio: true, norma: 'DS 594 Art. 21' },
+      { id: 10, categoria: 'Notificación', requisito: 'Notificación de caso sospechoso o confirmado de silicosis a SEREMI de Salud', periodicidad: 'Inmediata ante diagnóstico', obligatorio: true, norma: 'DS 109/68' },
     ],
-    estadisticas: { total_expuestos: 8, sobre_limite: 2, bajo_limite: 6, con_rx_vigente: 5, rx_vencidas: 3 }
+    evaluaciones: [
+      {
+        id: 1, worker_id: 3, worker_nombre: 'Jorge Martínez Pérez', rut: '9.876.543-1',
+        cargo: 'Mecánico Industrial', area: 'Mantenimiento', fecha_eval: '2026-01-20',
+        tipo_eval: 'Cuantitativa', concentracion_silice: 0.073, unidad: 'mg/m³',
+        limite_permisible: 0.1, porcentaje_lpp: 73, nivel_riesgo: 'Nivel 3 — Moderado',
+        laboratorio: 'ACHS — Lab. Higiene Industrial Acred. ISP',
+        n_informe_ambiental: 'AMB-SIL-2026-001',
+        rx_torax_fecha: '2026-01-20', rx_torax_resultado: 'Categoría OIT 0/0 — Sin opacidades',
+        rx_torax_lector: 'Dr. Marco Valenzuela (Certificado OIT)',
+        espirometria_fecha: '2026-01-20', espirometria_fvc: '98%', espirometria_fev1: '96%', espirometria_relacion: '82%', espirometria_resultado: 'Normal',
+        uso_epr: true, tipo_epr: 'Respirador 3M 7502 + filtro 2097 (NIOSH P100)', fit_test: '2025-12-10', prox_fit_test: '2026-12-10',
+        controles_ingenieria: 'Riego periódico en zonas de trabajo, aspiración local',
+        prox_eval_ambiental: '2028-01-20', prox_rx_torax: '2028-01-20',
+        estado: 'vigente', observaciones: 'Bajo control. Continuar vigilancia cada 2 años.'
+      },
+      {
+        id: 2, worker_id: 5, worker_nombre: 'Pedro Sánchez Rojas', rut: '11.111.111-1',
+        cargo: 'Soldador', area: 'Producción', fecha_eval: '2025-09-15',
+        tipo_eval: 'Cuantitativa', concentracion_silice: 0.128, unidad: 'mg/m³',
+        limite_permisible: 0.1, porcentaje_lpp: 128, nivel_riesgo: 'Nivel 4 — SOBRE LÍMITE PERMISIBLE',
+        laboratorio: 'ISL — Lab. Higiene Industrial Acred. ISP',
+        n_informe_ambiental: 'AMB-SIL-2025-015',
+        rx_torax_fecha: '2025-09-15', rx_torax_resultado: 'Categoría OIT 1/0 — Opacidades pequeñas escasas',
+        rx_torax_lector: 'Dra. Ana Cortés (Certificada OIT)',
+        espirometria_fecha: '2025-09-15', espirometria_fvc: '85%', espirometria_fev1: '82%', espirometria_relacion: '74%', espirometria_resultado: 'Leve restricción',
+        uso_epr: true, tipo_epr: 'Respirador 3M 7502 + filtro 2097 (NIOSH P100)', fit_test: '2025-08-20', prox_fit_test: '2026-08-20',
+        controles_ingenieria: 'INSUFICIENTES. Ventilación general sin extracción local',
+        prox_eval_ambiental: '2026-09-15', prox_rx_torax: '2026-09-15',
+        estado: 'critico',
+        observaciones: '⚠️ CRÍTICO: Concentración SOBRE LPP. Categoría OIT 1/0. Requiere medidas inmediatas: instalar extracción local, evaluar cambio de función. Próxima Rx en 1 año.'
+      },
+    ],
+    estadisticas: { total_expuestos: 10, sobre_limite: 1, nivel3: 4, nivel2: 3, nivel1: 2, sin_clasificar: 0, rx_vigentes: 7, rx_vencidas: 3, casos_silicosis: 0, casos_sospechosos: 1, cumplimiento_pct: 55 }
   },
-  {
+
+  TMERT: {
     id: 'TMERT',
-    nombre: 'TMERT - Trastornos Musculoesqueléticos',
-    descripcion: 'Protocolo de Vigilancia de Trastornos Musculoesqueléticos de Extremidades Superiores',
-    autoridad: 'MINSAL / SUSESO',
-    base_legal: 'Resolución Exenta 336/2011',
-    color: 'green',
+    nombre: 'TMERT — Trastornos Musculoesqueléticos Relacionados con el Trabajo',
+    norma_tecnica: 'Protocolo de Vigilancia Ocupacional TMERT (Actualización 2024)',
+    base_legal: ['Resolución Exenta 336/2011 MINSAL','DS 594 Art. 110-120','Circular SUSESO 3849/2024'],
+    objetivo: 'Identificar, evaluar e intervenir los factores de riesgo biomecánicos (repetición, postura, fuerza, recuperación) que generan TMERT de extremidades superiores.',
+    color: 'emerald',
     icon: 'fa-person-walking',
-    evaluaciones: [
-      { id: 1, worker_id: 1, worker_nombre: 'Carlos González', fecha_eval: '2024-03-01', puesto: 'Operador Línea 1', ciclo_trabajo: '< 30 seg', repetitividad: 'Alta', fuerza: 'Moderada', postura: 'Inadecuada', resultado: 'Riesgo Alto', plan_intervencion: true, proxima_eval: '2024-09-01', pausas_activas: true },
-      { id: 2, worker_id: 2, worker_nombre: 'María Rodríguez', fecha_eval: '2024-02-15', puesto: 'Supervisora', ciclo_trabajo: '> 120 seg', repetitividad: 'Baja', fuerza: 'Leve', postura: 'Adecuada', resultado: 'Riesgo Bajo', plan_intervencion: false, proxima_eval: '2025-02-15', pausas_activas: true },
-      { id: 3, worker_id: 8, worker_nombre: 'Valeria Herrera', fecha_eval: '2024-01-20', puesto: 'Operadora Bodega', ciclo_trabajo: '30-60 seg', repetitividad: 'Alta', fuerza: 'Moderada', postura: 'Moderada', resultado: 'Riesgo Moderado', plan_intervencion: true, proxima_eval: '2024-07-20', pausas_activas: true },
+    criterios_tecnicos: {
+      factores_riesgo: [
+        { factor: 'Repetitividad', descripcion: 'Ciclos de trabajo < 30 segundos o >50% ciclo con mismo movimiento', nivel_riesgo: 'Alta cuando ciclo < 30 seg', norma: 'LC TMERT Paso I' },
+        { factor: 'Postura / Movimiento', descripcion: 'Posiciones de hombro, codo, muñeca y mano fuera del rango neutro', nivel_riesgo: 'Elevación hombro >45° o extensión muñeca >45°', norma: 'LC TMERT Paso II' },
+        { factor: 'Fuerza', descripcion: 'Esfuerzo percibido en escala de Borg (0-10). Moderado >3, Alto >5', nivel_riesgo: 'Alto cuando Borg ≥5', norma: 'LC TMERT Paso III' },
+        { factor: 'Tiempos de Recuperación', descripcion: 'Pausas y descansos en relación al tiempo de trabajo con carga', nivel_riesgo: 'Insuficiente cuando <10% del tiempo total', norma: 'LC TMERT Paso IV' },
+      ],
+      clasificacion_riesgo: [
+        { nivel: 'Verde', descripcion: 'Sin riesgo o riesgo tolerable. No requiere intervención inmediata.', accion: 'Mantener condiciones. Evaluación en 2 años.', color: 'green' },
+        { nivel: 'Amarillo', descripcion: 'Riesgo moderado. Hay factores que requieren atención.', accion: 'Plan de mejora a mediano plazo. Re-evaluación en 1 año.', color: 'yellow' },
+        { nivel: 'Rojo', descripcion: 'Riesgo alto. Factores de riesgo presentes en forma importante.', accion: 'Intervención ergonómica prioritaria. Re-evaluación en 6 meses.', color: 'red' },
+      ],
+      metodologias_avanzadas: ['OCRA', 'RULA', 'REBA', 'Strain Index', 'Ecuación NIOSH'],
+    },
+    requisitos_empresa: [
+      { id: 1, categoria: 'Identificación Inicial', requisito: 'Aplicar Lista de Chequeo TMERT a todos los puestos de trabajo con uso intenso de EESS', periodicidad: 'Al inicio del programa y cuando hay cambios de proceso/maquinaria', obligatorio: true, norma: 'Protocolo TMERT sección 3' },
+      { id: 2, categoria: 'Evaluación', requisito: 'Aplicar LC TMERT (Pasos I-IV: repetitividad, postura, fuerza, recuperación) para clasificar en verde/amarillo/rojo', periodicidad: 'Puestos identificados con riesgo. Anual para puestos en rojo', obligatorio: true, norma: 'Resolución 336/2011' },
+      { id: 3, categoria: 'Intervención', requisito: 'Elaborar e implementar Plan de Intervención Ergonómica para puestos en riesgo amarillo/rojo', periodicidad: 'Puestos amarillo: 90 días. Puestos rojo: 30 días', obligatorio: true, norma: 'Protocolo TMERT sección 6' },
+      { id: 4, categoria: 'Vigilancia de Salud', requisito: 'Examen musculoesquelético de extremidades superiores (EESS) a trabajadores en riesgo', periodicidad: 'Puestos rojo: cada 6 meses. Puestos amarillo: anual', obligatorio: true, norma: 'Circular SUSESO 3849/2024' },
+      { id: 5, categoria: 'Pausas Activas', requisito: 'Implementar programa de pausas activas (mínimo 10 min en jornada de 8h)', periodicidad: 'Diaria, registro semanal de adherencia', obligatorio: true, norma: 'Protocolo TMERT sección 5.3' },
+      { id: 6, categoria: 'Capacitación', requisito: 'Capacitación a trabajadores sobre TME, posturas correctas y pausas activas', periodicidad: 'Anual + inducción a nuevos expuestos', obligatorio: true, norma: 'DS 594 Art. 21' },
+      { id: 7, categoria: 'Documentación', requisito: 'Registrar todas las evaluaciones LC TMERT y evidencia fotográfica de puestos', periodicidad: 'Mantener histórico de 5 años', obligatorio: true, norma: 'Protocolo TMERT sección 7' },
     ],
-    estadisticas: { total_evaluados: 18, riesgo_alto: 5, riesgo_moderado: 8, riesgo_bajo: 5, con_plan_intervencion: 13 }
+    evaluaciones: [
+      {
+        id: 1, worker_id: 1, worker_nombre: 'Carlos González Muñoz', rut: '12.345.678-9',
+        puesto: 'Operador Línea 1', area: 'Producción', fecha_eval: '2026-02-20',
+        evaluador: 'Claudia Torres S. — Prevencionista', metodologia: 'LC TMERT + OCRA',
+        paso1_ciclo: '< 30 seg', paso1_result: 'ROJO',
+        paso2_postura_hombro: '> 45°', paso2_postura_muneca: 'Desviación cubital > 20°', paso2_result: 'ROJO',
+        paso3_fuerza_borg: '5', paso3_result: 'ROJO',
+        paso4_recuperacion: '8% del tiempo', paso4_result: 'ROJO',
+        clasificacion_final: 'ROJO — Alto Riesgo',
+        indice_ocra: 3.8, interpretacion_ocra: 'Riesgo Alto (OCRA > 3.5)',
+        examen_msk_fecha: '2026-02-20', examen_msk_resultado: 'Tendinitis supraespinoso hombro derecho (sospecha)',
+        plan_intervencion: true, fecha_plan: '2026-02-25',
+        acciones_plan: ['Rediseño de altura de línea (ajustable 90-120cm)', 'Rotación de tareas cada 2h', 'Pausas activas 10 min x 2 al día', 'Derivación médico ocupacional'],
+        prox_evaluacion: '2026-08-20',
+        pausas_activas_adherencia: 85,
+        estado: 'activo',
+        observaciones: 'Trabajador con tendinitis sospechosa. Derivado a médico ocupacional el 25/02/2026.'
+      },
+      {
+        id: 2, worker_id: 8, worker_nombre: 'Valeria Herrera Díaz', rut: '17.890.123-4',
+        puesto: 'Operadora Bodega', area: 'Logística', fecha_eval: '2026-01-25',
+        evaluador: 'Claudia Torres S. — Prevencionista', metodologia: 'LC TMERT',
+        paso1_ciclo: '30-60 seg', paso1_result: 'AMARILLO',
+        paso2_postura_hombro: 'Neutro', paso2_postura_muneca: 'Extensión 30°', paso2_result: 'AMARILLO',
+        paso3_fuerza_borg: '4', paso3_result: 'AMARILLO',
+        paso4_recuperacion: '15% del tiempo', paso4_result: 'VERDE',
+        clasificacion_final: 'AMARILLO — Riesgo Moderado',
+        indice_ocra: null, interpretacion_ocra: null,
+        examen_msk_fecha: '2026-01-25', examen_msk_resultado: 'Sin hallazgos patológicos',
+        plan_intervencion: true, fecha_plan: '2026-02-10',
+        acciones_plan: ['Herramientas con mejor agarre ergonómico', 'Reorganización de altura de estantes', 'Pausas activas 10 min x 1 al día'],
+        prox_evaluacion: '2027-01-25',
+        pausas_activas_adherencia: 72,
+        estado: 'activo',
+        observaciones: 'Riesgo moderado bajo control. Re-evaluación en 1 año.'
+      },
+    ],
+    estadisticas: { total_evaluados: 22, riesgo_rojo: 5, riesgo_amarillo: 11, riesgo_verde: 6, con_plan_intervencion: 16, examen_msk_vigente: 15, cumplimiento_pct: 74 }
   },
-  {
+
+  PSICOSOCIAL: {
     id: 'PSICOSOCIAL',
-    nombre: 'Riesgos Psicosociales CEAL-SM / SUSESO ISTAS21',
-    descripcion: 'Protocolo de Vigilancia de Riesgos Psicosociales en el Trabajo',
-    autoridad: 'MINSAL / SUSESO',
-    base_legal: 'Resolución Exenta 1433/2017',
-    color: 'purple',
+    nombre: 'Riesgos Psicosociales — CEAL-SM / SUSESO',
+    norma_tecnica: 'Protocolo de Vigilancia de Riesgos Psicosociales (vigente desde 01/01/2023)',
+    base_legal: ['Resolución Exenta 1433/2017 MINSAL','Ley 21.012 (Garantías Laborales)','Circular SUSESO 3432/2023','Ley 21.645 (Acoso Laboral)'],
+    objetivo: 'Evaluar los factores psicosociales del trabajo mediante el Cuestionario CEAL-SM/SUSESO (vigente desde enero 2023, reemplaza al ISTAS21), para implementar planes de intervención.',
+    color: 'violet',
     icon: 'fa-brain',
-    evaluaciones: [
-      { id: 1, empresa: 'Global', fecha_aplicacion: '2023-08-15', instrumento: 'CEAL-SM', participacion: '87%', trabajadores_encuestados: 95, dimension_exigencias: 'Alto', dimension_trabajo_activo: 'Medio', dimension_apoyo_social: 'Alto', dimension_compensaciones: 'Alto', dimension_doble_presencia: 'Medio', nivel_riesgo: 'Alto', plan_intervencion: 'En ejecución', prox_medicion: '2025-08-15', estado: 'activo' },
+    criterios_tecnicos: {
+      instrumento_vigente: 'CEAL-SM/SUSESO (desde 01/01/2023)',
+      instrumento_anterior: 'SUSESO/ISTAS21 (reemplazado)',
+      periodicidad: 'Cada 2 años por centro de trabajo',
+      participacion_minima: '60% del universo de trabajadores para ser representativo',
+      dimensiones_12: [
+        { num: 1, dimension: 'Carga de trabajo', descripcion: 'Cantidad y complejidad de las tareas asignadas', riesgo_alto_cuando: 'Exceso de tareas, plazos imposibles, sobretiempo frecuente' },
+        { num: 2, dimension: 'Exigencias emocionales', descripcion: 'Demandas afectivas del trabajo (atención a público, situaciones difíciles)', riesgo_alto_cuando: 'Trabajo con clientes difíciles, sufrimiento, violencia laboral' },
+        { num: 3, dimension: 'Desarrollo profesional', descripcion: 'Posibilidades de aprender, desarrollarse y aplicar habilidades', riesgo_alto_cuando: 'Trabajo monótono, sin desafíos, sin capacitación' },
+        { num: 4, dimension: 'Reconocimiento y claridad del rol', descripcion: 'Claridad sobre funciones, responsabilidades y valoración del trabajo', riesgo_alto_cuando: 'Funciones ambiguas, falta de retroalimentación' },
+        { num: 5, dimension: 'Conflicto de rol', descripcion: 'Contradicción entre demandas del trabajo', riesgo_alto_cuando: 'Órdenes contradictorias, conflicto ético con el trabajo' },
+        { num: 6, dimension: 'Calidad del liderazgo', descripcion: 'Forma en que los supervisores gestionan a sus equipos', riesgo_alto_cuando: 'Jefatura autoritaria, falta de apoyo, maltrato' },
+        { num: 7, dimension: 'Compañerismo', descripcion: 'Relaciones entre pares, trabajo en equipo, solidaridad', riesgo_alto_cuando: 'Conflictos frecuentes, competencia desleal, aislamiento' },
+        { num: 8, dimension: 'Inseguridad sobre condiciones de trabajo', descripcion: 'Estabilidad del empleo, cambios en condiciones laborales', riesgo_alto_cuando: 'Contratos precarios, amenaza de despido, reorganizaciones' },
+        { num: 9, dimension: 'Doble presencia', descripcion: 'Conflicto entre responsabilidades laborales y domésticas/familiares', riesgo_alto_cuando: 'Jornadas extensas que impiden atender familia' },
+        { num: 10, dimension: 'Vulnerabilidad', descripcion: 'Condiciones de vulnerabilidad social, discriminación, inequidad', riesgo_alto_cuando: 'Discriminación por género, edad, migración' },
+        { num: 11, dimension: 'Salud mental', descripcion: 'Estado de bienestar psicológico general', riesgo_alto_cuando: 'Síntomas de estrés, ansiedad, burnout' },
+        { num: 12, dimension: 'Violencia y acoso', descripcion: 'Situaciones de violencia, acoso laboral o sexual (Ley 21.645)', riesgo_alto_cuando: 'Reportes de acoso, violencia laboral o sexual' },
+      ],
+      niveles_riesgo: [
+        { nivel: 'Bajo', descripcion: 'Sin riesgo significativo', accion: 'Mantener condiciones. Monitoreo en próxima medición.' },
+        { nivel: 'Medio', descripcion: 'Riesgo moderado', accion: 'Plan de intervención a mediano plazo (6-12 meses). Comité Paritario.' },
+        { nivel: 'Alto', descripcion: 'Riesgo significativo para la salud mental', accion: 'Plan de intervención inmediato (30-60 días). Notificación organismo administrador.' },
+      ]
+    },
+    requisitos_empresa: [
+      { id: 1, categoria: 'Aplicación Instrumento', requisito: 'Aplicar Cuestionario CEAL-SM/SUSESO a todos los trabajadores del centro de trabajo', periodicidad: 'Cada 2 años', obligatorio: true, norma: 'Circular SUSESO 3432/2023' },
+      { id: 2, categoria: 'Difusión y Participación', requisito: 'Informar a trabajadores sobre el proceso, propósito y confidencialidad. Garantizar participación ≥60%', periodicidad: 'Previo a cada medición', obligatorio: true, norma: 'Protocolo CEAL-SM sección 3' },
+      { id: 3, categoria: 'Análisis de Resultados', requisito: 'Análisis de resultados por dimensión y área de trabajo. Identificar grupos de riesgo alto', periodicidad: 'Posterior a cada medición', obligatorio: true, norma: 'Protocolo CEAL-SM sección 5' },
+      { id: 4, categoria: 'Plan de Intervención', requisito: 'Elaborar Plan de Intervención para dimensiones en riesgo alto o medio', periodicidad: '30 días tras resultados. Actualización anual de cumplimiento', obligatorio: true, norma: 'Protocolo CEAL-SM sección 6' },
+      { id: 5, categoria: 'Comité Paritario', requisito: 'Presentar resultados al Comité Paritario (CPHS) y Dirección. Acta de reunión obligatoria', periodicidad: 'Posterior a cada medición', obligatorio: true, norma: 'DS 54/1969 Art. 24' },
+      { id: 6, categoria: 'Seguimiento', requisito: 'Seguimiento semestral del avance del Plan de Intervención', periodicidad: 'Semestral', obligatorio: true, norma: 'Protocolo CEAL-SM sección 7' },
+      { id: 7, categoria: 'Canal de Denuncia', requisito: 'Mantener canal de denuncia de acoso laboral/sexual accesible y confidencial (Ley 21.645)', periodicidad: 'Permanente', obligatorio: true, norma: 'Ley 21.645 Art. 2' },
+      { id: 8, categoria: 'Capacitación', requisito: 'Capacitar a jefaturas en gestión de riesgos psicosociales y prevención de acoso', periodicidad: 'Anual', obligatorio: true, norma: 'Protocolo CEAL-SM sección 8' },
     ],
-    estadisticas: { ultima_medicion: '2023-08-15', proxima_medicion: '2025-08-15', participacion: '87%', nivel_riesgo: 'Alto', dimensiones_criticas: 3 }
+    evaluaciones: [
+      {
+        id: 1, centro_trabajo: 'Empresa Ejemplo S.A. — Sede Principal',
+        fecha_aplicacion: '2024-08-20', fecha_resultados: '2024-09-15',
+        instrumento: 'CEAL-SM/SUSESO', version: '1.0 (2023)',
+        universo_trabajadores: 145, participantes: 127, tasa_participacion: 87.6,
+        responsable: 'Claudia Torres S. + IST',
+        resultados_dimensiones: [
+          { dimension: 'Carga de trabajo', resultado: 'Alto', puntaje: 72, afectados_pct: 45 },
+          { dimension: 'Exigencias emocionales', resultado: 'Medio', puntaje: 54, afectados_pct: 32 },
+          { dimension: 'Desarrollo profesional', resultado: 'Medio', puntaje: 51, afectados_pct: 28 },
+          { dimension: 'Reconocimiento y claridad del rol', resultado: 'Alto', puntaje: 68, afectados_pct: 41 },
+          { dimension: 'Conflicto de rol', resultado: 'Bajo', puntaje: 35, afectados_pct: 18 },
+          { dimension: 'Calidad del liderazgo', resultado: 'Alto', puntaje: 74, afectados_pct: 48 },
+          { dimension: 'Compañerismo', resultado: 'Bajo', puntaje: 28, afectados_pct: 12 },
+          { dimension: 'Inseguridad condiciones trabajo', resultado: 'Medio', puntaje: 55, afectados_pct: 35 },
+          { dimension: 'Doble presencia', resultado: 'Medio', puntaje: 50, afectados_pct: 30 },
+          { dimension: 'Vulnerabilidad', resultado: 'Bajo', puntaje: 22, afectados_pct: 10 },
+          { dimension: 'Salud mental', resultado: 'Alto', puntaje: 70, afectados_pct: 42 },
+          { dimension: 'Violencia y acoso', resultado: 'Bajo', puntaje: 18, afectados_pct: 8 },
+        ],
+        dimensiones_alto_riesgo: ['Carga de trabajo','Reconocimiento y claridad del rol','Calidad del liderazgo','Salud mental'],
+        plan_intervencion_estado: 'En ejecución (60% avance)',
+        acta_cphs_fecha: '2024-10-01',
+        prox_medicion: '2026-08-20',
+        estado: 'activo'
+      }
+    ],
+    estadisticas: { ultima_medicion: '2024-08-20', proxima_medicion: '2026-08-20', participacion: 87.6, dimensiones_alto: 4, dimensiones_medio: 4, dimensiones_bajo: 4, plan_intervencion: 'En ejecución', cumplimiento_pct: 82 }
   },
-  {
+
+  UV: {
     id: 'UV',
     nombre: 'Radiación UV de Origen Solar',
-    descripcion: 'Protocolo de Exposición a Radiación UV',
-    autoridad: 'MINSAL',
-    base_legal: 'Ley 20.096, Circular B51/22',
+    norma_tecnica: 'Protocolo de Exposición Ocupacional a Radiación UV (MINSAL)',
+    base_legal: ['Ley 20.096 Art. 19','DS 594 Art. 103-114 (Radiaciones)','Circular B51/22 MINSAL','Resolución 336/2011'],
+    objetivo: 'Proteger a los trabajadores que realizan actividades al aire libre de los efectos nocivos de la radiación UV solar (quemaduras, melanoma, fotoqueratitis).',
     color: 'orange',
     icon: 'fa-sun',
-    evaluaciones: [
-      { id: 1, fecha: '2024-03-15', indice_uv: 11, nivel: 'Extremo', medidas_proteccion: ['Protector solar FPS50', 'Ropa manga larga', 'Legionario', 'Restricción horaria 11-16h'], trabajadores_expuestos: 15, capacitacion_vigente: true, prox_capacitacion: '2025-03-15' },
-      { id: 2, fecha: '2024-02-10', indice_uv: 9, nivel: 'Muy Alto', medidas_proteccion: ['Protector solar FPS30', 'Legionario', 'Restricción horaria 12-15h'], trabajadores_expuestos: 15, capacitacion_vigente: true, prox_capacitacion: '2025-03-15' },
+    criterios_tecnicos: {
+      indices_uv: [
+        { iuv: '1-2', clasificacion: 'Bajo', riesgo: 'Bajo', medidas: ['No se requieren medidas especiales'], color: 'green' },
+        { iuv: '3-5', clasificacion: 'Moderado', riesgo: 'Moderado', medidas: ['FPS 30+ en zonas expuestas', 'Sombrero de ala ancha', 'Gafas UV'], color: 'yellow' },
+        { iuv: '6-7', clasificacion: 'Alto', riesgo: 'Alto', medidas: ['FPS 50+ obligatorio', 'Ropa manga larga', 'Legionario', 'Gafas UV', 'Evitar exposición 11-16h'], color: 'orange' },
+        { iuv: '8-10', clasificacion: 'Muy Alto', riesgo: 'Muy alto', medidas: ['FPS 50+ obligatorio', 'Ropa manga larga', 'Legionario', 'Gafas UV', 'Restricción horaria 11-16h salvo necesidad justificada'], color: 'red' },
+        { iuv: '≥11', clasificacion: 'Extremo', riesgo: 'Extremo', medidas: ['FPS 50+ obligatorio', 'Ropa manga larga', 'Legionario', 'Gafas UV', 'Restricción estricta 11-16h', 'Sombrilla/toldo obligatorio'], color: 'purple' },
+      ],
+      epp_obligatorio: [
+        { epp: 'Protector solar FPS 50+ (resistente al agua)', aplicacion: 'Antes de salir + cada 2 horas', cuando: 'IUV ≥6', norma: 'Ley 20.096' },
+        { epp: 'Gorro/sombrero legionario (protege cuello y orejas)', cuando: 'IUV ≥3', norma: 'Circular B51/22' },
+        { epp: 'Ropa manga larga (tela con UPF ≥40)', cuando: 'IUV ≥6', norma: 'Circular B51/22' },
+        { epp: 'Lentes de sol (protección UV 400)', cuando: 'IUV ≥3', norma: 'Circular B51/22' },
+      ],
+      medidas_colectivas: [
+        'Instalación de mallas de sombra o toldos en zonas de trabajo fijo al aire libre',
+        'Reorganización de tareas para evitar exposición en horario crítico (11:00-16:00)',
+        'Rotación de trabajadores para reducir tiempo de exposición acumulada',
+        'Habilitar zonas de sombra para pausas y colaciones',
+      ],
+      fuente_indice_uv: 'Meteo-Chile / DMC (Dirección Meteorológica de Chile) — Regional',
+    },
+    requisitos_empresa: [
+      { id: 1, categoria: 'Identificación', requisito: 'Identificar trabajadores con exposición solar directa ≥1 hora diaria (especialmente meses oct-mar en zona central)', periodicidad: 'Anual + cambios de puesto', obligatorio: true, norma: 'Ley 20.096 Art. 19' },
+      { id: 2, categoria: 'Información', requisito: 'Comunicar diariamente el Índice UV a trabajadores expuestos (pizarra, app, correo)', periodicidad: 'Diaria (días laborales oct-mar)', obligatorio: true, norma: 'Ley 20.096 Art. 19' },
+      { id: 3, categoria: 'EPP', requisito: 'Proveer y controlar entrega de protector solar FPS50+, legionario y ropa manga larga', periodicidad: 'Temporada UV (oct-abr). Reposición según consumo', obligatorio: true, norma: 'Ley 20.096 + DS 594 Art. 53' },
+      { id: 4, categoria: 'Control Técnico', requisito: 'Instalar estructuras de sombra en puestos fijos de trabajo al aire libre', periodicidad: 'Permanente durante temporada UV', obligatorio: true, norma: 'DS 594 Art. 109' },
+      { id: 5, categoria: 'Vigilancia de Salud', requisito: 'Examen dermatológico para trabajadores con exposición intensa (>10 años)', periodicidad: 'Cada 2 años para trabajadores con larga exposición', obligatorio: true, norma: 'Protocolo UV MINSAL' },
+      { id: 6, categoria: 'Capacitación', requisito: 'Capacitación sobre riesgos UV, uso de EPP fotoproteción y reconocimiento de lesiones cutáneas', periodicidad: 'Anual (antes de cada temporada UV — septiembre)', obligatorio: true, norma: 'DS 594 Art. 21' },
+      { id: 7, categoria: 'Restricción Horaria', requisito: 'Política de restricción de trabajo en horario 11:00-16:00 cuando IUV ≥8', periodicidad: 'Temporada UV (oct-abr)', obligatorio: true, norma: 'Ley 20.096' },
     ],
-    estadisticas: { trabajadores_expuestos: 15, con_epp_vigente: 12, capacitacion_vigente: true, indice_uv_hoy: 8 }
+    registros_iuv: [
+      { fecha: '2026-03-17', region: 'Metropolitana', iuv: 8, clasificacion: 'Muy Alto', medidas_aplicadas: ['FPS50+ entregado', 'Legionario', 'Restricción 12-15h'], trabajadores_expuestos: 18 },
+      { fecha: '2026-03-10', region: 'Metropolitana', iuv: 10, clasificacion: 'Muy Alto', medidas_aplicadas: ['FPS50+ entregado', 'Legionario', 'Restricción 11-16h', 'Toldo instalado'], trabajadores_expuestos: 18 },
+      { fecha: '2026-02-20', region: 'Metropolitana', iuv: 11, clasificacion: 'Extremo', medidas_aplicadas: ['Todas las medidas aplicadas', 'Restricción estricta 11-16h'], trabajadores_expuestos: 18 },
+    ],
+    estadisticas: { trabajadores_expuestos: 18, con_epp_vigente: 15, con_epp_pendiente: 3, capacitacion_vigente: true, iuv_hoy: 8, clasificacion_hoy: 'Muy Alto', cumplimiento_pct: 88 }
   },
-  {
+
+  MMC: {
     id: 'MMC',
-    nombre: 'Manejo Manual de Cargas (Ley 20.949)',
-    descripcion: 'Evaluación ergonómica de manejo manual de cargas',
-    autoridad: 'MINTRAB / MINSAL',
-    base_legal: 'Ley 20.949, DS 63/2005',
-    color: 'red',
+    nombre: 'Manejo Manual de Cargas — Ley 20.949',
+    norma_tecnica: 'Guía Técnica MINTRAB — Evaluación y Control de Riesgos MMC',
+    base_legal: ['Ley 20.949 (17/09/2017)','Código del Trabajo Art. 211-F al 211-J','DS 63/2005 (Ley 20.001)','Guía Técnica MINTRAB 2015'],
+    objetivo: 'Prevenir lesiones musculoesqueléticas de columna y extremidades asociadas al levantamiento, descenso, transporte y empuje/jale de cargas.',
+    color: 'rose',
     icon: 'fa-box',
-    evaluaciones: [
-      { id: 1, worker_id: 8, worker_nombre: 'Valeria Herrera', fecha_eval: '2024-01-20', puesto: 'Operadora Bodega', peso_habitual: '15 kg', frecuencia: '20 veces/hora', resultado: 'Sobre Límite Legal', limite_legal_genero: '20 kg (mujer)', medidas_correctivas: 'Uso de carro portador, rotación de tareas', estado: 'con_intervencion' },
+    criterios_tecnicos: {
+      limites_legales: [
+        { grupo: 'Hombres adultos (≥18 años)', limite_kg: 25, norma: 'Ley 20.949' },
+        { grupo: 'Mujeres adultas (≥18 años)', limite_kg: 20, norma: 'Ley 20.949 + Ley 20.001' },
+        { grupo: 'Trabajadores jóvenes (< 18 años)', limite_kg: 20, norma: 'Ley 20.949 + CT Art. 14' },
+        { grupo: 'Trabajadores embarazadas', limite_kg: 0, norma: 'CT Art. 202 — Prohibición absoluta', nota: 'Trabajo en posición erguida + prohibición levantamiento' },
+      ],
+      metodologia_niosh: {
+        nombre: 'Ecuación Revisada de NIOSH (1994)',
+        peso_limite_recomendado: 23,
+        variables: ['LC (Constante de carga)', 'HM (Factor horizontal)', 'VM (Factor vertical)', 'DM (Factor distancia)', 'AM (Factor asimetría)', 'FM (Factor frecuencia)', 'CM (Factor agarre)'],
+        indicadores: [
+          { indicador: 'LPR', descripcion: 'Límite de Peso Recomendado = 23 × HM × VM × DM × AM × FM × CM', interpretation: 'Peso máximo seguro para ese levantamiento específico' },
+          { indicador: 'IL', descripcion: 'Índice de Levantamiento = Peso real / LPR', interpretation: 'IL <1: Bajo riesgo | IL 1-3: Riesgo moderado | IL >3: Alto riesgo' },
+        ]
+      },
+      metodologia_MAC: {
+        nombre: 'Método MAC (Manual Handling Assessment Charts — HSE)',
+        uso: 'Evaluación rápida de tareas de levantamiento, empuje y jale',
+      }
+    },
+    requisitos_empresa: [
+      { id: 1, categoria: 'Identificación', requisito: 'Identificar todas las tareas con manejo manual de cargas > 3 kg frecuente o > límite legal esporádico', periodicidad: 'Al inicio + cambios de proceso', obligatorio: true, norma: 'Ley 20.949 Art. 211-F' },
+      { id: 2, categoria: 'Evaluación', requisito: 'Evaluar riesgo mediante Ecuación NIOSH o método validado (Índice de Levantamiento)', periodicidad: 'Puestos identificados. Re-eval ante cambios', obligatorio: true, norma: 'Guía Técnica MINTRAB' },
+      { id: 3, categoria: 'Control', requisito: 'Implementar medidas de control: ayudas mecánicas, reorganización, rediseño de tareas', periodicidad: 'Cuando IL > 1 o peso supera límites legales', obligatorio: true, norma: 'Ley 20.949 Art. 211-H' },
+      { id: 4, categoria: 'Protección Especial', requisito: 'No asignar tareas de MMC > 20 kg a mujeres y jóvenes. Prohibición absoluta para embarazadas', periodicidad: 'Permanente — verificar en asignación de tareas', obligatorio: true, norma: 'Ley 20.949 Art. 211-J' },
+      { id: 5, categoria: 'Capacitación', requisito: 'Capacitar en técnicas correctas de levantamiento y uso de ayudas mecánicas', periodicidad: 'Anual + inducción', obligatorio: true, norma: 'DS 594 Art. 21' },
+      { id: 6, categoria: 'Vigilancia de Salud', requisito: 'Examen musculoesquelético de columna y extremidades inferiores para trabajadores expuestos', periodicidad: 'Anual para tareas con IL > 2', obligatorio: true, norma: 'Guía Técnica MINTRAB' },
     ],
-    estadisticas: { total_evaluados: 10, sobre_limite: 3, bajo_limite: 7, con_intervencion: 3 }
+    evaluaciones: [
+      {
+        id: 1, worker_id: 8, worker_nombre: 'Valeria Herrera Díaz', rut: '17.890.123-4',
+        puesto: 'Operadora Bodega', area: 'Logística', fecha_eval: '2026-01-20',
+        tarea: 'Levantamiento y traslado de cajas desde pallets', metodologia: 'Ecuación NIOSH',
+        peso_real_kg: 18, altura_origen_cm: 20, altura_destino_cm: 90,
+        distancia_horizontal_cm: 35, frecuencia_por_hora: 25, agarre: 'Regular',
+        lpr_calculado: 14.2, indice_levantamiento: 1.27, clasificacion_il: 'Riesgo Moderado',
+        limite_legal_aplicable: 20, cumple_limite_legal: true,
+        medidas_correctivas: ['Plataforma elevadora de pallets', 'Máximo 2 cajas por jale', 'Rotación con otra tarea cada 45 min'],
+        implementadas: false, plazo_implementacion: '2026-03-31',
+        estado: 'activo', observaciones: 'IL > 1.0. Implementar medidas antes del 31/03/2026.'
+      },
+    ],
+    estadisticas: { total_evaluados: 15, il_alto: 2, il_moderado: 5, il_bajo: 8, sobre_limite_legal: 0, con_ayuda_mecanica: 8, cumplimiento_pct: 70 }
   },
-  {
+
+  VOZ: {
     id: 'VOZ',
     nombre: 'Trastornos de la Voz Profesional',
-    descripcion: 'Vigilancia de trabajadores con uso intensivo de la voz',
-    autoridad: 'MINSAL',
-    base_legal: 'Circular B51/45',
+    norma_tecnica: 'Protocolo de Vigilancia de Trastornos de la Voz (MINSAL)',
+    base_legal: ['Circular B51/45 MINSAL','DS 594 Art. 73 (Agentes físicos)','Ley 16.744'],
+    objetivo: 'Vigilar la salud vocal de trabajadores con uso intensivo de la voz profesional para detectar y prevenir disfonías y nódulos vocales.',
     color: 'indigo',
     icon: 'fa-microphone',
-    evaluaciones: [
-      { id: 1, worker_id: 4, worker_nombre: 'Ana López', fecha_eval: '2024-02-01', cargo_voz: 'Administrativa (call center)', horas_voz_dia: 6, evaluacion_vocal: 'Sin alteraciones', laringoscopia: 'Normal', hidratacion_adecuada: true, prox_eval: '2025-02-01', estado: 'vigente' },
+    criterios_tecnicos: {
+      grupos_riesgo: [
+        { grupo: 'Alto riesgo', ocupaciones: ['Docentes', 'Educadoras de párvulos', 'Operadores de call center', 'Guías turísticos', 'Actores/locutores'], horas_voz_dia: '≥ 6 horas' },
+        { grupo: 'Riesgo moderado', ocupaciones: ['Supervisores/jefaturas', 'Vendedores', 'Recepcionistas', 'Profesionales de salud'], horas_voz_dia: '3-6 horas' },
+      ],
+      factores_agravantes: ['Ruido ambiental > 65 dB (requiere esfuerzo vocal)', 'Baja humedad relativa (< 40%)', 'Exposición a polvo o sustancias irritantes', 'Tabaquismo', 'Reflejo gastroesofágico'],
+      evaluaciones_requeridas: [
+        { evaluacion: 'Evaluación fonoaudiológica inicial', descripcion: 'Anamnesis vocal, evaluación perceptiva de la voz (escala GRBAS)', periodicidad: 'Ingreso a puesto de riesgo' },
+        { evaluacion: 'Laringoscopía/estroboscopía laríngea', descripcion: 'Evaluación estructural de cuerdas vocales por otorrinolaringólogo', periodicidad: 'Ingreso + cada 2 años o ante síntomas' },
+        { evaluacion: 'Autoevaluación vocal (Voice Handicap Index VHI)', descripcion: 'Cuestionario de autopercepción de la discapacidad vocal', periodicidad: 'Semestral' },
+        { evaluacion: 'Análisis acústico de la voz', descripcion: 'Medición de jitter, shimmer, relación armónico-ruido', periodicidad: 'Ingreso + anual' },
+      ]
+    },
+    requisitos_empresa: [
+      { id: 1, categoria: 'Identificación', requisito: 'Identificar trabajadores con uso intensivo de la voz (≥ 3-6 h/día)', periodicidad: 'Al inicio + cambios de puesto', obligatorio: true, norma: 'Circular B51/45' },
+      { id: 2, categoria: 'Condiciones Ambientales', requisito: 'Garantizar ruido ambiental < 65 dB en puestos con uso de voz. Humedad relativa 40-60%', periodicidad: 'Verificación semestral', obligatorio: true, norma: 'DS 594 Art. 73' },
+      { id: 3, categoria: 'Vigilancia de Salud', requisito: 'Evaluación fonoaudiológica de ingreso y periódica', periodicidad: 'Ingreso + cada 2 años o ante síntomas', obligatorio: true, norma: 'Circular B51/45' },
+      { id: 4, categoria: 'Vigilancia de Salud', requisito: 'Laringoscopía por especialista ORL', periodicidad: 'Ingreso + ante síntomas o diagnóstico de riesgo', obligatorio: true, norma: 'Circular B51/45' },
+      { id: 5, categoria: 'Higiene Vocal', requisito: 'Capacitación en higiene vocal: hidratación, técnica vocal, uso de micrófono', periodicidad: 'Anual', obligatorio: true, norma: 'Circular B51/45' },
+      { id: 6, categoria: 'Pausas Vocales', requisito: 'Implementar pausas vocales de 15 min cada 2 horas de uso intensivo de la voz', periodicidad: 'Diaria, verificación mensual', obligatorio: true, norma: 'Circular B51/45' },
     ],
-    estadisticas: { total_vigilados: 5, con_patologia: 0, sin_alteraciones: 5 }
+    evaluaciones: [
+      {
+        id: 1, worker_id: 4, worker_nombre: 'Ana López Vega', rut: '16.234.567-8',
+        cargo: 'Administrativa (Call Center)', area: 'Administración', fecha_eval: '2026-01-15',
+        horas_voz_dia: 7, nivel_ruido_ambiente_db: 58,
+        evaluacion_fonoaudiologica: '2026-01-15', resultado_fonoaudio: 'Sin disfonía. Leve tensión muscular cervical.',
+        grbas_g: 0, grbas_r: 0, grbas_b: 1, grbas_a: 0, grbas_s: 0, grbas_total: 'G0R0B1A0S0 — Sin alteración significativa',
+        laringoscopia_fecha: '2025-06-10', laringoscopia_resultado: 'Cuerdas vocales sin lesiones estructurales',
+        vhi_puntaje: 12, vhi_clasificacion: 'Discapacidad vocal leve',
+        hidratacion_adecuada: true, uso_microfono: true, pausas_vocales: true,
+        prox_evaluacion: '2028-01-15',
+        estado: 'vigente', observaciones: 'Uso de microfono tipo headset. Hidratación correcta. Continuar higiene vocal.'
+      },
+    ],
+    estadisticas: { total_vigilados: 8, con_disfonia: 1, sin_alteraciones: 7, laringoscopia_vigente: 6, evaluacion_fonoaudio_vigente: 7, cumplimiento_pct: 90 }
   }
-]
+}
 
-// GET /api/protocols - Lista todos los protocolos
+// GET /api/protocols
 app.get('/', (c) => {
-  const summary = protocols.map(p => ({
-    id: p.id,
-    nombre: p.nombre,
-    descripcion: p.descripcion,
-    color: p.color,
-    icon: p.icon,
+  const summary = Object.values(protocolsDB).map(p => ({
+    id: p.id, nombre: p.nombre, color: p.color, icon: p.icon,
+    norma_tecnica: p.norma_tecnica, base_legal: p.base_legal,
     estadisticas: p.estadisticas
   }))
   return c.json({ success: true, data: summary })
@@ -119,17 +477,33 @@ app.get('/', (c) => {
 // GET /api/protocols/:id
 app.get('/:id', (c) => {
   const id = c.req.param('id').toUpperCase()
-  const protocol = protocols.find(p => p.id === id)
-  if (!protocol) return c.json({ success: false, error: 'Protocolo no encontrado' }, 404)
-  return c.json({ success: true, data: protocol })
+  const p = protocolsDB[id]
+  if (!p) return c.json({ success: false, error: 'Protocolo no encontrado' }, 404)
+  return c.json({ success: true, data: p })
 })
 
-// GET /api/protocols/:id/evaluaciones
-app.get('/:id/evaluaciones', (c) => {
+// PUT /api/protocols/:id/evaluaciones/:evalId
+app.put('/:id/evaluaciones/:evalId', async (c) => {
   const id = c.req.param('id').toUpperCase()
-  const protocol = protocols.find(p => p.id === id)
-  if (!protocol) return c.json({ success: false, error: 'Protocolo no encontrado' }, 404)
-  return c.json({ success: true, data: protocol.evaluaciones })
+  const evalId = parseInt(c.req.param('evalId'))
+  const p = protocolsDB[id]
+  if (!p) return c.json({ success: false, error: 'Protocolo no encontrado' }, 404)
+  const idx = p.evaluaciones.findIndex((e: any) => e.id === evalId)
+  if (idx === -1) return c.json({ success: false, error: 'Evaluación no encontrada' }, 404)
+  const body = await c.req.json()
+  p.evaluaciones[idx] = { ...p.evaluaciones[idx], ...body }
+  return c.json({ success: true, data: p.evaluaciones[idx], message: 'Evaluación actualizada' })
+})
+
+// POST /api/protocols/:id/evaluaciones
+app.post('/:id/evaluaciones', async (c) => {
+  const id = c.req.param('id').toUpperCase()
+  const p = protocolsDB[id]
+  if (!p) return c.json({ success: false, error: 'Protocolo no encontrado' }, 404)
+  const body = await c.req.json()
+  const newEval = { id: p.evaluaciones.length + 1, ...body, fecha_registro: new Date().toISOString() }
+  p.evaluaciones.push(newEval)
+  return c.json({ success: true, data: newEval }, 201)
 })
 
 export default app

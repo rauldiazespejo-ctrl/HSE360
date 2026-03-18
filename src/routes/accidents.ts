@@ -2,48 +2,66 @@ import { Hono } from 'hono'
 
 const app = new Hono()
 
-const accidents = [
-  { id: 1, tipo: 'DIAT', folio: 'ACC-2024-001', worker_id: 1, worker_nombre: 'Carlos González', fecha_accidente: '2024-02-14', hora: '10:30', lugar: 'Línea de Producción N°2', descripcion: 'Atrapamiento de mano derecha en banda transportadora durante operación de limpieza.', lesion: 'Fractura de metacarpo índice derecho', gravedad: 'Grave', dias_perdidos: 21, mutualidad: 'ACHS', estado_denuncia: 'Enviada', calificacion: 'Accidente del Trabajo', reincorporacion: '2024-03-14', causa_inmediata: 'Acto Subestándar - No uso de bloqueo LOTO', causa_basica: 'Falta de procedimiento LOTO', acciones_correctivas: ['Implementar procedimiento LOTO', 'Capacitar en LOTO', 'Instalar señalética'], estado: 'cerrado' },
-  { id: 2, tipo: 'DIAT', folio: 'ACC-2024-002', worker_id: 5, worker_nombre: 'Pedro Sánchez', fecha_accidente: '2024-03-05', hora: '14:15', lugar: 'Taller de Soldadura', descripcion: 'Proyección de partículas metálicas al ojo izquierdo durante actividad de soldadura.', lesion: 'Cuerpo extraño ocular', gravedad: 'Leve', dias_perdidos: 2, mutualidad: 'ISL', estado_denuncia: 'Enviada', calificacion: 'Accidente del Trabajo', reincorporacion: '2024-03-07', causa_inmediata: 'Acto Subestándar - No uso de careta de soldar', causa_basica: 'EPP deteriorado', acciones_correctivas: ['Reemplazar EPP', 'Reforzar uso de EPP'], estado: 'cerrado' },
-  { id: 3, tipo: 'DIAT', folio: 'ACC-2024-003', worker_id: 8, worker_nombre: 'Valeria Herrera', fecha_accidente: '2024-04-18', hora: '09:00', lugar: 'Bodega Central', descripcion: 'Caída a mismo nivel por piso húmedo sin señalización.', lesion: 'Contusión rodilla izquierda', gravedad: 'Leve', dias_perdidos: 3, mutualidad: 'ACHS', estado_denuncia: 'Enviada', calificacion: 'Accidente del Trabajo', reincorporacion: '2024-04-21', causa_inmediata: 'Condición Subestándar - Piso húmedo sin señalizar', causa_basica: 'Falta de programa de mantenimiento', acciones_correctivas: ['Instalar alfombras antideslizantes', 'Señalética de piso húmedo'], estado: 'en_proceso' },
-  { id: 4, tipo: 'DIEP', folio: 'ENF-2024-001', worker_id: 3, worker_nombre: 'Jorge Martínez', fecha_accidente: '2024-01-22', hora: null, lugar: 'Empresa', descripcion: 'Diagnóstico de neumoconiosis por exposición crónica a sílice en puesto de mecánico industrial.', lesion: 'Silicosis etapa I', gravedad: 'Grave', dias_perdidos: 0, mutualidad: 'ACHS', estado_denuncia: 'Enviada', calificacion: 'Enfermedad Profesional', reincorporacion: null, causa_inmediata: 'Exposición prolongada a polvo de sílice', causa_basica: 'Controles inadecuados', acciones_correctivas: ['Cambio de puesto de trabajo', 'Control médico periódico'], estado: 'en_vigilancia' },
-  { id: 5, tipo: 'DIAT', folio: 'ACC-2024-004', worker_id: 1, worker_nombre: 'Carlos González', fecha_accidente: '2024-05-10', hora: '16:45', lugar: 'Línea de Producción N°1', descripcion: 'Golpe en pierna derecha con material en proceso de transporte.', lesion: 'Contusión tibial derecha', gravedad: 'Leve', dias_perdidos: 1, mutualidad: 'ACHS', estado_denuncia: 'Enviada', calificacion: 'Accidente del Trabajo', reincorporacion: '2024-05-11', causa_inmediata: 'Condición Subestándar - Área congestionada', causa_basica: 'Deficiente orden y aseo', acciones_correctivas: ['Implementar 5S en área'], estado: 'cerrado' },
+export let accidentsDB: any[] = [
+  { id: 1, tipo: 'DIAT', folio: 'DIAT-2026-001', worker_id: 1, worker_nombre: 'Carlos González Muñoz', rut: '12.345.678-9', fecha_accidente: '2026-01-22', hora: '10:30', lugar: 'Línea de Producción N°2', descripcion: 'Atrapamiento de mano derecha en banda transportadora durante operación de limpieza sin bloqueo LOTO.', lesion: 'Fractura de metacarpo índice derecho', parte_cuerpo: 'Mano derecha', gravedad: 'Grave', dias_perdidos: 18, mutualidad: 'ACHS', folio_mutualidad: 'ACHS-2026-00341', estado_denuncia: 'Enviada', fecha_denuncia: '2026-01-22', calificacion: 'Accidente del Trabajo', fecha_calificacion: '2026-02-05', reincorporacion: '2026-02-09', causa_inmediata: 'Acto Subestándar — Operación de limpieza sin bloqueo LOTO (Lock Out Tag Out)', causa_basica: 'Factor Personal: Falta de conocimiento del procedimiento LOTO. Factor Trabajo: Procedimiento LOTO inexistente para esta línea.', acciones_correctivas: ['Elaborar e implementar procedimiento LOTO para línea 2','Capacitación en LOTO a todo el personal de producción','Instalar candados y tarjetas de bloqueo en tableros','Auditoría mensual de cumplimiento LOTO'], estado: 'cerrado', investigacion_completada: true, testigos: 'Jorge Martínez', observaciones: '' },
+  { id: 2, tipo: 'DIAT', folio: 'DIAT-2026-002', worker_id: 5, worker_nombre: 'Pedro Sánchez Rojas', rut: '11.111.111-1', fecha_accidente: '2026-02-14', hora: '14:15', lugar: 'Taller de Soldadura', descripcion: 'Proyección de partícula metálica incandescente al ojo izquierdo durante soldadura SMAW sin careta en posición correcta.', lesion: 'Quemadura corneal leve ojo izquierdo', parte_cuerpo: 'Ojo izquierdo', gravedad: 'Leve', dias_perdidos: 2, mutualidad: 'ISL', folio_mutualidad: 'ISL-2026-00128', estado_denuncia: 'Enviada', fecha_denuncia: '2026-02-14', calificacion: 'Accidente del Trabajo', fecha_calificacion: '2026-02-15', reincorporacion: '2026-02-16', causa_inmediata: 'Acto Subestándar — Careta de soldar mal posicionada (levantada)', causa_basica: 'Factor Trabajo: EPP deteriorado (careta con mecanismo de ajuste defectuoso). Condición Subestándar: EPP defectuoso no detectado en inspección.', acciones_correctivas: ['Reemplazar careta de soldar','Inspección mensual de estado EPP en taller','Reforzar uso correcto de EPP en capacitación'], estado: 'cerrado', investigacion_completada: true, testigos: '', observaciones: '' },
+  { id: 3, tipo: 'DIAT', folio: 'DIAT-2026-003', worker_id: 8, worker_nombre: 'Valeria Herrera Díaz', rut: '17.890.123-4', fecha_accidente: '2026-03-05', hora: '09:10', lugar: 'Bodega Central — Pasillo B', descripcion: 'Caída a mismo nivel en pasillo de bodega tras piso mojado sin señalización. El pasillo fue limpiado 30 min antes sin señalizar.', lesion: 'Contusión rodilla izquierda y muñeca derecha', parte_cuerpo: 'Rodilla izquierda / Muñeca derecha', gravedad: 'Leve', dias_perdidos: 3, mutualidad: 'ACHS', folio_mutualidad: 'ACHS-2026-00512', estado_denuncia: 'Enviada', fecha_denuncia: '2026-03-05', calificacion: 'Accidente del Trabajo', fecha_calificacion: '2026-03-06', reincorporacion: '2026-03-08', causa_inmediata: 'Condición Subestándar — Piso húmedo sin señalización de peligro', causa_basica: 'Factor Trabajo: Procedimiento de limpieza sin protocolo de señalización. Sin gestión de riesgo de resbalones/caídas en la empresa.', acciones_correctivas: ['Elaborar procedimiento de limpieza con señalización obligatoria','Instalar alfombras antideslizantes en zonas húmedas','Señalética permanente en zona de mayor riesgo'], estado: 'en_proceso', investigacion_completada: true, testigos: 'Carlos González', observaciones: 'Acciones correctivas en proceso de implementación. Plazo: 31/03/2026.' },
+  { id: 4, tipo: 'DIEP', folio: 'DIEP-2026-001', worker_id: 5, worker_nombre: 'Pedro Sánchez Rojas', rut: '11.111.111-1', fecha_accidente: '2026-03-10', hora: null, lugar: 'Empresa — diagnóstico por vigilancia', descripcion: 'Diagnóstico de Hipoacusia Sensorioneural de Origen Laboral (NIHL) moderada bilateral en control audiológico de seguimiento. Trabajador NSE IV con exposición a 95 dB(A) sin controles de ingeniería adecuados.', lesion: 'Hipoacusia Sensorioneural Laboral (NIHL) moderada bilateral', parte_cuerpo: 'Sistema auditivo bilateral', gravedad: 'Moderado', dias_perdidos: 0, mutualidad: 'ISL', folio_mutualidad: 'ISL-DIEP-2026-0008', estado_denuncia: 'Enviada', fecha_denuncia: '2026-03-10', calificacion: 'Enfermedad Profesional', fecha_calificacion: null, reincorporacion: null, causa_inmediata: 'Exposición prolongada a ruido > 90 dB(A) sin controles de ingeniería adecuados', causa_basica: 'Controles de exposición insuficientes. NSE IV sin rediseño de puesto. EPA sin supervisión de uso efectivo.', acciones_correctivas: ['Rediseño inmediato de puesto (evaluación reubicación)','Instalar cabina insonorizada en taller de soldadura','Examen NIHL adicional por ORL especialista','Notificar SEREMI de Salud'], estado: 'en_vigilancia', investigacion_completada: false, testigos: '', observaciones: '⚠️ ENFERMEDAD PROFESIONAL. Notificación SEREMI pendiente.' },
 ]
 
-const estadisticasAnuales = {
-  año: 2024,
+const estadisticas2026 = {
+  anio: 2026,
   total_trabajadores: 145,
-  accidentes_trabajo: 4,
-  enfermedades_profesionales: 1,
-  dias_perdidos_total: 27,
-  tasa_accidentabilidad: 2.76, // (accidentes/trabajadores)*100
-  tasa_siniestralidad: 18.62, // (dias_perdidos/trabajadores)*100
+  accidentes_trabajo_ytd: 3,
+  enfermedades_profesionales_ytd: 1,
+  dias_perdidos_ytd: 23,
+  accidentes_fatales_ytd: 0,
+  tasa_accidentabilidad: 2.07,
+  tasa_siniestralidad: 15.86,
   tasa_mortalidad: 0,
-  accidentes_por_mes: [0,1,2,0,1,0,0,0,0,0,0,0],
-  causas_principales: { actos_subestandar: 60, condiciones_subestandar: 30, factores_personales: 10 }
+  accidentes_por_mes: [2,2,1,0,0,0,0,0,0,0,0,0],
+  ep_por_mes: [0,0,1,0,0,0,0,0,0,0,0,0],
+  causas_actos: 67, causas_condiciones: 33,
+  partes_cuerpo: { 'Mano/Dedos': 1, 'Ojo': 1, 'Rodilla/Pierna': 1 },
+  areas_mayor_incidencia: ['Producción', 'Taller de Soldadura', 'Logística']
 }
 
-// GET /api/accidents
 app.get('/', (c) => {
   const { tipo, estado, year } = c.req.query()
-  let filtered = [...accidents]
-  if (tipo) filtered = filtered.filter(a => a.tipo === tipo)
-  if (estado) filtered = filtered.filter(a => a.estado === estado)
+  let filtered = [...accidentsDB]
+  if (tipo && tipo !== 'all') filtered = filtered.filter(a => a.tipo === tipo)
+  if (estado && estado !== 'all') filtered = filtered.filter(a => a.estado === estado)
   if (year) filtered = filtered.filter(a => a.fecha_accidente.startsWith(year))
   return c.json({ success: true, data: filtered, total: filtered.length })
 })
 
-// GET /api/accidents/stats
-app.get('/stats', (c) => {
-  return c.json({ success: true, data: estadisticasAnuales })
-})
+app.get('/stats', (c) => c.json({ success: true, data: estadisticas2026 }))
 
-// GET /api/accidents/:id
 app.get('/:id', (c) => {
   const id = parseInt(c.req.param('id'))
-  const accident = accidents.find(a => a.id === id)
-  if (!accident) return c.json({ success: false, error: 'Registro no encontrado' }, 404)
-  return c.json({ success: true, data: accident })
+  const a = accidentsDB.find(x => x.id === id)
+  if (!a) return c.json({ success: false, error: 'Registro no encontrado' }, 404)
+  return c.json({ success: true, data: a })
+})
+
+app.post('/', async (c) => {
+  const body = await c.req.json()
+  const anio = new Date().getFullYear()
+  const tipo = body.tipo || 'DIAT'
+  const count = accidentsDB.filter(a => a.tipo === tipo && a.folio.includes(String(anio))).length + 1
+  const folio = `${tipo}-${anio}-${String(count).padStart(3,'0')}`
+  const newRecord = { id: accidentsDB.length + 1, folio, estado: 'abierto', investigacion_completada: false, ...body, fecha_registro: new Date().toISOString() }
+  accidentsDB.push(newRecord)
+  return c.json({ success: true, data: newRecord, message: `${tipo} registrado con folio ${folio}` }, 201)
+})
+
+app.put('/:id', async (c) => {
+  const id = parseInt(c.req.param('id'))
+  const idx = accidentsDB.findIndex(a => a.id === id)
+  if (idx === -1) return c.json({ success: false, error: 'Registro no encontrado' }, 404)
+  const body = await c.req.json()
+  accidentsDB[idx] = { ...accidentsDB[idx], ...body }
+  return c.json({ success: true, data: accidentsDB[idx], message: 'Registro actualizado' })
 })
 
 export default app
