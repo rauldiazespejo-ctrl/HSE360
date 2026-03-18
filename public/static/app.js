@@ -382,7 +382,8 @@ function buildLayout() {
           ['PSICOSOCIAL','fa-brain','Riesgos Psicosociales'],
           ['UV','fa-sun','Radiación UV'],
           ['MMC','fa-box','Manejo Manual Cargas'],
-          ['HIC','fa-mountain','Hipobaria Intermitente Crónica'],['HUMOS','fa-smog','Metales y Humos Metálicos'],
+          ['HIC','fa-mountain','Hipobaria Intermitente'],
+          ['HUMOS','fa-smog','Humos Metálicos'],
         ].map(([id,ic,label]) => `
           <a class="nav-item" data-view="protocol-detail" data-pid="${id}" onclick="navigate('protocol-detail',{id:'${id}'})">
             <span class="nav-icon"><i class="fas ${ic}"></i></span><span class="truncate text-xs">${label}</span>
