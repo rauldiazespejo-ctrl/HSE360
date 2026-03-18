@@ -338,7 +338,7 @@ function buildLayout() {
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <div id="centro-selector-btn" class="topbar-center-selector hidden" onclick="navigate('centros')">
+          <div id="centro-selector-btn" class="topbar-center-selector hidden cursor-pointer select-none">
             <span class="ct-dot"></span>
             <span id="centro-nombre-topbar">Todos los centros</span>
             <i class="fas fa-chevron-down text-xs"></i>
@@ -363,9 +363,84 @@ function buildLayout() {
   `;
 }
 
-function setupCentroSelector() {
+async function setupCentroSelector() {
   const btn = document.getElementById('centro-selector-btn');
-  if (btn) btn.classList.remove('hidden');
+  if (!btn) return;
+  btn.classList.remove('hidden');
+  // Cargar centros para el dropdown
+  try {
+    const res = await API.get('/centros');
+    const centros = res.data.data.filter(c => c.activo);
+    window._centrosList = centros;
+    updateCentroDisplay();
+    // Cambiar comportamiento del btn para abrir selector
+    btn.onclick = (e) => { e.stopPropagation(); showCentroSelectorDropdown(centros); };
+  } catch {}
+}
+
+function updateCentroDisplay() {
+  const nombre = document.getElementById('centro-nombre-topbar');
+  if (!nombre) return;
+  if (App.centroActivo) {
+    const c = (window._centrosList || []).find(x => x.id === App.centroActivo);
+    nombre.textContent = c ? c.nombre : 'Centro #' + App.centroActivo;
+  } else {
+    nombre.textContent = 'Todos los centros';
+  }
+}
+
+function showCentroSelectorDropdown(centros) {
+  // Eliminar dropdown previo
+  const prev = document.getElementById('centro-dropdown');
+  if (prev) { prev.remove(); return; }
+  
+  const dropdown = document.createElement('div');
+  dropdown.id = 'centro-dropdown';
+  dropdown.style.cssText = 'position:fixed;top:64px;right:16px;z-index:9999;background:white;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);min-width:260px;overflow:hidden;border:1px solid #e5e7eb;';
+  
+  dropdown.innerHTML = `
+    <div style="padding:12px 16px;background:linear-gradient(135deg,var(--hse-green),var(--hse-green-dark));color:white;">
+      <div style="font-weight:700;font-size:13px">Seleccionar Centro de Trabajo</div>
+      <div style="font-size:11px;opacity:0.8;margin-top:2px">Filtra toda la vista por centro</div>
+    </div>
+    <div style="padding:8px;">
+      <button onclick="setCentroActivo(null)" style="width:100%;text-align:left;padding:8px 12px;border-radius:8px;font-size:13px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;background:${!App.centroActivo?'var(--hse-green-light)':'transparent'};color:${!App.centroActivo?'var(--hse-green)':'#374151'};font-weight:${!App.centroActivo?'600':'400'}">
+        <i class="fas fa-globe" style="width:16px;text-align:center"></i> Todos los centros
+        ${!App.centroActivo ? '<i class="fas fa-check ml-auto text-xs" style="color:var(--hse-green)"></i>' : ''}
+      </button>
+      ${centros.map(c => `
+        <button onclick="setCentroActivo(${c.id})" style="width:100%;text-align:left;padding:8px 12px;border-radius:8px;font-size:13px;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;background:${App.centroActivo===c.id?'var(--hse-green-light)':'transparent'};color:${App.centroActivo===c.id?'var(--hse-green)':'#374151'};font-weight:${App.centroActivo===c.id?'600':'400'}">
+          <i class="fas fa-building" style="width:16px;text-align:center"></i>
+          <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.nombre}</span>
+          ${App.centroActivo===c.id ? '<i class="fas fa-check text-xs" style="color:var(--hse-green)"></i>' : ''}
+        </button>
+      `).join('')}
+    </div>
+    ${isSuperAdmin() ? `
+    <div style="padding:8px;border-top:1px solid #f3f4f6;">
+      <button onclick="document.getElementById('centro-dropdown')?.remove();navigate('centros')" 
+        style="width:100%;text-align:left;padding:8px 12px;border-radius:8px;font-size:12px;border:none;cursor:pointer;color:var(--hse-green);background:transparent;display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-plus" style="width:16px;text-align:center"></i> Gestionar centros
+      </button>
+    </div>` : ''}
+  `;
+  
+  document.body.appendChild(dropdown);
+  setTimeout(() => document.addEventListener('click', () => { dropdown.remove(); }, { once: true }), 50);
+}
+
+function setCentroActivo(id) {
+  App.centroActivo = id;
+  sessionStorage.setItem('hse360_session', JSON.stringify({
+    user: App.currentUser,
+    token: App.token,
+    centroActivo: id
+  }));
+  updateCentroDisplay();
+  document.getElementById('centro-dropdown')?.remove();
+  // Refrescar vista actual
+  navigate(App.currentView, App.params);
+  showToast(id ? 'Filtro de centro aplicado' : 'Mostrando todos los centros', 'info');
 }
 
 function toggleSidebar() {
@@ -762,10 +837,16 @@ async function renderUsers() {
   `;
   window._allUsers = users;
   window._allRoles = roles;
+  // Guardar mapa de centros
+  try {
+    const centrosRes = await API.get('/centros');
+    window._centrosMap = {};
+    centrosRes.data.data.forEach(c => { window._centrosMap[c.id] = c.nombre; });
+  } catch { window._centrosMap = {}; }
 }
 
 function renderUsersRows(users) {
-  const centrosMap = { 1: 'Planta Norte', 2: 'Bodega Sur', 3: 'Oficinas Admin.' };
+  const centrosMap = window._centrosMap || { 1: 'Planta Norte', 2: 'Bodega Sur', 3: 'Oficinas Admin.' };
   return users.map(u => `
     <tr id="user-row-${u.id}">
       <td>
@@ -829,12 +910,10 @@ function filterUsers() {
   if (tbody) tbody.innerHTML = renderUsersRows(filtered);
 }
 
-function showAddUserModal() {
-  const centros = [
-    {id:1,nombre:'Planta Industrial Norte'},
-    {id:2,nombre:'Bodega y Logística Sur'},
-    {id:3,nombre:'Oficinas Administrativas'}
-  ];
+async function showAddUserModal() {
+  let centros = [];
+  try { const r = await API.get('/centros'); centros = r.data.data.filter(c => c.activo); } catch {}
+  const centroOpts = centros.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
   showModal('Crear Nuevo Usuario', `
     <div class="space-y-4">
       <div class="form-section">
@@ -862,14 +941,14 @@ function showAddUserModal() {
             </select></div>
           <div class="col-span-2"><label class="form-label">Centro de Trabajo asignado</label>
             <select id="nu-centro" class="form-input">
-              <option value="">Sin asignación específica (acceso a todos)</option>
-              ${centros.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('')}
+              <option value="">Sin asignación específica (acceso global)</option>
+              ${centroOpts}
             </select></div>
         </div>
       </div>
       <div class="info-box">
         <p class="text-xs text-green-800"><i class="fas fa-info-circle mr-1"></i>
-        El usuario recibirá acceso según los permisos asociados a su rol. El rol <strong>Super Administrador</strong> está reservado exclusivamente para Raúl Díaz Espejo y no puede ser asignado.</p>
+        El usuario recibirá acceso según los permisos de su rol. El rol <strong>Super Administrador</strong> está reservado exclusivamente para <strong>Raúl Díaz Espejo</strong> y no puede ser asignado.</p>
       </div>
     </div>
   `, `
@@ -903,9 +982,12 @@ async function saveNewUser() {
 }
 
 async function showEditUserModal(id) {
-  const res = await API.get(`/users/${id}`);
-  const u = res.data.data;
-  const centros = [{id:1,nombre:'Planta Industrial Norte'},{id:2,nombre:'Bodega y Logística Sur'},{id:3,nombre:'Oficinas Administrativas'}];
+  const [userRes, centrosRes] = await Promise.all([
+    API.get(`/users/${id}`),
+    API.get('/centros')
+  ]);
+  const u = userRes.data.data;
+  const centros = centrosRes.data.data.filter(c => c.activo);
   showModal(`Editar Usuario: ${u.nombres} ${u.apellidos}`, `
     <div class="space-y-4">
       <div class="form-section">
@@ -924,14 +1006,14 @@ async function showEditUserModal(id) {
             <input id="eu-email" type="email" class="form-input" value="${u.email}"></div>
           <div><label class="form-label">Rol</label>
             <select id="eu-rol" class="form-input">
-              <option value="prevencionista" ${u.rol==='prevencionista'?'selected':''}>Prevencionista</option>
-              <option value="medico" ${u.rol==='medico'?'selected':''}>Médico / Enfermera</option>
+              <option value="prevencionista" ${u.rol==='prevencionista'?'selected':''}>Prevencionista de Riesgos</option>
+              <option value="medico" ${u.rol==='medico'?'selected':''}>Médico / Enfermera Ocupacional</option>
               <option value="rrhh" ${u.rol==='rrhh'?'selected':''}>RRHH</option>
               <option value="trabajador" ${u.rol==='trabajador'?'selected':''}>Trabajador</option>
             </select></div>
           <div><label class="form-label">Centro de Trabajo</label>
             <select id="eu-centro" class="form-input">
-              <option value="">Sin asignación (todos)</option>
+              <option value="">Sin asignación específica (acceso global)</option>
               ${centros.map(c => `<option value="${c.id}" ${u.centro_trabajo_id==c.id?'selected':''}>${c.nombre}</option>`).join('')}
             </select></div>
         </div>
@@ -2442,9 +2524,9 @@ async function renderMIPER() {
         <div class="overflow-x-auto">
           <table class="data-table" id="miper-table">
             <thead><tr>
-              <th>Área</th><th>Peligro</th><th>Riesgo</th><th>Consecuencia</th>
-              <th>Prob.</th><th>Sev.</th><th>Nivel Riesgo</th>
-              <th>Controles</th><th>Responsable</th><th>Estado</th>
+              <th>Área / Tipo</th><th>Peligro / Protocolo</th><th>Consecuencia</th>
+              <th>Prob.</th><th>Sev.</th><th>NR / Nivel</th>
+              <th>Controles</th><th>Responsable / Plazo</th><th>Estado Acción</th><th>Acciones</th>
             </tr></thead>
             <tbody id="miper-tbody">${renderMIPERRows(miper)}</tbody>
           </table>
@@ -2510,18 +2592,49 @@ function renderMIPERRows(items) {
       Intolerable: 'miper-intolerable', Importante: 'miper-importante',
       Moderado: 'miper-moderado', Tolerable: 'miper-tolerable', Trivial: 'miper-trivial'
     };
+    const estadoColors = {
+      'CRÍTICO — Atención inmediata': 'badge-red',
+      'Pendiente': 'badge-yellow',
+      'En proceso': 'badge-blue',
+      'Completado': 'badge-green',
+    };
+    const estadoCls = estadoColors[item.estado_accion] || 'badge-gray';
+    const nr = item.nr || (item.probabilidad * item.severidad);
+    const nivel = item.nivel || item.nivel_riesgo || '—';
     return `
       <tr>
         <td><span class="badge badge-blue text-xs">${item.area}</span></td>
-        <td class="text-sm font-medium max-w-xs">${item.peligro}</td>
-        <td class="text-sm text-gray-600 max-w-xs">${item.tipo_riesgo}</td>
-        <td class="text-xs text-gray-500">${item.consecuencia}</td>
-        <td class="text-center font-bold">${item.probabilidad}</td>
-        <td class="text-center font-bold">${item.severidad}</td>
-        <td><span class="badge ${riskColors[item.nivel_riesgo] || 'badge-gray'} text-xs">${item.nivel_riesgo}</span></td>
-        <td class="text-xs text-gray-600 max-w-xs truncate">${item.medidas_control}</td>
-        <td class="text-xs text-gray-500">${item.responsable}</td>
-        <td>${estadoBadgeGeneric(item.estado)}</td>
+        <td>
+          <div class="text-sm font-medium">${item.peligro}</div>
+          <div class="text-xs text-gray-400 mt-0.5">${item.tipo_riesgo}</div>
+          ${item.protocolo ? `<span class="badge badge-hse text-xs mt-0.5">${item.protocolo}</span>` : ''}
+        </td>
+        <td class="text-xs text-gray-500 max-w-xs">${item.consecuencia}</td>
+        <td class="text-center font-bold text-lg">${item.probabilidad}</td>
+        <td class="text-center font-bold text-lg">${item.severidad}</td>
+        <td class="text-center">
+          <div class="font-black text-lg">${nr}</div>
+          <span class="badge ${riskColors[nivel] || 'badge-gray'} text-xs mt-0.5">${nivel}</span>
+        </td>
+        <td class="text-xs text-gray-600 max-w-xs">
+          <div>${item.medidas_existentes || '—'}</div>
+          ${item.medidas_propuestas ? `<div class="text-green-600 mt-0.5"><i class="fas fa-arrow-right text-xs mr-1"></i>${item.medidas_propuestas}</div>` : ''}
+        </td>
+        <td>
+          <div class="text-xs text-gray-500">${item.responsable}</div>
+          ${item.plazo ? `<div class="text-xs text-red-500 mt-0.5"><i class="fas fa-calendar mr-1"></i>${formatDate(item.plazo)}</div>` : ''}
+        </td>
+        <td><span class="badge ${estadoCls} text-xs">${item.estado_accion || '—'}</span></td>
+        <td>
+          <div class="flex gap-1">
+            <button class="btn btn-secondary py-1 px-2 text-xs" onclick="showEditMIPERModal(${item.id})" title="Editar">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-danger py-1 px-2 text-xs" onclick="confirmDeleteMIPER(${item.id})" title="Eliminar">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </td>
       </tr>
     `;
   }).join('');
@@ -2531,8 +2644,8 @@ function filterMIPER() {
   const s = document.getElementById('search-miper').value.toLowerCase();
   const nivel = document.getElementById('filter-miper-nivel').value;
   let filtered = window._allMIPER || [];
-  if (s) filtered = filtered.filter(m => (m.area + m.peligro + m.tipo_riesgo).toLowerCase().includes(s));
-  if (nivel !== 'all') filtered = filtered.filter(m => m.nivel_riesgo === nivel);
+  if (s) filtered = filtered.filter(m => (m.area + m.peligro + m.tipo_riesgo + (m.responsable||'')).toLowerCase().includes(s));
+  if (nivel !== 'all') filtered = filtered.filter(m => (m.nivel || m.nivel_riesgo) === nivel);
   const tbody = document.getElementById('miper-tbody');
   if (tbody) tbody.innerHTML = renderMIPERRows(filtered);
 }
@@ -2556,42 +2669,220 @@ function showNewMIPERModal() {
             <select id="nm-area" class="form-input">
               <option>Producción</option><option>Mantenimiento</option><option>Logística</option>
               <option>Bodega</option><option>Administración</option><option>Terreno</option>
+              <option>Taller Soldadura</option><option>Exterior / Logística</option><option>Todas las áreas</option>
             </select></div>
+          <div><label class="form-label">Puesto de Trabajo</label>
+            <input id="nm-puesto" class="form-input" placeholder="Ej: Operador de Maquinaria"></div>
           <div><label class="form-label">Tipo de Riesgo</label>
             <select id="nm-tipo" class="form-input">
               <option>Físico</option><option>Químico</option><option>Biológico</option>
               <option>Ergonómico</option><option>Psicosocial</option><option>Mecánico</option>
               <option>Eléctrico</option><option>Locativo</option>
             </select></div>
-          <div class="col-span-2"><label class="form-label">Descripción del Peligro *</label>
-            <textarea id="nm-peligro" class="form-input" rows="2" placeholder="Describa el peligro identificado..."></textarea></div>
-          <div class="col-span-2"><label class="form-label">Consecuencia potencial</label>
-            <input id="nm-consec" class="form-input" placeholder="Ej: Lesión auditiva, fractura, incendio..."></div>
-          <div><label class="form-label">Probabilidad</label>
-            <select id="nm-prob" class="form-input">
-              <option value="Alta">Alta</option><option value="Media" selected>Media</option><option value="Baja">Baja</option>
-            </select></div>
-          <div><label class="form-label">Severidad</label>
-            <select id="nm-sev" class="form-input">
-              <option value="Crítica">Crítica</option><option value="Alta">Alta</option>
-              <option value="Media" selected>Media</option><option value="Leve">Leve</option>
-            </select></div>
-          <div class="col-span-2"><label class="form-label">Medidas de Control</label>
-            <textarea id="nm-ctrl" class="form-input" rows="2" placeholder="EPP, controles de ingeniería, señalización..."></textarea></div>
-          <div><label class="form-label">Responsable</label>
-            <input id="nm-resp" class="form-input" placeholder="Nombre del responsable"></div>
           <div><label class="form-label">Protocolo MINSAL</label>
             <select id="nm-proto" class="form-input">
               <option value="">Sin protocolo</option>
               ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','VOZ'].map(p=>`<option value="${p}">${p}</option>`).join('')}
             </select></div>
+          <div class="col-span-2"><label class="form-label">Descripción del Peligro *</label>
+            <textarea id="nm-peligro" class="form-input" rows="2" placeholder="Describa el peligro identificado..."></textarea></div>
+          <div class="col-span-2"><label class="form-label">Consecuencia potencial</label>
+            <input id="nm-consec" class="form-input" placeholder="Ej: Lesión auditiva, fractura, incendio..."></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title"><i class="fas fa-calculator mr-2"></i>Valoración del Riesgo (Probabilidad × Severidad = NR)</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="form-label">Probabilidad (1-5) *</label>
+            <select id="nm-prob" class="form-input" onchange="calcNR()">
+              <option value="1">1 — Muy baja</option>
+              <option value="2">2 — Baja</option>
+              <option value="3" selected>3 — Media</option>
+              <option value="4">4 — Alta</option>
+              <option value="5">5 — Muy alta</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Severidad (1-5) *</label>
+            <select id="nm-sev" class="form-input" onchange="calcNR()">
+              <option value="1">1 — Leve</option>
+              <option value="2">2 — Moderada</option>
+              <option value="3" selected>3 — Grave</option>
+              <option value="4">4 — Muy grave</option>
+              <option value="5">5 — Mortal</option>
+            </select>
+          </div>
+          <div class="col-span-2">
+            <div class="p-3 rounded-xl text-center font-bold" id="nr-preview" style="background:#fef9c3;color:#713f12">
+              NR = 9 — Nivel: <strong>Moderado</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title"><i class="fas fa-shield-halved mr-2"></i>Medidas de Control</div>
+        <div class="grid grid-cols-1 gap-3">
+          <div><label class="form-label">Medidas existentes</label>
+            <textarea id="nm-ctrl-ex" class="form-input" rows="2" placeholder="EPP actuales, procedimientos existentes..."></textarea></div>
+          <div><label class="form-label">Medidas propuestas</label>
+            <textarea id="nm-ctrl-prop" class="form-input" rows="2" placeholder="Nuevas medidas de control recomendadas..."></textarea></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="form-label">Responsable</label>
+              <input id="nm-resp" class="form-input" placeholder="Nombre del responsable"></div>
+            <div><label class="form-label">Plazo de ejecución</label>
+              <input id="nm-plazo" type="date" class="form-input"></div>
+          </div>
         </div>
       </div>
     </div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-    <button class="btn btn-primary" onclick="closeModal();showToast('Peligro registrado en MIPER','success')"><i class="fas fa-save mr-1"></i>Guardar</button>
+    <button class="btn btn-primary" onclick="saveNewMIPER()"><i class="fas fa-save mr-1"></i>Guardar Peligro</button>
   `);
+  calcNR();
+}
+
+function calcNR() {
+  const prob = parseInt(document.getElementById('nm-prob')?.value || 3);
+  const sev = parseInt(document.getElementById('nm-sev')?.value || 3);
+  const nr = prob * sev;
+  const niveles = [
+    { max: 4, nivel: 'Trivial', bg: '#dcfce7', color: '#166534' },
+    { max: 8, nivel: 'Tolerable', bg: '#d1fae5', color: '#166534' },
+    { max: 12, nivel: 'Moderado', bg: '#fef9c3', color: '#713f12' },
+    { max: 17, nivel: 'Importante', bg: '#fed7aa', color: '#7c2d12' },
+    { max: 25, nivel: 'Intolerable', bg: '#fecaca', color: '#7f1d1d' },
+  ];
+  const n = niveles.find(x => nr <= x.max) || niveles[4];
+  const preview = document.getElementById('nr-preview');
+  if (preview) {
+    preview.style.background = n.bg;
+    preview.style.color = n.color;
+    preview.innerHTML = 'NR = <strong>' + nr + '</strong> (' + prob + ' × ' + sev + ') — Nivel de Riesgo: <strong>' + n.nivel + '</strong>';
+  }
+}
+
+async function saveNewMIPER() {
+  const peligro = document.getElementById('nm-peligro').value.trim();
+  if (!peligro) { showToast('La descripción del peligro es obligatoria', 'error'); return; }
+  const body = {
+    area: document.getElementById('nm-area').value,
+    puesto: document.getElementById('nm-puesto').value.trim(),
+    tipo_riesgo: document.getElementById('nm-tipo').value,
+    protocolo: document.getElementById('nm-proto').value || null,
+    peligro,
+    consecuencia: document.getElementById('nm-consec').value.trim(),
+    probabilidad: parseInt(document.getElementById('nm-prob').value),
+    severidad: parseInt(document.getElementById('nm-sev').value),
+    medidas_existentes: document.getElementById('nm-ctrl-ex').value.trim(),
+    medidas_propuestas: document.getElementById('nm-ctrl-prop').value.trim(),
+    responsable: document.getElementById('nm-resp').value.trim(),
+    plazo: document.getElementById('nm-plazo').value,
+    estado_accion: 'Pendiente'
+  };
+  try {
+    await API.post('/miper', body);
+    showToast('Peligro registrado en la MIPER exitosamente', 'success');
+    closeModal();
+    navigate('miper');
+  } catch { showToast('Error al guardar el peligro', 'error'); }
+}
+
+async function showEditMIPERModal(id) {
+  const res = await API.get('/miper');
+  const item = res.data.data.find(m => m.id === id);
+  if (!item) return;
+  showModal('Editar Peligro MIPER #' + id, `
+    <div class="space-y-4">
+      <div class="form-section">
+        <div class="form-section-title"><i class="fas fa-triangle-exclamation mr-2"></i>Identificación del Peligro</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="form-label">Área</label>
+            <input id="em-area" class="form-input" value="${item.area}"></div>
+          <div><label class="form-label">Puesto</label>
+            <input id="em-puesto" class="form-input" value="${item.puesto || ''}"></div>
+          <div class="col-span-2"><label class="form-label">Descripción del Peligro</label>
+            <textarea id="em-peligro" class="form-input" rows="2">${item.peligro}</textarea></div>
+          <div class="col-span-2"><label class="form-label">Consecuencia</label>
+            <input id="em-consec" class="form-input" value="${item.consecuencia}"></div>
+          <div><label class="form-label">Probabilidad (1-5)</label>
+            <select id="em-prob" class="form-input">
+              ${[1,2,3,4,5].map(n=>'<option value="' + n + '" ' + (item.probabilidad==n?'selected':'') + '>' + n + '</option>').join('')}
+            </select></div>
+          <div><label class="form-label">Severidad (1-5)</label>
+            <select id="em-sev" class="form-input">
+              ${[1,2,3,4,5].map(n=>'<option value="' + n + '" ' + (item.severidad==n?'selected':'') + '>' + n + '</option>').join('')}
+            </select></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title"><i class="fas fa-shield-halved mr-2"></i>Controles y Seguimiento</div>
+        <div class="grid grid-cols-1 gap-3">
+          <div><label class="form-label">Medidas existentes</label>
+            <textarea id="em-ctrl-ex" class="form-input" rows="2">${item.medidas_existentes || ''}</textarea></div>
+          <div><label class="form-label">Medidas propuestas</label>
+            <textarea id="em-ctrl-prop" class="form-input" rows="2">${item.medidas_propuestas || ''}</textarea></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="form-label">Estado de Acción</label>
+              <select id="em-estado" class="form-input">
+                ${['Pendiente','En proceso','Completado','CRÍTICO — Atención inmediata'].map(s=>'<option ' + (item.estado_accion===s?'selected':'') + '>' + s + '</option>').join('')}
+              </select></div>
+            <div><label class="form-label">Plazo</label>
+              <input id="em-plazo" type="date" class="form-input" value="${item.plazo || ''}"></div>
+          </div>
+          <div><label class="form-label">Responsable</label>
+            <input id="em-resp" class="form-input" value="${item.responsable || ''}"></div>
+        </div>
+      </div>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="updateMIPER(${id})"><i class="fas fa-save mr-1"></i>Guardar Cambios</button>
+  `);
+}
+
+async function updateMIPER(id) {
+  const body = {
+    area: document.getElementById('em-area').value.trim(),
+    puesto: document.getElementById('em-puesto').value.trim(),
+    peligro: document.getElementById('em-peligro').value.trim(),
+    consecuencia: document.getElementById('em-consec').value.trim(),
+    probabilidad: parseInt(document.getElementById('em-prob').value),
+    severidad: parseInt(document.getElementById('em-sev').value),
+    medidas_existentes: document.getElementById('em-ctrl-ex').value.trim(),
+    medidas_propuestas: document.getElementById('em-ctrl-prop').value.trim(),
+    estado_accion: document.getElementById('em-estado').value,
+    plazo: document.getElementById('em-plazo').value,
+    responsable: document.getElementById('em-resp').value.trim()
+  };
+  try {
+    await API.put('/miper/' + id, body);
+    showToast('Peligro actualizado correctamente', 'success');
+    closeModal();
+    navigate('miper');
+  } catch { showToast('Error al actualizar', 'error'); }
+}
+
+function confirmDeleteMIPER(id) {
+  showModal('Confirmar Eliminación', `
+    <div class="info-box-red">
+      <p class="text-sm text-red-700 font-medium">¿Deseas eliminar este peligro de la MIPER?</p>
+      <p class="text-xs text-red-600 mt-2">Esta acción no se puede deshacer.</p>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-danger" onclick="deleteMIPER(${id})"><i class="fas fa-trash mr-1"></i>Eliminar</button>
+  `);
+}
+
+async function deleteMIPER(id) {
+  try {
+    await API.delete('/miper/' + id);
+    showToast('Peligro eliminado de la MIPER', 'success');
+    closeModal();
+    navigate('miper');
+  } catch { showToast('Error al eliminar', 'error'); }
 }
 
 // ================================================================
@@ -2816,26 +3107,126 @@ function showNewEvalModal(protocolId) {
 // REPORTES
 // ================================================================
 async function renderReports() {
-  setPageTitle('Reportería HSE', 'Generación de informes y estadísticas — Ley 16.744 · 2026');
+  setPageTitle('Reportería HSE', 'Informes y estadísticas — Ley 16.744 · DS 594 · 2026');
   const content = document.getElementById('page-content');
+  
+  // Cargamos KPIs para las estadísticas
+  let kpis = null;
+  let centros = [];
+  let miper = [];
+  try {
+    const [kRes, cRes, mRes] = await Promise.all([
+      API.get('/dashboard/kpis'),
+      API.get('/centros'),
+      API.get('/miper')
+    ]);
+    kpis = kRes.data.data;
+    centros = cRes.data.data;
+    miper = mRes.data.data;
+  } catch {}
 
   const reports = [
-    { id: 'accidentabilidad', icon: 'fa-triangle-exclamation', title: 'Informe Anual de Accidentabilidad', desc: 'Tasas, días perdidos, tipos de accidentes y tendencias. Obligatorio para mutualidad.', color: '#dc2626', periodo: '2026' },
+    { id: 'accidentabilidad', icon: 'fa-triangle-exclamation', title: 'Informe de Accidentabilidad', desc: 'Tasas, días perdidos, tipos de accidentes y tendencias. Obligatorio para mutualidad.', color: '#dc2626', periodo: '2026' },
     { id: 'protocolos', icon: 'fa-clipboard-list', title: 'Cumplimiento Protocolos MINSAL', desc: 'Estado de implementación de los 7 protocolos de vigilancia de la salud ocupacional.', color: '#7c3aed', periodo: '2026' },
     { id: 'examenes', icon: 'fa-stethoscope', title: 'Estado de Exámenes Médicos', desc: 'Vigentes, por vencer y vencidos. Nómina de trabajadores pendientes de evaluación.', color: '#16a34a', periodo: '2026' },
     { id: 'epp', icon: 'fa-hard-hat', title: 'Inventario y Entregas EPP', desc: 'Stock actual, entregas realizadas, firmas digitales y renovaciones pendientes.', color: '#d97706', periodo: '2026' },
     { id: 'capacitaciones', icon: 'fa-graduation-cap', title: 'Plan de Capacitación Anual', desc: 'Cumplimiento del programa ODI, coberturas y certificaciones. DS 40 Art. 21.', color: '#2563eb', periodo: '2026' },
+    { id: 'miper', icon: 'fa-triangle-exclamation', title: 'Informe Matriz MIPER', desc: 'Mapa de riesgos, peligros identificados, controles implementados y estado de gestión.', color: '#f59e0b', periodo: '2026' },
     { id: 'trabajador', icon: 'fa-user-circle', title: 'Ficha Individual del Trabajador', desc: 'Historial completo: protocolos, exámenes, EPP, accidentes y capacitaciones.', color: '#0891b2', periodo: 'Según selección' },
-    { id: 'miper', icon: 'fa-triangle', title: 'Informe MIPER', desc: 'Mapa de riesgos, peligros identificados, controles implementados y estado de gestión.', color: '#f59e0b', periodo: '2026' },
-    { id: 'estadisticas', icon: 'fa-chart-bar', title: 'Estadísticas Globales HSE', desc: 'Dashboard ejecutivo con todos los KPIs de la plataforma HSE 360 para directivos.', color: '#374151', periodo: '2026' },
+    { id: 'estadisticas', icon: 'fa-chart-bar', title: 'Estadísticas Globales HSE 360', desc: 'Dashboard ejecutivo con todos los KPIs de la plataforma HSE 360 para directivos.', color: '#374151', periodo: '2026' },
   ];
 
+  const centrosFiltro = centros.filter(c => c.activo);
+  const miperIntolerable = miper.filter(m => (m.nivel||m.nivel_riesgo) === 'Intolerable').length;
+  const miperImportante = miper.filter(m => (m.nivel||m.nivel_riesgo) === 'Importante').length;
+
   content.innerHTML = `
-    <div class="mb-5 p-4 rounded-xl flex items-start gap-3" style="background:linear-gradient(135deg,#f8fafc,#f1f5f9);border:1.5px solid #cbd5e1">
-      <i class="fas fa-file-chart-column text-slate-600 text-xl mt-0.5"></i>
-      <div>
-        <div class="font-bold text-slate-800">Centro de Reportes — HSE 360</div>
-        <div class="text-sm text-slate-600 mt-0.5">Genera informes en PDF y Excel para presentar a la dirección, mutualidad e inspectorías del trabajo. Todos los informes cumplen con los requisitos de la Ley 16.744 y el DS 594.</div>
+    <!-- Resumen estadístico en tiempo real -->
+    ${kpis ? `
+    <div class="card p-5 mb-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-gray-800"><i class="fas fa-chart-line mr-2" style="color:var(--hse-green)"></i>Resumen Ejecutivo HSE 360 — ${new Date().toLocaleDateString('es-CL',{month:'long',year:'numeric'})}</h3>
+        <span class="badge badge-hse">Actualizado en tiempo real</span>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+        <div class="p-3 rounded-xl text-center" style="background:#f0fdf4;border:1px solid #86efac">
+          <div class="text-2xl font-black text-green-700">${kpis.trabajadores.activos}</div>
+          <div class="text-xs text-green-600 mt-1">Trabajadores Activos</div>
+          <div class="text-xs text-gray-400 mt-0.5">de ${kpis.trabajadores.total} registrados</div>
+        </div>
+        <div class="p-3 rounded-xl text-center" style="background:${kpis.accidentabilidad.tasa > kpis.accidentabilidad.meta ? '#fef2f2' : '#f0fdf4'};border:1px solid ${kpis.accidentabilidad.tasa > kpis.accidentabilidad.meta ? '#fecaca' : '#86efac'}">
+          <div class="text-2xl font-black ${kpis.accidentabilidad.tasa > kpis.accidentabilidad.meta ? 'text-red-700' : 'text-green-700'}">${kpis.accidentabilidad.tasa}%</div>
+          <div class="text-xs ${kpis.accidentabilidad.tasa > kpis.accidentabilidad.meta ? 'text-red-600' : 'text-green-600'} mt-1">Tasa Accidentabilidad</div>
+          <div class="text-xs text-gray-400 mt-0.5">Meta: ≤ ${kpis.accidentabilidad.meta}%</div>
+        </div>
+        <div class="p-3 rounded-xl text-center" style="background:#fffbeb;border:1px solid #fde68a">
+          <div class="text-2xl font-black text-yellow-700">${kpis.protocolos.cumplimiento_pct}%</div>
+          <div class="text-xs text-yellow-600 mt-1">Cumplimiento Protocolos</div>
+          <div class="text-xs text-gray-400 mt-0.5">${kpis.protocolos.al_dia} al día · ${kpis.protocolos.criticos} crítico</div>
+        </div>
+        <div class="p-3 rounded-xl text-center" style="background:#fef2f2;border:1px solid #fecaca">
+          <div class="text-2xl font-black text-red-700">${kpis.alertas_activas}</div>
+          <div class="text-xs text-red-600 mt-1">Alertas Activas</div>
+          <div class="text-xs text-gray-400 mt-0.5">Requieren atención</div>
+        </div>
+      </div>
+
+      <!-- Fila 2: datos detallados -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="p-3 bg-gray-50 rounded-xl text-xs">
+          <div class="font-bold text-gray-600 mb-2"><i class="fas fa-stethoscope mr-1 text-green-600"></i>Exámenes Médicos</div>
+          <div class="flex justify-between"><span>Vigentes</span><span class="font-bold text-green-600">${kpis.examenes.total_vigentes}</span></div>
+          <div class="flex justify-between"><span>Por vencer (90d)</span><span class="font-bold text-yellow-600">${kpis.examenes.por_vencer}</span></div>
+          <div class="flex justify-between"><span>Vencidos</span><span class="font-bold text-red-600">${kpis.examenes.vencidos}</span></div>
+        </div>
+        <div class="p-3 bg-gray-50 rounded-xl text-xs">
+          <div class="font-bold text-gray-600 mb-2"><i class="fas fa-hard-hat mr-1 text-orange-500"></i>EPP</div>
+          <div class="flex justify-between"><span>Ítems críticos</span><span class="font-bold text-red-600">${kpis.epp.items_criticos}</span></div>
+          <div class="flex justify-between"><span>Stock bajo</span><span class="font-bold text-yellow-600">${kpis.epp.items_bajo_stock}</span></div>
+          <div class="flex justify-between"><span>Firmas pendientes</span><span class="font-bold text-blue-600">${kpis.epp.entregas_pendientes}</span></div>
+        </div>
+        <div class="p-3 bg-gray-50 rounded-xl text-xs">
+          <div class="font-bold text-gray-600 mb-2"><i class="fas fa-graduation-cap mr-1 text-purple-600"></i>Capacitaciones</div>
+          <div class="flex justify-between"><span>Cobertura ODI</span><span class="font-bold text-indigo-600">${kpis.capacitaciones.cobertura_odi}%</span></div>
+          <div class="flex justify-between"><span>Vencidas</span><span class="font-bold text-red-600">${kpis.capacitaciones.vencidas}</span></div>
+          <div class="flex justify-between"><span>Por vencer</span><span class="font-bold text-yellow-600">${kpis.capacitaciones.por_vencer}</span></div>
+        </div>
+        <div class="p-3 bg-gray-50 rounded-xl text-xs">
+          <div class="font-bold text-gray-600 mb-2"><i class="fas fa-triangle-exclamation mr-1 text-yellow-600"></i>Matriz MIPER</div>
+          <div class="flex justify-between"><span>Peligros totales</span><span class="font-bold text-gray-700">${miper.length}</span></div>
+          <div class="flex justify-between"><span>Intolerables</span><span class="font-bold text-red-600">${miperIntolerable}</span></div>
+          <div class="flex justify-between"><span>Importantes</span><span class="font-bold text-orange-600">${miperImportante}</span></div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
+
+    <!-- Centros de trabajo -->
+    <div class="card p-4 mb-5">
+      <h3 class="font-bold text-gray-700 mb-3"><i class="fas fa-building mr-2" style="color:var(--hse-green)"></i>Centros de Trabajo Activos (${centrosFiltro.length})</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        ${centrosFiltro.map(c => `
+          <div class="p-3 rounded-xl border" style="border-color:${c.estado_cumplimiento>=80?'#86efac':c.estado_cumplimiento>=60?'#fde68a':'#fecaca'}">
+            <div class="flex items-center justify-between mb-2">
+              <div class="font-semibold text-sm text-gray-700 truncate">${c.nombre}</div>
+              <span class="font-black text-sm flex-shrink-0 ml-2" style="color:${c.estado_cumplimiento>=80?'#16a34a':c.estado_cumplimiento>=60?'#d97706':'#dc2626'}">${c.estado_cumplimiento}%</span>
+            </div>
+            <div class="text-xs text-gray-400">${c.n_trabajadores} trabajadores · ${c.mutualidad}</div>
+            <div class="progress-bar mt-2"><div class="progress-fill" style="width:${c.estado_cumplimiento}%;background:${c.estado_cumplimiento>=80?'#16a34a':c.estado_cumplimiento>=60?'#d97706':'#dc2626'}"></div></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Generación de informes -->
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-gray-800"><i class="fas fa-file-export mr-2" style="color:var(--hse-green)"></i>Generar Informes</h3>
+      <div class="flex items-center gap-2">
+        <label class="text-xs text-gray-500">Centro:</label>
+        <select id="report-centro" class="form-input w-48 text-xs py-1.5">
+          <option value="">Todos los centros</option>
+          ${centrosFiltro.map(c => `<option value="${c.id}" ${App.centroActivo===c.id?'selected':''}>${c.nombre}</option>`).join('')}
+        </select>
       </div>
     </div>
 
@@ -2844,11 +3235,11 @@ async function renderReports() {
         <div class="card overflow-hidden hover:shadow-md transition-shadow">
           <div class="p-4 text-white" style="background:linear-gradient(135deg,${r.color}dd,${r.color})">
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2)">
-                <i class="fas ${r.icon} text-xl"></i>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(255,255,255,0.2)">
+                <i class="fas ${r.icon} text-lg"></i>
               </div>
-              <div>
-                <div class="font-bold text-sm">${r.title}</div>
+              <div class="min-w-0">
+                <div class="font-bold text-sm leading-tight">${r.title}</div>
                 <div class="text-xs opacity-75 mt-0.5">Período: ${r.periodo}</div>
               </div>
             </div>
@@ -2856,11 +3247,14 @@ async function renderReports() {
           <div class="p-4">
             <p class="text-xs text-gray-600 mb-4 leading-relaxed">${r.desc}</p>
             <div class="flex gap-2">
-              <button class="btn btn-danger flex-1 justify-center text-xs" onclick="generateReport('${r.id}','pdf')">
+              <button class="btn btn-danger flex-1 justify-center text-xs py-2" onclick="generateReport('${r.id}','pdf')">
                 <i class="fas fa-file-pdf mr-1"></i>PDF
               </button>
-              <button class="btn btn-success flex-1 justify-center text-xs" onclick="generateReport('${r.id}','excel')">
+              <button class="btn btn-success flex-1 justify-center text-xs py-2" onclick="generateReport('${r.id}','excel')">
                 <i class="fas fa-file-excel mr-1"></i>Excel
+              </button>
+              <button class="btn btn-secondary py-2 px-3 text-xs" onclick="generateReport('${r.id}','view')" title="Vista previa">
+                <i class="fas fa-eye"></i>
               </button>
             </div>
           </div>
@@ -2868,34 +3262,17 @@ async function renderReports() {
       `).join('')}
     </div>
 
-    <!-- Tech stack info -->
-    <div class="mt-6 card p-5">
-      <h3 class="font-bold text-gray-700 mb-3"><i class="fas fa-server mr-2" style="color:var(--hse-green)"></i>Plataforma HSE 360 — Stack Tecnológico</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-        <div class="p-3 bg-blue-50 rounded-xl">
-          <div class="font-bold text-blue-700 mb-2"><i class="fas fa-desktop mr-1"></i>Frontend</div>
-          <div class="text-xs text-blue-600 space-y-1">
-            <div>• Hono Framework (TypeScript)</div>
-            <div>• Tailwind CSS + Chart.js</div>
-            <div>• SPA con routing JS nativo</div>
-          </div>
-        </div>
-        <div class="p-3 bg-green-50 rounded-xl">
-          <div class="font-bold text-green-700 mb-2"><i class="fas fa-database mr-1"></i>Backend</div>
-          <div class="text-xs text-green-600 space-y-1">
-            <div>• Hono REST API</div>
-            <div>• Cloudflare Workers (Edge)</div>
-            <div>• Cloudflare D1 (SQLite)</div>
-          </div>
-        </div>
-        <div class="p-3 bg-purple-50 rounded-xl">
-          <div class="font-bold text-purple-700 mb-2"><i class="fas fa-shield-halved mr-1"></i>Seguridad</div>
-          <div class="text-xs text-purple-600 space-y-1">
-            <div>• JWT + roles y permisos</div>
-            <div>• Ley 19.628 (datos médicos)</div>
-            <div>• Superadmin único: Raúl Díaz Espejo</div>
-          </div>
-        </div>
+    <!-- Pie con info legal -->
+    <div class="mt-6 p-4 rounded-xl text-xs text-gray-500" style="background:#f8fafc;border:1px solid #e2e8f0">
+      <div class="flex items-center gap-2 mb-2">
+        <i class="fas fa-balance-scale text-gray-400"></i>
+        <strong>Base Legal — Reportería Obligatoria</strong>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div>• <strong>Ley 16.744</strong>: Accidentes y enf. profesionales</div>
+        <div>• <strong>DS 594</strong>: Condiciones sanitarias y ambientales</div>
+        <div>• <strong>DS 40 Art. 21</strong>: ODI - Obligación de informar</div>
+        <div>• <strong>Protocolos MINSAL</strong>: Vigilancia de salud</div>
       </div>
     </div>
   `;
@@ -2912,9 +3289,42 @@ async function generateReport(type, format) {
     miper: 'Informe Matriz MIPER 2026',
     estadisticas: 'Estadísticas Globales HSE 360',
   };
+  const centro = document.getElementById('report-centro')?.value;
+  const centroNombre = centro ? (window._centrosList||[]).find(c=>c.id==centro)?.nombre : 'Todos los centros';
+  
+  if (format === 'view') {
+    showModal(`Vista previa: ${reportNames[type]}`, `
+      <div class="space-y-3">
+        <div class="info-box">
+          <div class="text-xs text-green-800">
+            <i class="fas fa-info-circle mr-1"></i>
+            <strong>${reportNames[type]}</strong> · Centro: ${centroNombre || 'Todos'} · Generado: ${new Date().toLocaleDateString('es-CL')}
+          </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl text-sm text-gray-600">
+          <p class="font-bold text-gray-800 mb-2">HSE 360 — Plataforma Integral de Seguridad y Salud</p>
+          <p class="text-xs">Este informe contiene información confidencial según Ley 19.628. Su distribución debe ser autorizada por el Super Administrador.</p>
+          <div class="mt-3 p-3 border rounded-lg bg-white">
+            <div class="text-xs font-bold text-gray-500 mb-2">CONTENIDO DEL INFORME:</div>
+            <div class="text-xs space-y-1 text-gray-600">
+              <div>• Período de análisis: Enero - ${new Date().toLocaleDateString('es-CL',{month:'long'})} 2026</div>
+              <div>• Centro: ${centroNombre || 'Todos los centros'}</div>
+              <div>• Generado por: ${App.currentUser?.nombres} ${App.currentUser?.apellidos}</div>
+              <div>• Fecha: ${new Date().toLocaleString('es-CL')}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `, `
+      <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
+      <button class="btn btn-danger" onclick="closeModal();generateReport('${type}','pdf')"><i class="fas fa-file-pdf mr-1"></i>Exportar PDF</button>
+    `);
+    return;
+  }
+  
   showToast(`Generando ${reportNames[type]} en ${format.toUpperCase()}...`, 'info');
-  await new Promise(r => setTimeout(r, 1200));
-  showToast(`✓ ${reportNames[type]}.${format} generado exitosamente`, 'success');
+  await new Promise(r => setTimeout(r, 1500));
+  showToast(`✓ ${reportNames[type]}.${format === 'pdf' ? 'pdf' : 'xlsx'} listo para descargar`, 'success');
 }
 
 // ================================================================
