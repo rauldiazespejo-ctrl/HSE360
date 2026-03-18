@@ -417,50 +417,104 @@ export const protocolsDB: Record<string, any> = {
     estadisticas: { total_evaluados: 15, il_alto: 2, il_moderado: 5, il_bajo: 8, sobre_limite_legal: 0, con_ayuda_mecanica: 8, cumplimiento_pct: 70 }
   },
 
-  VOZ: {
-    id: 'VOZ',
-    nombre: 'Trastornos de la Voz Profesional',
-    norma_tecnica: 'Protocolo de Vigilancia de Trastornos de la Voz (MINSAL)',
-    base_legal: ['Circular B51/45 MINSAL','DS 594 Art. 73 (Agentes físicos)','Ley 16.744'],
-    objetivo: 'Vigilar la salud vocal de trabajadores con uso intensivo de la voz profesional para detectar y prevenir disfonías y nódulos vocales.',
-    color: 'indigo',
-    icon: 'fa-microphone',
+
+  // ── HIC — Hipobaria Intermitente Crónica ──────────────────────────────
+  HIC: {
+    id: 'HIC',
+    nombre: 'Hipobaria Intermitente Crónica — Gran Altitud',
+    norma_tecnica: 'Guía Técnica MINSAL 2013 · DS 594 · Circ. SUSESO 3838/2024',
+    base_legal: ['Guía Técnica Protocolo HIC MINSAL 2013','DS 594 (Condiciones Sanitarias y Ambientales)','Circ. SUSESO N°3838/2024','DS 44/2025 Art. 15 (IRL)','Ley 16.744'],
+    objetivo: 'Vigilar la salud de trabajadores expuestos a hipobaria intermitente crónica (altitud ≥ 3.000 msnm) en régimen de turno, previniendo daños cardiovasculares, neurológicos y hematológicos por hipoxia crónica.',
+    color: 'sky',
+    icon: 'fa-mountain',
     criterios_tecnicos: {
       grupos_riesgo: [
-        { grupo: 'Alto riesgo', ocupaciones: ['Docentes', 'Educadoras de párvulos', 'Operadores de call center', 'Guías turísticos', 'Actores/locutores'], horas_voz_dia: '≥ 6 horas' },
-        { grupo: 'Riesgo moderado', ocupaciones: ['Supervisores/jefaturas', 'Vendedores', 'Recepcionistas', 'Profesionales de salud'], horas_voz_dia: '3-6 horas' },
+        { grupo: 'Exposición directa', ocupaciones: ['Mineros faena de altura', 'Operadores de maquinaria en altura', 'Personal de mantenimiento en altura', 'Supervisores en faena'], altitud_msnm: '≥ 3.000 msnm', regimen: 'Turno rotativo con retorno nivel del mar' },
+        { grupo: 'Exposición prolongada', ocupaciones: ['Trabajadores en faena continua ≥ 14 días'], altitud_msnm: '≥ 3.500 msnm', regimen: 'Turnos extendidos' },
       ],
-      factores_agravantes: ['Ruido ambiental > 65 dB (requiere esfuerzo vocal)', 'Baja humedad relativa (< 40%)', 'Exposición a polvo o sustancias irritantes', 'Tabaquismo', 'Reflejo gastroesofágico'],
+      factores_agravantes: ['Altitud ≥ 4.000 msnm (mayor riesgo)','Tabaquismo activo','Enfermedad cardiovascular preexistente','Apnea del sueño no tratada','Anemia o poliglobulia basal','Hipertensión arterial no controlada'],
       evaluaciones_requeridas: [
-        { evaluacion: 'Evaluación fonoaudiológica inicial', descripcion: 'Anamnesis vocal, evaluación perceptiva de la voz (escala GRBAS)', periodicidad: 'Ingreso a puesto de riesgo' },
-        { evaluacion: 'Laringoscopía/estroboscopía laríngea', descripcion: 'Evaluación estructural de cuerdas vocales por otorrinolaringólogo', periodicidad: 'Ingreso + cada 2 años o ante síntomas' },
-        { evaluacion: 'Autoevaluación vocal (Voice Handicap Index VHI)', descripcion: 'Cuestionario de autopercepción de la discapacidad vocal', periodicidad: 'Semestral' },
-        { evaluacion: 'Análisis acústico de la voz', descripcion: 'Medición de jitter, shimmer, relación armónico-ruido', periodicidad: 'Ingreso + anual' },
+        { evaluacion: 'Examen médico preempleo', descripcion: 'Evaluación de aptitud para trabajo en altura: anamnesis, examen físico, PA, ECG, oximetría', periodicidad: 'Preempleo obligatorio' },
+        { evaluacion: 'Hemograma + hematocrito', descripcion: 'Control poliglobulia: hombres ≤ 21%, mujeres ≤ 19%. Hemoglobina, glóbulos rojos', periodicidad: 'Anual o semestral si alterado' },
+        { evaluacion: 'Oximetría de pulso en altura', descripcion: 'SpO₂ basal y durante la jornada en faena de altura', periodicidad: 'Preempleo + periódica en altura' },
+        { evaluacion: 'ECG de reposo', descripcion: 'Electrocardiograma para detección arritmias y HTP', periodicidad: 'Anual' },
+        { evaluacion: 'Evaluación apnea del sueño', descripcion: 'Polisomnografía o poligrafía respiratoria si hay sospecha clínica', periodicidad: 'Ante sospecha o síntomas referidos' },
       ]
     },
     requisitos_empresa: [
-      { id: 1, categoria: 'Identificación', requisito: 'Identificar trabajadores con uso intensivo de la voz (≥ 3-6 h/día)', periodicidad: 'Al inicio + cambios de puesto', obligatorio: true, norma: 'Circular B51/45' },
-      { id: 2, categoria: 'Condiciones Ambientales', requisito: 'Garantizar ruido ambiental < 65 dB en puestos con uso de voz. Humedad relativa 40-60%', periodicidad: 'Verificación semestral', obligatorio: true, norma: 'DS 594 Art. 73' },
-      { id: 3, categoria: 'Vigilancia de Salud', requisito: 'Evaluación fonoaudiológica de ingreso y periódica', periodicidad: 'Ingreso + cada 2 años o ante síntomas', obligatorio: true, norma: 'Circular B51/45' },
-      { id: 4, categoria: 'Vigilancia de Salud', requisito: 'Laringoscopía por especialista ORL', periodicidad: 'Ingreso + ante síntomas o diagnóstico de riesgo', obligatorio: true, norma: 'Circular B51/45' },
-      { id: 5, categoria: 'Higiene Vocal', requisito: 'Capacitación en higiene vocal: hidratación, técnica vocal, uso de micrófono', periodicidad: 'Anual', obligatorio: true, norma: 'Circular B51/45' },
-      { id: 6, categoria: 'Pausas Vocales', requisito: 'Implementar pausas vocales de 15 min cada 2 horas de uso intensivo de la voz', periodicidad: 'Diaria, verificación mensual', obligatorio: true, norma: 'Circular B51/45' },
+      { id: 1, categoria: 'Identificación', requisito: 'Identificar puestos expuestos a altitud ≥ 3.000 msnm y elaborar nómina de expuestos', periodicidad: 'Al inicio + cambios de puesto', obligatorio: true, norma: 'Guía Técnica MINSAL 2013' },
+      { id: 2, categoria: 'Evaluación Médica', requisito: 'Examen médico preempleo de aptitud para trabajo en altura (OAL)', periodicidad: 'Preempleo obligatorio', obligatorio: true, norma: 'Guía Técnica MINSAL 2013 Cap.4' },
+      { id: 3, categoria: 'Control Hematológico', requisito: 'Control de hematocrito: hombres ≤ 21%, mujeres ≤ 19% (poliglobulia). Hemograma anual', periodicidad: 'Anual (semestral si alterado)', obligatorio: true, norma: 'Guía Técnica MINSAL 2013 Cap.4' },
+      { id: 4, categoria: 'Turnos y Recuperación', requisito: 'Implementar régimen de turnos con tiempo suficiente de recuperación a nivel del mar', periodicidad: 'Verificación mensual', obligatorio: true, norma: 'Guía Técnica MINSAL 2013 Cap.3' },
+      { id: 5, categoria: 'Oxígeno Suplementario', requisito: 'Disponibilidad de oxígeno de emergencia en faena de altura ≥ 4.000 msnm', periodicidad: 'Verificación periódica', obligatorio: true, norma: 'DS 594 Art.23' },
+      { id: 6, categoria: 'IRL', requisito: 'Entrega de IRL (Informe de Riesgos Laborales) a cada trabajador expuesto — reemplaza ODI', periodicidad: 'Ingreso + cambio de puesto', obligatorio: true, norma: 'DS 44 Art. 15' },
     ],
     evaluaciones: [
       {
-        id: 1, worker_id: 4, worker_nombre: 'Ana López Vega', rut: '16.234.567-8',
-        cargo: 'Administrativa (Call Center)', area: 'Administración', fecha_eval: '2026-01-15',
-        horas_voz_dia: 7, nivel_ruido_ambiente_db: 58,
-        evaluacion_fonoaudiologica: '2026-01-15', resultado_fonoaudio: 'Sin disfonía. Leve tensión muscular cervical.',
-        grbas_g: 0, grbas_r: 0, grbas_b: 1, grbas_a: 0, grbas_s: 0, grbas_total: 'G0R0B1A0S0 — Sin alteración significativa',
-        laringoscopia_fecha: '2025-06-10', laringoscopia_resultado: 'Cuerdas vocales sin lesiones estructurales',
-        vhi_puntaje: 12, vhi_clasificacion: 'Discapacidad vocal leve',
-        hidratacion_adecuada: true, uso_microfono: true, pausas_vocales: true,
-        prox_evaluacion: '2028-01-15',
-        estado: 'vigente', observaciones: 'Uso de microfono tipo headset. Hidratación correcta. Continuar higiene vocal.'
+        id: 1, worker_id: 1, worker_nombre: 'Carlos Rodríguez Soto', rut: '14.567.890-1',
+        cargo: 'Minero de Interior', area: 'Producción', fecha_eval: '2026-01-20',
+        altitud_faena_msnm: 3800, regimen_turno: '7x7',
+        hematocrito_pct: 18.5, hemoglobina_gdl: 16.2, oximetria_spo2: 92,
+        ecg_resultado: 'Normal. Sin signos de HTP.',
+        apnea_sueno_evaluada: false, apnea_sueno_resultado: 'No evaluada',
+        presion_arterial: '122/78', frecuencia_cardiaca: 72,
+        prox_evaluacion: '2027-01-20',
+        estado: 'vigente', observaciones: 'Hematocrito dentro de rango. Sin contraindicación para trabajo en altura. Continuar vigilancia anual.'
       },
     ],
-    estadisticas: { total_vigilados: 8, con_disfonia: 1, sin_alteraciones: 7, laringoscopia_vigente: 6, evaluacion_fonoaudio_vigente: 7, cumplimiento_pct: 90 }
+    estadisticas: { total_vigilados: 12, con_poliglobulia: 1, apnea_detectada: 0, con_restriccion: 0, evaluacion_vigente: 11, cumplimiento_pct: 60 }
+  },
+
+  // ── HUMOS — Metales, Metaloides y Humos de Soldadura ─────────────────
+  HUMOS: {
+    id: 'HUMOS',
+    nombre: 'Metales, Metaloides y Humos de Soldadura',
+    norma_tecnica: 'Res. Exenta N°606/2023 MINSAL · Nota Técnica 87 ISPCH · Circ. SUSESO 3838/2024',
+    base_legal: ['Res. Exenta N°606 jun-2023 MINSAL (Protocolo Vigilancia Metales)','Circ. SUSESO N°3838/2024 (Metales Cancerígenos)','DS 594 Art. 59-65 (Agentes Químicos)','NCh 3358 (Estrategia muestreo ambiental)','DS 44/2025 Art. 15 (IRL)','Ley 16.744'],
+    objetivo: 'Vigilar la salud de trabajadores expuestos a metales, metaloides y humos de soldadura (Fe, Mn, Cr+6, Ni, Pb, Cd, As, Cu, Zn), previniendo enfermedades profesionales como fiebre por humos, silicosis metálica, cáncer pulmonar y neurotoxicidad.',
+    color: 'amber',
+    icon: 'fa-smog',
+    criterios_tecnicos: {
+      grupos_riesgo: [
+        { grupo: 'Soldadores y fundidores', ocupaciones: ['Soldadores por arco', 'Soldadores MIG/TIG/MAG', 'Fundidores', 'Cortadores plasma/oxicorte'], metales_principales: ['Fe','Mn','Cr+6','Ni','Cu'], riesgo: 'Alto' },
+        { grupo: 'Expuestos a cancerígenos', ocupaciones: ['Trabajadores con Cr+6 (cromado)', 'Trabajadores con Cd', 'Trabajadores con As/arsénico'], metales_principales: ['Cr+6','Cd','As'], riesgo: 'Muy Alto — Cancerígenos Grupo 1 IARC' },
+        { grupo: 'Expuestos a neurotóxicos', ocupaciones: ['Baterías/fundición Pb', 'Plantas de Mn', 'Metalurgia'], metales_principales: ['Pb','Mn'], riesgo: 'Alto — Neurotoxicidad' },
+      ],
+      factores_agravantes: ['Ventilación deficiente en área de soldadura','Ausencia o mal uso de EPR (respirador)','Exposición simultánea a múltiples metales','Tabaquismo (potencia riesgo cancerígeno)','Jornadas prolongadas o horas extras','Temperatura ambiente elevada (mayor evaporación metales)'],
+      evaluaciones_requeridas: [
+        { evaluacion: 'Examen médico preempleo y periódico', descripcion: 'Anamnesis ocupacional, examen físico, función pulmonar (espirometría)', periodicidad: 'Preempleo + anual' },
+        { evaluacion: 'Monitoreo biológico', descripcion: 'Plombemia (Pb), creatinina+Cd urinario (Cd), arsénico inorgánico urinario (As)', periodicidad: 'Anual (o semestral para cancerígenos)' },
+        { evaluacion: 'Espirometría', descripcion: 'Evaluación función pulmonar: CVF, VEF1, VEF1/CVF', periodicidad: 'Preempleo + anual' },
+        { evaluacion: 'Radiografía de tórax OIT', descripcion: 'Clasificación neumoconiosis según OIT para GES con polvo metálico o fibrogénico', periodicidad: 'Cada 2 años (normal) / anual (alterado)' },
+        { evaluacion: 'Muestreo ambiental cuantitativo', descripcion: 'Fracción inhalable y/o respirable de metales en jornada laboral. Lab. acreditado SEREMI', periodicidad: 'Anual o ante cambio proceso' },
+      ]
+    },
+    requisitos_empresa: [
+      { id: 1, categoria: 'Inventario', requisito: 'Inventario de metales y metaloides presentes (Fe, Mn, Cr, Ni, Pb, Cd, As, Cu, Zn) con fichas SDS', periodicidad: 'Al inicio + actualización anual', obligatorio: true, norma: 'DS 594 Art. 59' },
+      { id: 2, categoria: 'GES', requisito: 'Identificación de Grupos de Exposición Similar (GES) por puesto de trabajo', periodicidad: 'Al inicio + cambios proceso', obligatorio: true, norma: 'Res. Exenta N°606/2023 Cap.3' },
+      { id: 3, categoria: 'Evaluación Ambiental', requisito: 'Muestreo ambiental cuantitativo de metales (fracción inhalable/respirable) por laboratorio acreditado', periodicidad: 'Anual o ante cambio de proceso', obligatorio: true, norma: 'DS 594 Art. 61 · NCh 3358' },
+      { id: 4, categoria: 'Cancerígenos', requisito: 'GES con Cr+6, As o Cd: aplicar protocolo especial cancerígenos (Circ. SUSESO 3838/2024)', periodicidad: 'Según protocolo específico', obligatorio: true, norma: 'Circ. SUSESO 3838/2024' },
+      { id: 5, categoria: 'Ventilación', requisito: 'Ventilación local exhaustora (VLE) en zonas de soldadura y fundición', periodicidad: 'Verificación semestral', obligatorio: true, norma: 'DS 594 Art. 63' },
+      { id: 6, categoria: 'EPR', requisito: 'Programa de Protección Respiratoria: selección, entrega, prueba ajuste, mantención de EPR', periodicidad: 'Continuo + verificación semestral', obligatorio: true, norma: 'DS 594 Art. 64' },
+      { id: 7, categoria: 'IRL', requisito: 'Entrega de IRL (Informe de Riesgos Laborales) por puesto — reemplaza ODI', periodicidad: 'Ingreso + cambio de puesto', obligatorio: true, norma: 'DS 44 Art. 15' },
+    ],
+    evaluaciones: [
+      {
+        id: 1, worker_id: 2, worker_nombre: 'Miguel Ángel Torres Díaz', rut: '15.678.901-2',
+        cargo: 'Soldador de Producción', area: 'Producción', fecha_eval: '2026-02-10',
+        metales_exposicion: ['Fe','Mn','Cr+6'],
+        muestreo_ambiental_fecha: '2026-01-15',
+        resultado_fe_mgm3: 2.1, resultado_mn_mgm3: 0.08, resultado_cr6_mgm3: 0.003,
+        limite_fe_ds594: 5.0, limite_mn_ds594: 0.2, limite_cr6_ds594: 0.05,
+        espirometria_fecha: '2026-02-10', espirometria_resultado: 'Normal. CVF 98% teórico. VEF1/CVF 82%.',
+        rx_torax_fecha: '2025-08-20', rx_torax_resultado: 'Sin hallazgos patológicos. Clasificación OIT 0/0.',
+        plombemia_ugl: null, creatinina_mgdl: null, arsenico_urinario_ugL: null,
+        ventilacion_vle: true, epr_entregado: true, epr_prueba_ajuste: true,
+        prox_evaluacion: '2027-02-10',
+        estado: 'vigente', observaciones: 'Cr+6 por debajo del límite legal. Continuar uso EPR obligatorio. Verificar VLE semestral.'
+      },
+    ],
+    estadisticas: { total_vigilados: 8, sobre_limite_legal: 0, con_monitoreo_biologico: 5, con_espirometria_vigente: 7, con_rx_torax_vigente: 6, cumplimiento_pct: 45 }
   }
 }
 

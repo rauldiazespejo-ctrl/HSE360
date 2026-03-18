@@ -37,9 +37,9 @@ app.get('/chart-protocolos', (c) => {
   return c.json({
     success: true,
     data: {
-      labels: ['PREXOR','PLANESI','TMERT','Psicosocial','UV','MMC','Voz'],
-      cumplimiento: [68, 55, 78, 82, 90, 75, 95],
-      colores: ['#3b82f6','#f59e0b','#22c55e','#a855f7','#f97316','#ef4444','#6366f1']
+      labels: ['PREXOR','PLANESI','TMERT','Psicosocial','UV','MMC','HIC','HUMOS'],
+      cumplimiento: [68, 55, 78, 82, 90, 75, 60, 45],
+      colores: ['#3b82f6','#f59e0b','#22c55e','#a855f7','#f97316','#ef4444','#0369a1','#78350f']
     }
   })
 })

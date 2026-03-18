@@ -71,7 +71,7 @@ export const centros: any[] = [
     responsable_prevencion: '— (En proceso de contratación)',
     responsable_medico: '— (Derivado a Mutual)',
     activo: true,
-    protocolos_activos: ['PSICOSOCIAL','VOZ'],
+    protocolos_activos: ['PSICOSOCIAL','HIC'],
     fecha_registro: '2026-03-01',
     logo_url: null,
     estado_cumplimiento: 55,

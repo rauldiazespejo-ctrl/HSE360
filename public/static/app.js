@@ -397,7 +397,7 @@ function buildLayout() {
           ['PSICOSOCIAL','fa-brain','Riesgos Psicosociales'],
           ['UV','fa-sun','Radiación UV'],
           ['MMC','fa-box','Manejo Manual Cargas'],
-          ['VOZ','fa-microphone','Trastornos de Voz'],
+          ['HIC','fa-mountain','Hipobaria Intermitente Crónica'],['HUMOS','fa-smog','Metales y Humos Metálicos'],
         ].map(([id,ic,label]) => `
           <a class="nav-item" data-view="protocol-detail" data-pid="${id}" onclick="navigate('protocol-detail',{id:'${id}'})">
             <span class="nav-icon"><i class="fas ${ic}"></i></span><span class="truncate text-xs">${label}</span>
@@ -727,7 +727,7 @@ function showAddCentroModal() {
       <div class="form-section">
         <div class="form-section-title"><i class="fas fa-clipboard-list mr-2"></i>Protocolos MINSAL a aplicar</div>
         <div class="grid grid-cols-3 gap-2">
-          ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','VOZ'].map(p => `
+          ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'].map(p => `
             <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-100">
               <input type="checkbox" class="ct-protocolo" value="${p}" class="w-4 h-4">
               <span class="text-sm font-medium text-gray-700">${p}</span>
@@ -801,7 +801,7 @@ async function showEditCentroModal(id) {
       <div class="form-section">
         <div class="form-section-title"><i class="fas fa-clipboard-list mr-2"></i>Protocolos activos</div>
         <div class="grid grid-cols-3 gap-2">
-          ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','VOZ'].map(p => `
+          ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'].map(p => `
             <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-100">
               <input type="checkbox" class="ect-protocolo" value="${p}" ${ct.protocolos_activos.includes(p)?'checked':''}>
               <span class="text-sm font-medium text-gray-700">${p}</span>
@@ -1634,7 +1634,7 @@ function showAddWorkerModal() {
       <div class="form-section">
         <div class="form-section-title"><i class="fas fa-clipboard-list mr-2"></i>Protocolos MINSAL aplicables</div>
         <div class="grid grid-cols-3 gap-2">
-          ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','VOZ'].map(p => `
+          ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'].map(p => `
             <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-100">
               <input type="checkbox" class="w-proto" value="${p}">
               <span class="text-sm font-medium text-gray-700">${p}</span>
@@ -2166,9 +2166,10 @@ function showNewCapModal() {
             <input id="nc-nombre" class="form-input" placeholder="Ej: IRL 2026 — Riesgos Planta Norte (DS 44 Art.15)"></div>
           <div><label class="form-label">Tipo *</label>
             <select id="nc-tipo" class="form-input">
-              <option>IRL (DS 44)</option><option>Protocolo MINSAL</option><option>Emergencias</option>
-              <option>Uso correcto EPP</option><option>Primeros Auxilios</option><option>Trabajo en altura</option>
-              <option>Manejo Defensivo</option><option>Inducción</option>
+              <option>IRL (DS 44)</option><option>PREXOR</option><option>PLANESI</option><option>TMERT</option>
+              <option>PSICOSOCIAL</option><option>UV</option><option>MMC</option><option>HIC</option><option>HUMOS</option>
+              <option>Emergencias</option><option>Uso correcto EPP</option><option>Primeros Auxilios</option>
+              <option>Trabajo en altura</option><option>Manejo Defensivo</option><option>Inducción</option>
             </select></div>
           <div><label class="form-label">Fecha de Realización *</label>
             <input id="nc-fecha" type="date" class="form-input" value="${new Date().toISOString().split('T')[0]}"></div>
@@ -2185,7 +2186,7 @@ function showNewCapModal() {
           <div class="col-span-2"><label class="form-label">Protocolo Asociado</label>
             <select id="nc-proto" class="form-input">
               <option value="">Sin protocolo específico</option>
-              ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','VOZ'].map(p=>`<option value="${p}">${p}</option>`).join('')}
+              ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'].map(p=>`<option value="${p}">${p}</option>`).join('')}
             </select></div>
           <div class="col-span-2"><label class="form-label">Descripción / Temario</label>
             <textarea id="nc-desc" class="form-input" rows="3" placeholder="Temas tratados, objetivos de la capacitación..."></textarea></div>
@@ -2790,7 +2791,7 @@ function showNewMIPERModal() {
           <div><label class="form-label">Protocolo MINSAL</label>
             <select id="nm-proto" class="form-input">
               <option value="">Sin protocolo</option>
-              ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','VOZ'].map(p=>`<option value="${p}">${p}</option>`).join('')}
+              ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'].map(p=>`<option value="${p}">${p}</option>`).join('')}
             </select></div>
           <div class="col-span-2"><label class="form-label">Descripción del Peligro *</label>
             <textarea id="nm-peligro" class="form-input" rows="2" placeholder="Describa el peligro identificado..."></textarea></div>
@@ -3256,30 +3257,114 @@ const PROTOCOL_META = {
       {n:6,actividad:'Implementación de ayudas mecánicas',dirigido:'Trabajador',por:'APR/CPHS',periodo:'Mensual'},
     ]
   },
-  VOZ: {
-    icon:'fa-microphone', color:'#0891b2',
-    titulo:'VOZ',
-    subtitulo:'Disfonía Ocupacional — Trabajadores de la Voz',
-    norma:'Circ. MINSAL 3E/186 · DS 44/2025 Art.15',
-    desc:'Protocolo de Vigilancia de Trabajadores expuestos a Trastornos de Voz. Docentes, teleoperadores, locutores, etc.',
-    irl:'Uso profesional intensivo de la voz. Riesgo: disfonía crónica, laringitis. Medidas: hidratación, técnica vocal, reposo. DS 44 Art.15.',
+  // ── HIC — Hipobaria Intermitente Crónica ─────────────────────────
+  HIC: {
+    icon:'fa-mountain', color:'#0369a1',
+    titulo:'HIC',
+    subtitulo:'Hipobaria Intermitente Crónica por Gran Altitud',
+    norma:'Guía Técnica MINSAL 2013 · DS 594 · DS 44/2025 Art.15 · Circ. SUSESO 3838/2024',
+    desc:'Protocolo para trabajadores que laboran a ≥ 3.000 msnm en régimen de turno, con retorno periódico al nivel del mar. Aplica principalmente a minería y faenas de altura. Riesgos: mal de altura crónico, apnea del sueño, daño cardiovascular.',
+    irl:'Exposición a hipobaria intermitente crónica (altitud ≥ 3.000 msnm). Riesgos: hipoxia, poliglobulia, HTA, apnea del sueño, daño neurológico. Medidas: evaluaciones médicas preempleo y periódicas, exámenes de laboratorio, oximetría, restricción de exposición. Base DS 44 Art.15.',
     pasos:[
-      {n:'1', fase:'Planificación', items:[
-        {id:'1.1',item:'Identificar cargos con uso intensivo de voz',evidencia:'Listado de cargos',marco:'Circ. 3E/186'},
-        {id:'1.2',item:'IRL — Información riesgos trastornos de voz — reemplaza ODI',evidencia:'Acta IRL firmada',marco:'DS 44 Art.15'},
-        {id:'1.3',item:'Elaboración Carta Gantt',evidencia:'Carta Gantt firmada',marco:'DS44 SGSST'},
+      {n:'1', fase:'Planificación y Organización', items:[
+        {id:'1.1',item:'Difusión del protocolo HIC por el OAL a la empresa',evidencia:'Carta conductora OAL + kit HIC',marco:'Guía Técnica MINSAL 2013'},
+        {id:'1.2',item:'Identificación de puestos expuestos a altitud ≥ 3.000 msnm',evidencia:'Listado de puestos / MIPER actualizado',marco:'DS 594 Art.1'},
+        {id:'1.3',item:'Conformación del Equipo de Salud Ocupacional (ESO)',evidencia:'Acta de constitución ESO',marco:'Guía Técnica MINSAL 2013'},
+        {id:'1.4',item:'Capacitación del ESO por el OAL',evidencia:'Certificados capacitación ESO',marco:'DS 44 Art.15'},
+        {id:'1.5',item:'Elaboración Carta Gantt de implementación',evidencia:'Carta Gantt firmada por ejecutivos',marco:'DS44 SGSST'},
+        {id:'1.6',item:'IRL — Información de Riesgos HIC por puesto',evidencia:'Acta IRL firmada (firma ológrafa + huella digital)',marco:'DS 44 Art.15'},
       ]},
-      {n:'2', fase:'Difusión y Capacitación', items:[
-        {id:'2.1',item:'Difusión interna + entrega IRL',evidencia:'Registro charla / acta IRL',marco:'DS 44 Art.15'},
-        {id:'2.2',item:'Capacitación: higiene vocal, hidratación, técnica',evidencia:'Registro capacitación',marco:'DS 44 Art.15'},
-        {id:'2.3',item:'Evaluación fonoaudiológica basal',evidencia:'Informe fonoaudiológico OAL',marco:'Circ. 3E/186'},
-        {id:'2.4',item:'Ingreso a programa de vigilancia de salud',evidencia:'Certificado ingreso OAL',marco:'Circ. 3E/186'},
+      {n:'2', fase:'Evaluación de Salud Preempleo y Periódica', items:[
+        {id:'2.1',item:'Examen médico preempleo para trabajo en altura ≥ 3.000 msnm',evidencia:'Informe médico de aptitud OAL',marco:'Guía Técnica MINSAL 2013'},
+        {id:'2.2',item:'Exámenes de laboratorio: hemograma, hematocrito, oximetría, ECG, presión arterial',evidencia:'Resultados laboratorio OAL',marco:'Guía Técnica MINSAL 2013 Cap.4'},
+        {id:'2.3',item:'Evaluación de apnea del sueño (polisomnografía si hay sospecha)',evidencia:'Informe especialista/OAL',marco:'Circ. SUSESO 3838/2024'},
+        {id:'2.4',item:'Evaluación periódica anual (médica + laboratorio)',evidencia:'Informe anual OAL',marco:'Guía Técnica MINSAL 2013'},
+        {id:'2.5',item:'Registro en nómina de trabajadores expuestos',evidencia:'Planilla nómina firmada',marco:'Guía Técnica MINSAL 2013'},
+      ]},
+      {n:'3', fase:'Difusión y Capacitación', items:[
+        {id:'3.1',item:'Difusión interna protocolo HIC + entrega IRL a 100% de expuestos',evidencia:'Registro charla / acta IRL firmada',marco:'DS 44 Art.15'},
+        {id:'3.2',item:'Capacitación: efectos hipobaria, síntomas de alarma, autocuidado',evidencia:'Registro capacitación / evaluaciones',marco:'DS 44 Art.15'},
+        {id:'3.3',item:'Difusión externa: envío reporte a SEREMI Salud y DT',evidencia:'Carta conductora timbrada SEREMI',marco:'DS 594'},
+      ]},
+      {n:'4', fase:'Medidas Preventivas y de Control', items:[
+        {id:'4.1',item:'Implementar turnos rotativos con tiempo suficiente de recuperación a nivel del mar',evidencia:'Registro turnos / contrato colectivo',marco:'Guía Técnica MINSAL 2013 Cap.3'},
+        {id:'4.2',item:'Disponibilidad de oxígeno suplementario en faena',evidencia:'Inventario equipos O₂',marco:'DS 594 Art.23'},
+        {id:'4.3',item:'Control de hematocrito: hombres ≤ 21%, mujeres ≤ 19% (poliglobulia)',evidencia:'Informes laboratorio periódicos',marco:'Guía Técnica MINSAL 2013'},
+        {id:'4.4',item:'Programa de aclimatación progresiva para nuevos ingresantes',evidencia:'Protocolo de aclimatación',marco:'Guía Técnica MINSAL 2013 Cap.3'},
+        {id:'4.5',item:'Restricción de exposición a trabajadores con contraindicación médica',evidencia:'Informe médico restricción / reasignación',marco:'Guía Técnica MINSAL 2013'},
+      ]},
+      {n:'5', fase:'Vigilancia Continua y Mejora', items:[
+        {id:'5.1',item:'Ingreso al programa de vigilancia de salud OAL',evidencia:'Certificado ingreso programa OAL',marco:'Guía Técnica MINSAL 2013'},
+        {id:'5.2',item:'Visita de verificación OAL a faena de altura',evidencia:'Acta de visita OAL',marco:'Guía Técnica MINSAL 2013'},
+        {id:'5.3',item:'Revisión Carta Gantt en reunión CPHS semestral',evidencia:'Acta CPHS',marco:'DS 44 Art.15'},
+        {id:'5.4',item:'Actualización IRL ante cambio de turno o ingreso nuevo trabajador',evidencia:'Acta IRL actualizada firmada',marco:'DS 44 Art.15'},
       ]},
     ],
     ganttActividades:[
-      {n:1,actividad:'Difusión VOZ + IRL',dirigido:'Trabajador',por:'APR',periodo:'2 veces al año'},
-      {n:2,actividad:'Capacitación: higiene vocal',dirigido:'Trabajador',por:'APR/OAL',periodo:'3 veces al año'},
-      {n:3,actividad:'Evaluación fonoaudiológica periódica',dirigido:'Trabajador',por:'OAL',periodo:'Anual'},
+      {n:1,actividad:'Inspección condiciones faena en altura',dirigido:'Trabajador',por:'CPHS/APR',periodo:'2 veces al año'},
+      {n:2,actividad:'Evaluación médica preempleo y periódica',dirigido:'Trabajador',por:'OAL/MUTUAL',periodo:'Anual'},
+      {n:3,actividad:'Exámenes laboratorio (hemograma, oximetría, ECG)',dirigido:'Trabajador',por:'OAL',periodo:'Anual'},
+      {n:4,actividad:'Difusión HIC + IRL',dirigido:'Trabajador',por:'APR',periodo:'2 veces al año'},
+      {n:5,actividad:'Capacitación: efectos hipobaria y autocuidado',dirigido:'Trabajador',por:'APR/OAL',periodo:'3 veces al año'},
+      {n:6,actividad:'Verificación turnos y tiempo recuperación nivel del mar',dirigido:'Trabajador',por:'RRHH/APR',periodo:'Mensual'},
+      {n:7,actividad:'Control hematocrito y poliglobulia',dirigido:'Trabajador',por:'OAL',periodo:'Semestral'},
+      {n:8,actividad:'Revisión IRL y actualización por cambio de turno',dirigido:'Trabajador',por:'APR',periodo:'Anual o cambio puesto'},
+    ]
+  },
+  // ── HUMOS — Metales y Metaloides / Humos Metálicos ──────────────
+  HUMOS: {
+    icon:'fa-smog', color:'#78350f',
+    titulo:'HUMOS',
+    subtitulo:'Metales, Metaloides y Humos de Soldadura',
+    norma:'Res. Exenta N°606/2023 MINSAL · DS 594 Art.59-65 · Circ. SUSESO 3838/2024 · DS 44/2025 Art.15',
+    desc:'Protocolo de Vigilancia Ocupacional por Exposición a Metales, Metaloides y Humos de Soldadura (Res. Exenta N°606, jun-2023). Aplica a soldadores, fundidores, trabajadores expuestos a Fe, Mn, Cr+6, Ni, Pb, Cd, As, Cu, Zn. Incluye control ambiental y vigilancia de salud.',
+    irl:'Exposición a metales/metaloides y humos de soldadura. Riesgos: fiebre por humos metálicos, silicosis, cáncer pulmonar (Cr+6, As, Cd), neurotoxicidad (Mn, Pb), hepatotoxicidad. Medidas: EPR adecuado, ventilación local exhaustora, controles ingenieriles. Base DS 44 Art.15.',
+    pasos:[
+      {n:'1', fase:'Planificación y Organización', items:[
+        {id:'1.1',item:'Difusión del protocolo Metales/Humos por el OAL a la empresa',evidencia:'Carta conductora OAL + kit Protocolo',marco:'Res. Exenta N°606/2023'},
+        {id:'1.2',item:'Inventario de metales/metaloides presentes (Fe, Mn, Cr, Ni, Pb, Cd, As, Cu, Zn)',evidencia:'Fichas SDS / inventario materiales',marco:'DS 594 Art.59'},
+        {id:'1.3',item:'Identificación de Grupos de Exposición Similar (GES)',evidencia:'Informe GES por puesto',marco:'Res. Exenta N°606/2023 Cap.3'},
+        {id:'1.4',item:'Conformación del Equipo de Salud Ocupacional (ESO)',evidencia:'Acta constitución ESO',marco:'Res. Exenta N°606/2023'},
+        {id:'1.5',item:'Elaboración Carta Gantt de implementación',evidencia:'Carta Gantt firmada por ejecutivos',marco:'DS44 SGSST'},
+        {id:'1.6',item:'IRL — Información de Riesgos por Metales/Humos por puesto',evidencia:'Acta IRL firmada (firma ológrafa + huella digital)',marco:'DS 44 Art.15'},
+      ]},
+      {n:'2', fase:'Evaluación Ambiental', items:[
+        {id:'2.1',item:'Evaluación cualitativa inicial por higienista del OAL',evidencia:'Informe cualitativo OAL',marco:'Res. Exenta N°606/2023 Cap.4'},
+        {id:'2.2',item:'Muestreo ambiental cuantitativo de metales (fracción inhalable/respirable)',evidencia:'Informe cuantitativo laboratorio acreditado',marco:'DS 594 Art.61 · NCh 3358'},
+        {id:'2.3',item:'Comparación con Límites Permisibles Ponderados (LPP) DS 594',evidencia:'Informe comparativo LPP',marco:'DS 594 Anexo N°1'},
+        {id:'2.4',item:'GES con Cr+6, As o Cd → protocolo cancerígenos (Circ. 3838)',evidencia:'Informe específico cancerígenos OAL',marco:'Circ. SUSESO 3838/2024'},
+      ]},
+      {n:'3', fase:'Difusión y Capacitación', items:[
+        {id:'3.1',item:'Difusión interna protocolo + entrega IRL a 100% de expuestos',evidencia:'Registro charla / acta IRL firmada',marco:'DS 44 Art.15'},
+        {id:'3.2',item:'Capacitación: riesgos de metales, efectos en salud, uso EPR correcto',evidencia:'Registro capacitación / evaluaciones',marco:'DS 44 Art.15'},
+        {id:'3.3',item:'Capacitación específica soldadura: generación humos, ventilación, equipo',evidencia:'Registro capacitación soldadores',marco:'DS 594 Art.62'},
+        {id:'3.4',item:'Difusión externa: informe a SEREMI Salud y DT',evidencia:'Carta conductora timbrada',marco:'DS 594'},
+      ]},
+      {n:'4', fase:'Medidas de Control', items:[
+        {id:'4.1',item:'Implementación ventilación local exhaustora (VLE) en soldadura y fundición',evidencia:'Plano/especificación técnica VLE',marco:'DS 594 Art.63'},
+        {id:'4.2',item:'Programa de Protección Respiratoria (EPR): selección, entrega, mantención',evidencia:'PPR impreso + registros de entrega',marco:'DS 594 Art.64'},
+        {id:'4.3',item:'Implementar controles ingenieriles: sustitución, encapsulamiento, VLE',evidencia:'Plan de controles con responsables y plazos',marco:'Res. Exenta N°606/2023'},
+        {id:'4.4',item:'Restricción de acceso a áreas con metales cancerígenos (Cr+6, As, Cd)',evidencia:'Señalética + registros de acceso controlado',marco:'Circ. SUSESO 3838/2024'},
+      ]},
+      {n:'5', fase:'Vigilancia de Salud', items:[
+        {id:'5.1',item:'Examen médico preempleo y periódico: laboratorio biológico (indicadores de exposición)',evidencia:'Informes médicos OAL',marco:'Res. Exenta N°606/2023 Cap.5'},
+        {id:'5.2',item:'Monitoreo biológico: plombemia (Pb), creatinina (Cd), arsénico urinario (As)',evidencia:'Resultados laboratorio acreditado',marco:'Res. Exenta N°606/2023 Anexo'},
+        {id:'5.3',item:'Radiografía de tórax OIT (GES con polvo metálico / fibrogénico)',evidencia:'Informe radiológico OIT',marco:'Res. Exenta N°606/2023'},
+        {id:'5.4',item:'Ingreso al programa de vigilancia de salud OAL',evidencia:'Certificado ingreso programa vigilancia',marco:'Res. Exenta N°606/2023'},
+        {id:'5.5',item:'Verificación de cumplimiento medidas — visita OAL semestral',evidencia:'Acta de visita OAL',marco:'Res. Exenta N°606/2023'},
+        {id:'5.6',item:'Revisión Carta Gantt en reunión CPHS',evidencia:'Acta CPHS',marco:'DS 44 Art.15'},
+      ]},
+    ],
+    ganttActividades:[
+      {n:1,actividad:'Inspección de áreas con exposición a metales/humos',dirigido:'Trabajador',por:'CPHS/APR',periodo:'2 veces al año'},
+      {n:2,actividad:'Observaciones de actividades de trabajadores expuestos',dirigido:'Trabajador',por:'APR/CPHS',periodo:'Mensual'},
+      {n:3,actividad:'Muestreo ambiental cuantitativo de metales',dirigido:'Trabajador',por:'OAL/MUTUAL',periodo:'Anual'},
+      {n:4,actividad:'Difusión Protocolo Metales/Humos + IRL',dirigido:'Trabajador',por:'APR',periodo:'2 veces al año'},
+      {n:5,actividad:'Capacitación: riesgos metales, humos soldadura, EPR',dirigido:'Trabajador',por:'APR/CPHS',periodo:'3 veces al año'},
+      {n:6,actividad:'Medidas preventivas y verificación VLE/EPR',dirigido:'Trabajador',por:'APR/CPHS',periodo:'Mensual'},
+      {n:7,actividad:'Monitoreo biológico (laboratorio indicadores exposición)',dirigido:'Trabajador',por:'OAL',periodo:'Anual'},
+      {n:8,actividad:'Evaluación médica periódica + Rx tórax OIT',dirigido:'Trabajador',por:'OAL',periodo:'Anual'},
+      {n:9,actividad:'Revisión IRL y actualización',dirigido:'Trabajador',por:'APR',periodo:'Anual o cambio puesto'},
     ]
   },
 };
@@ -3295,14 +3380,14 @@ async function renderProtocols() {
   // Construir mapa de cumplimiento desde API o defaults
   const cumplMap = {};
   apiData.forEach(p => { if(p.id) cumplMap[p.id] = p.cumplimiento_pct || 0; });
-  const defaults = { PREXOR:72, PLANESI:55, TMERT:88, PSICOSOCIAL:65, UV:91, MMC:80, VOZ:30 };
+  const defaults = { PREXOR:72, PLANESI:55, TMERT:88, PSICOSOCIAL:65, UV:91, MMC:80, HIC:60, HUMOS:45 };
 
   const protIds = Object.keys(PROTOCOL_META);
   const cumplimiento = {};
   protIds.forEach(id => { cumplimiento[id] = cumplMap[id] ?? defaults[id]; });
 
   // ── KPI global ──
-  const totalActivos = protIds.filter(id=>id!=='VOZ').length;
+  const totalActivos = protIds.filter(id=>id!=='').length;
   const pctGlobal = Math.round(protIds.reduce((a,id)=>a+cumplimiento[id],0)/protIds.length);
   const enRiesgo = protIds.filter(id=>cumplimiento[id]<60).length;
 
@@ -3330,7 +3415,7 @@ async function renderProtocols() {
             <div class="text-xs" style="color:rgba(0,180,216,0.85)">Cumpl. global</div>
           </div>
           <div class="text-center p-2 rounded-lg" style="background:rgba(255,255,255,0.08)">
-            <div class="text-2xl font-black text-white">${totalActivos}/7</div>
+            <div class="text-2xl font-black text-white">${totalActivos}/8</div>
             <div class="text-xs" style="color:rgba(0,180,216,0.85)">Activos</div>
           </div>
           ${enRiesgo>0?`<div class="text-center p-2 rounded-lg" style="background:rgba(220,38,38,0.2);border:1px solid rgba(220,38,38,0.3)">
@@ -3371,7 +3456,7 @@ async function renderProtocols() {
         ${protIds.map(pid => {
           const p = PROTOCOL_META[pid];
           const pct = cumplimiento[pid];
-          const activo = pid !== 'VOZ';
+          const activo = true;
           return `
             <div class="protocol-card card-hover" onclick="navigate('protocol-detail',{id:'${pid}'})">
               <div class="protocol-card-header" style="background:linear-gradient(135deg,${p.color}e8,${p.color})">
@@ -3654,7 +3739,7 @@ function renderPasoAPasoView() {
           </div>
           ${protIds.map(pid => {
             const p = PROTOCOL_META[pid];
-            const pct = ({PREXOR:72,PLANESI:55,TMERT:88,PSICOSOCIAL:65,UV:91,MMC:80,VOZ:30})[pid]||0;
+            const pct = ({PREXOR:72,PLANESI:55,TMERT:88,PSICOSOCIAL:65,UV:91,MMC:80,HIC:60,HUMOS:45})[pid]||0;
             const pc = pct>=80?'#059669':pct>=60?'#d97706':'#dc2626';
             return `
               <button id="paso-sel-${pid}" onclick="showPasoProtocol('${pid}')"
@@ -3972,7 +4057,7 @@ async function renderProtocolDetail(id) {
   const content = document.getElementById('page-content');
   const res = await API.get('/protocols/' + id).catch(()=>({data:{data:{}}}));
   const proto = res.data?.data || {};
-  const pct = proto.cumplimiento_pct || ({PREXOR:72,PLANESI:55,TMERT:88,PSICOSOCIAL:65,UV:91,MMC:80,VOZ:30}[id] || 0);
+  const pct = proto.cumplimiento_pct || ({PREXOR:72,PLANESI:55,TMERT:88,PSICOSOCIAL:65,UV:91,MMC:80,HIC:60,HUMOS:45}[id] || 0);
 
   content.innerHTML = `
     <!-- Volver -->
