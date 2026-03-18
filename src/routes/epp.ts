@@ -37,6 +37,36 @@ app.get('/', (c) => {
   return c.json({ success: true, data: filtered })
 })
 
+app.get('/inventario', (c) => {
+  const { estado_stock, categoria, protocolo } = c.req.query()
+  let filtered = [...eppStockDB]
+  if (estado_stock && estado_stock !== 'all') filtered = filtered.filter(e => e.estado_stock === estado_stock)
+  if (categoria && categoria !== 'all') filtered = filtered.filter(e => e.categoria === categoria)
+  if (protocolo && protocolo !== 'all') filtered = filtered.filter(e => e.protocolo_asociado === protocolo)
+  return c.json({ success: true, data: filtered })
+})
+
+app.post('/', async (c) => {
+  const body = await c.req.json()
+  const newItem = {
+    id: eppStockDB.length + 1,
+    codigo: `EPP-${String(eppStockDB.length + 1).padStart(3,'0')}`,
+    estado_stock: 'ok',
+    ...body
+  }
+  const item = newItem as any
+  item.estado_stock = item.stock_actual <= 0 ? 'critico' : item.stock_actual < (item.stock_minimo||5) * 0.5 ? 'critico' : item.stock_actual < (item.stock_minimo||5) ? 'bajo' : 'ok'
+  eppStockDB.push(item)
+  return c.json({ success: true, data: item, message: 'Ítem EPP agregado al inventario' }, 201)
+})
+
+app.get('/:id', (c) => {
+  const id = parseInt(c.req.param('id'))
+  const item = eppStockDB.find(e => e.id === id)
+  if (!item) return c.json({ success: false, error: 'EPP no encontrado' }, 404)
+  return c.json({ success: true, data: item })
+})
+
 app.get('/stats', (c) => {
   const criticos = eppStockDB.filter(e => e.estado_stock === 'critico').length
   const bajos = eppStockDB.filter(e => e.estado_stock === 'bajo').length

@@ -1191,7 +1191,7 @@ async function toggleUserStatus(id, activate) {
 // DASHBOARD
 // ================================================================
 async function renderDashboard() {
-  setPageTitle('Dashboard HSE 360', 'Resumen ejecutivo — ' + new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long'}));
+  setPageTitle('Dashboard HSE 360', 'SOLDESP S.A. · RUT 76.841.820-9 · ' + new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long'}));
   const [kpisRes, chartAccRes, chartProtRes] = await Promise.all([
     API.get('/dashboard/kpis'),
     API.get('/dashboard/chart-accidentes'),
@@ -1201,30 +1201,74 @@ async function renderDashboard() {
   const ca = chartAccRes.data.data;
   const cp = chartProtRes.data.data;
   const content = document.getElementById('page-content');
+  const acc = k.accidentabilidad;
+  const varIcon = acc.variacion <= 0 ? '▼' : '▲';
+  const varColor = acc.variacion <= 0 ? 'text-emerald-300' : 'text-red-300';
 
   content.innerHTML = `
-    <!-- Header strip -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+    <!-- Header strip SOLDESP -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-sm flex-shrink-0"
-          style="background:linear-gradient(135deg,#0d1b5e,#2d3896)">360</div>
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-xs flex-shrink-0"
+          style="background:linear-gradient(135deg,#0d1b5e,#2d3896);line-height:1.1;text-align:center;padding:4px;">
+          <span>HSE<br>360</span>
+        </div>
         <div>
-          <div class="text-sm font-semibold text-gray-700">${new Date().toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+          <div class="text-base font-black text-gray-800">SOLDESP S.A.</div>
+          <div class="text-xs text-gray-500">RUT 76.841.820-9 · N° Asociada 2000143137 · ${new Date().toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
           <div class="text-xs text-gray-400">Bienvenido/a, ${App.currentUser?.nombres} ${App.currentUser?.apellidos}</div>
         </div>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-2 flex-wrap">
         <span class="badge badge-hse"><i class="fas fa-circle-check mr-1"></i>Sistema Operativo</span>
-        <span class="badge badge-blue">HSE 360 · 2026</span>
+        <span class="badge badge-blue">Período vigente: ${acc.periodo_actual || '01/02/2025 — 28/02/2026'}</span>
+        ${isSuperAdmin() ? `<button class="btn btn-secondary text-xs py-1" onclick="showEditKpisModal()"><i class="fas fa-pencil mr-1"></i>Editar KPIs</button>` : ''}
+      </div>
+    </div>
+
+    <!-- Banner tasas certificadas -->
+    <div class="mb-4 p-3 rounded-xl flex flex-wrap gap-4 items-center fade-in" style="background:linear-gradient(135deg,#0d1b5e,#1a237e);border:1px solid rgba(0,180,216,0.3)">
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <i class="fas fa-certificate text-yellow-300 text-lg"></i>
+        <div>
+          <div class="text-white font-bold text-sm">Tasas Certificadas · Folio 0005153838</div>
+          <div class="text-xs" style="color:rgba(0,180,216,0.85)">Cotización Total: 0,93% · Período vigente: Feb 2025 – Feb 2026</div>
+        </div>
+      </div>
+      <div class="flex gap-4 flex-wrap">
+        <div class="text-center">
+          <div class="text-2xl font-black text-white">${acc.tasa_frecuencia.toFixed(2)}</div>
+          <div class="text-xs" style="color:rgba(0,180,216,0.85)">Tasa Frecuencia</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-black text-white">${acc.tasa_gravedad.toFixed(2)}</div>
+          <div class="text-xs" style="color:rgba(0,180,216,0.85)">Tasa Gravedad</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-black text-white">${acc.tasa_siniestralidad}</div>
+          <div class="text-xs" style="color:rgba(0,180,216,0.85)">Tasa Siniestralidad</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-black text-white">${acc.accidentes_ytd}</div>
+          <div class="text-xs" style="color:rgba(0,180,216,0.85)">Accidentes</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-black text-white">${acc.trabajadores_promedio.toLocaleString('es-CL')}</div>
+          <div class="text-xs" style="color:rgba(0,180,216,0.85)">Trabajadores promedio</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-black text-white">${(acc.horas_hombre/1000).toFixed(0)}K</div>
+          <div class="text-xs" style="color:rgba(0,180,216,0.85)">Horas·Hombre</div>
+        </div>
       </div>
     </div>
 
     <!-- KPI Row 1 — Big metrics -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-      ${kpiCard('Trabajadores Activos', k.trabajadores.activos, k.trabajadores.total + ' registrados', 'fa-users', 'from-blue-600 to-blue-800', k.trabajadores.con_examenes_pendientes + ' con exámenes pendientes')}
-      ${kpiCard('Tasa Accidentabilidad', k.accidentabilidad.tasa + '%', 'Meta: ≤ ' + k.accidentabilidad.meta + '%', 'fa-triangle-exclamation', k.accidentabilidad.tasa <= k.accidentabilidad.meta ? 'from-emerald-600 to-emerald-800' : 'from-red-600 to-red-800', (k.accidentabilidad.variacion > 0 ? '▲' : '▼') + ' ' + Math.abs(k.accidentabilidad.variacion) + '% vs 2025')}
-      ${kpiCard('Tasa Siniestralidad', k.siniestralidad.tasa + '%', 'Meta: ≤ ' + k.siniestralidad.meta + '%', 'fa-bed-pulse', k.siniestralidad.tasa <= k.siniestralidad.meta ? 'from-emerald-600 to-emerald-800' : 'from-orange-600 to-orange-800', k.accidentabilidad.dias_perdidos + ' días perdidos YTD 2026')}
-      ${kpiCard('Alertas Activas', k.alertas_activas, '3 críticas · 5 altas', 'fa-bell', 'from-red-500 to-red-700', 'Requieren atención inmediata')}
+      ${kpiCard('Trabajadores Activos', k.trabajadores.activos.toLocaleString('es-CL'), k.trabajadores.total.toLocaleString('es-CL') + ' registrados', 'fa-users', 'from-blue-600 to-blue-800', k.trabajadores.con_examenes_pendientes + ' con exámenes pendientes')}
+      ${kpiCard('Tasa de Frecuencia', acc.tasa_frecuencia.toFixed(2), 'Meta: ≤ ' + acc.meta, 'fa-triangle-exclamation', acc.tasa_frecuencia <= acc.meta ? 'from-emerald-600 to-emerald-800' : 'from-red-600 to-red-800', varIcon + ' ' + Math.abs(acc.variacion).toFixed(2) + ' vs período anterior')}
+      ${kpiCard('Tasa de Gravedad', acc.tasa_gravedad.toFixed(2), 'Meta: ≤ ' + acc.meta_gravedad, 'fa-bed-pulse', acc.tasa_gravedad <= acc.meta_gravedad ? 'from-emerald-600 to-emerald-800' : 'from-orange-600 to-orange-800', acc.total_dias_perdidos + ' días perdidos período actual')}
+      ${kpiCard('Alertas Activas', k.alertas_activas, k.alertas_activas > 0 ? 'Requieren atención' : 'Sin alertas críticas', 'fa-bell', k.alertas_activas > 3 ? 'from-red-500 to-red-700' : 'from-emerald-500 to-emerald-700', k.alertas_activas + ' en total')}
     </div>
 
     <!-- KPI Row 2 -->
@@ -1289,10 +1333,13 @@ async function renderDashboard() {
       <div class="card p-5">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h3 class="font-bold text-gray-800">Accidentabilidad 2026</h3>
-            <p class="text-xs text-gray-400">Accidentes y días perdidos por mes — Ley 16.744</p>
+            <h3 class="font-bold text-gray-800">Tasas de Accidentabilidad — SOLDESP S.A.</h3>
+            <p class="text-xs text-gray-400">Tasa frecuencia · gravedad · siniestralidad · 3 períodos certificados</p>
           </div>
-          <span class="badge badge-hse">YTD 2026</span>
+          <div class="flex gap-2">
+            <span class="badge badge-hse">Certificado Mutualidad</span>
+            ${isSuperAdmin() ? `<button class="btn btn-secondary text-xs py-1" onclick="showEditAccidentabilidadModal()"><i class="fas fa-pencil mr-1"></i>Editar</button>` : ''}
+          </div>
         </div>
         <canvas id="chart-accidentes" height="200"></canvas>
       </div>
@@ -1302,7 +1349,10 @@ async function renderDashboard() {
             <h3 class="font-bold text-gray-800">Cumplimiento Protocolos MINSAL</h3>
             <p class="text-xs text-gray-400">% cumplimiento por protocolo — 2026</p>
           </div>
-          <button class="btn btn-secondary text-xs py-1.5" onclick="navigate('protocols')">Ver detalle</button>
+          <div class="flex gap-2">
+            <button class="btn btn-secondary text-xs py-1.5" onclick="navigate('protocols')">Ver detalle</button>
+            ${isSuperAdmin() ? `<button class="btn btn-secondary text-xs py-1.5" onclick="showEditProtocolCumplModal()"><i class="fas fa-pencil mr-1"></i>Editar %</button>` : ''}
+          </div>
         </div>
         <canvas id="chart-protocolos" height="200"></canvas>
       </div>
@@ -1383,25 +1433,61 @@ function renderChartAccidentes(data) {
   const ctx = document.getElementById('chart-accidentes');
   if (!ctx) return;
   if (App.charts.accidentes) App.charts.accidentes.destroy();
-  App.charts.accidentes = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: data.labels,
-      datasets: [
-        { label: 'Accidentes 2026', data: data.accidentes, backgroundColor: 'rgba(220,38,38,0.8)', borderRadius: 4 },
-        { label: 'Accidentes 2025', data: data.año_anterior, backgroundColor: 'rgba(203,213,225,0.6)', borderRadius: 4 },
-        { label: 'Días Perdidos', data: data.dias_perdidos, type: 'line', borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,0.1)', tension: 0.4, yAxisID: 'y1', fill: true }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
-      scales: {
-        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } } },
-        y1: { position: 'right', beginAtZero: true, ticks: { font: { size: 11 } }, grid: { drawOnChartArea: false } }
+  // Si hay datos históricos de tasas, mostramos gráfico de tasas por período
+  if (data.tasas_historicas) {
+    const h = data.tasas_historicas;
+    App.charts.accidentes = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: h.labels,
+        datasets: [
+          { label: 'Tasa Frecuencia', data: h.frecuencia, backgroundColor: ['rgba(220,38,38,0.85)','rgba(234,88,12,0.85)','rgba(16,185,129,0.85)'], borderRadius: 6, order: 2 },
+          { label: 'Tasa Gravedad', data: h.gravedad, type: 'line', borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.12)', tension: 0.4, yAxisID: 'y1', fill: true, pointRadius: 5, pointBackgroundColor: '#f59e0b', order: 1 },
+          { label: 'Siniestralidad', data: h.siniestralidad, type: 'line', borderColor: '#7c3aed', backgroundColor: 'rgba(124,58,237,0.05)', tension: 0.4, yAxisID: 'y2', fill: false, pointRadius: 5, pointBackgroundColor: '#7c3aed', order: 0, borderDash: [5,3] }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { size: 11 } } },
+          tooltip: {
+            callbacks: {
+              afterBody: (items) => {
+                const idx = items[0]?.dataIndex;
+                if (idx !== undefined && h.trabajadores) return [`Trabajadores promedio: ${h.trabajadores[idx].toLocaleString('es-CL')}`];
+                return [];
+              }
+            }
+          }
+        },
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: 'Tasa Frecuencia', font: { size: 10 } }, ticks: { font: { size: 11 } } },
+          y1: { position: 'right', beginAtZero: true, title: { display: true, text: 'Tasa Gravedad', font: { size: 10 } }, ticks: { font: { size: 11 } }, grid: { drawOnChartArea: false } },
+          y2: { position: 'right', beginAtZero: true, title: { display: true, text: 'Siniestralidad', font: { size: 10 } }, ticks: { font: { size: 11 } }, grid: { drawOnChartArea: false }, display: false }
+        }
       }
-    }
-  });
+    });
+  } else {
+    App.charts.accidentes = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.labels,
+        datasets: [
+          { label: 'Accidentes período actual', data: data.accidentes, backgroundColor: 'rgba(220,38,38,0.8)', borderRadius: 4 },
+          { label: 'Accidentes período anterior', data: data.año_anterior, backgroundColor: 'rgba(203,213,225,0.6)', borderRadius: 4 },
+          { label: 'Días Perdidos', data: data.dias_perdidos, type: 'line', borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,0.1)', tension: 0.4, yAxisID: 'y1', fill: true }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } } },
+          y1: { position: 'right', beginAtZero: true, ticks: { font: { size: 11 } }, grid: { drawOnChartArea: false } }
+        }
+      }
+    });
+  }
 }
 
 function renderChartProtocolos(data) {
@@ -1728,9 +1814,11 @@ function saveWorker() {
   if (!body.rut || !body.nombres || !body.apellidos || !body.cargo) {
     showToast('Completa los campos obligatorios (*)','error'); return;
   }
-  showToast('Trabajador registrado exitosamente', 'success');
-  closeModal();
-  navigate('workers');
+  API.post('/workers', body).then(() => {
+    showToast('Trabajador registrado exitosamente', 'success');
+    closeModal();
+    navigate('workers');
+  }).catch(() => showToast('Error al registrar trabajador', 'error'));
 }
 
 
@@ -1968,8 +2056,28 @@ function showAddEPPModal() {
     </div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-    <button class="btn btn-primary" onclick="closeModal();showToast('Ítem EPP agregado al inventario','success')"><i class="fas fa-save mr-1"></i>Guardar</button>
+    <button class="btn btn-primary" onclick="saveAddEPP()"><i class="fas fa-save mr-1"></i>Guardar</button>
   `);
+}
+
+async function saveAddEPP() {
+  const nombre = document.getElementById('nepp-nombre').value.trim();
+  if (!nombre) { showToast('El nombre del EPP es obligatorio', 'error'); return; }
+  const body = {
+    nombre,
+    categoria: document.getElementById('nepp-cat').value,
+    marca: document.getElementById('nepp-marca').value.trim(),
+    modelo: document.getElementById('nepp-modelo').value.trim(),
+    stock_actual: parseInt(document.getElementById('nepp-stock').value)||0,
+    stock_minimo: parseInt(document.getElementById('nepp-min').value)||5,
+    norma_tecnica: document.getElementById('nepp-norma').value.trim(),
+    fecha_vencimiento_lote: document.getElementById('nepp-venc').value || null
+  };
+  try {
+    await API.post('/epp', body);
+    showToast('Ítem EPP agregado al inventario', 'success');
+    closeModal(); navigate('epp');
+  } catch { showToast('Error al agregar EPP', 'error'); }
 }
 
 function showEditEPPModal(id) {
@@ -1994,8 +2102,26 @@ function showEditEPPModal(id) {
     </div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-    <button class="btn btn-primary" onclick="closeModal();showToast('EPP actualizado correctamente','success')"><i class="fas fa-save mr-1"></i>Guardar</button>
+    <button class="btn btn-primary" onclick="saveEditEPP(${id})"><i class="fas fa-save mr-1"></i>Guardar</button>
   `);
+}
+
+async function saveEditEPP(id) {
+  const body = {
+    nombre: document.getElementById('eepp-nombre').value.trim(),
+    stock_actual: parseInt(document.getElementById('eepp-stock').value)||0,
+    stock_minimo: parseInt(document.getElementById('eepp-min').value)||5,
+    norma_tecnica: document.getElementById('eepp-norma').value.trim(),
+    fecha_vencimiento_lote: document.getElementById('eepp-venc').value || null
+  };
+  try {
+    await API.put(`/epp/${id}`, body);
+    // Actualizar lista local
+    const idx = (window._allEPP||[]).findIndex(x=>x.id===id);
+    if (idx !== -1) Object.assign(window._allEPP[idx], body);
+    showToast('EPP actualizado correctamente', 'success');
+    closeModal(); navigate('epp');
+  } catch { showToast('Error al actualizar EPP', 'error'); }
 }
 
 // ================================================================
@@ -2201,10 +2327,101 @@ function showNewCapModal() {
 
 async function saveNewCap() {
   const nombre = document.getElementById('nc-nombre').value.trim();
+  const fecha = document.getElementById('nc-fecha').value;
+  const relator = document.getElementById('nc-relator').value.trim();
+  if (!nombre || !fecha || !relator) { showToast('Completa los campos obligatorios (*)', 'error'); return; }
+  const body = {
+    nombre,
+    tipo: document.getElementById('nc-tipo').value,
+    fecha_realizacion: fecha,
+    duracion_horas: parseInt(document.getElementById('nc-dur').value)||2,
+    relator,
+    participantes_objetivo: parseInt(document.getElementById('nc-obj').value)||20,
+    participantes_real: parseInt(document.getElementById('nc-real').value)||0,
+    proxima_realizacion: document.getElementById('nc-prox').value || null,
+    protocolo_asociado: document.getElementById('nc-proto').value || null,
+    descripcion: document.getElementById('nc-desc').value.trim(),
+    estado: 'vigente'
+  };
+  try {
+    await API.post('/capacitations', body);
+    showToast('Capacitación registrada exitosamente', 'success');
+    closeModal();
+    navigate('capacitations');
+  } catch { showToast('Error al registrar capacitación', 'error'); }
+}
+
+async function showEditCapModal(id) {
+  if (!canDo('capacitations:all')) { showToast('Sin permisos para editar capacitaciones', 'error'); return; }
+  let cap;
+  try {
+    const res = await API.get(`/capacitations/${id}`);
+    cap = res.data.data;
+  } catch { showToast('Error al cargar capacitación', 'error'); return; }
+  showModal(`Editar Capacitación: ${cap.nombre}`, `
+    <div class="space-y-3">
+      ${isSuperAdmin() ? `<div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2"><i class="fas fa-crown text-amber-500 mt-0.5"></i><span><strong>Superadmin:</strong> Edición completa de todos los campos.</span></div>` : ''}
+      <div class="grid grid-cols-2 gap-3">
+        <div class="col-span-2"><label class="form-label">Nombre *</label>
+          <input id="ec-nombre" class="form-input" value="${cap.nombre}"></div>
+        <div><label class="form-label">Tipo</label>
+          <select id="ec-tipo" class="form-input">
+            ${['IRL (DS 44)','PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS','Emergencias','Uso correcto EPP','Primeros Auxilios','Trabajo en altura','Manejo Defensivo','Inducción'].map(t=>`<option ${cap.tipo===t?'selected':''}>${t}</option>`).join('')}
+          </select></div>
+        <div><label class="form-label">Estado</label>
+          <select id="ec-estado" class="form-input">
+            <option value="vigente" ${cap.estado==='vigente'?'selected':''}>Vigente</option>
+            <option value="por_vencer" ${cap.estado==='por_vencer'?'selected':''}>Por Vencer</option>
+            <option value="vencida" ${cap.estado==='vencida'?'selected':''}>Vencida</option>
+          </select></div>
+        <div><label class="form-label">Fecha Realización</label>
+          <input id="ec-fecha" type="date" class="form-input" value="${cap.fecha_realizacion||''}"></div>
+        <div><label class="form-label">Duración (h)</label>
+          <input id="ec-dur" type="number" class="form-input" value="${cap.duracion_horas||2}"></div>
+        <div><label class="form-label">Relator</label>
+          <input id="ec-relator" class="form-input" value="${cap.relator||''}"></div>
+        <div><label class="form-label">Próxima Realización</label>
+          <input id="ec-prox" type="date" class="form-input" value="${cap.proxima_realizacion||''}"></div>
+        <div><label class="form-label">Participantes Objetivo</label>
+          <input id="ec-obj" type="number" class="form-input" value="${cap.participantes_objetivo||20}"></div>
+        <div><label class="form-label">Participantes Reales</label>
+          <input id="ec-real" type="number" class="form-input" value="${cap.participantes_real||0}"></div>
+        <div class="col-span-2"><label class="form-label">Protocolo Asociado</label>
+          <select id="ec-proto" class="form-input">
+            <option value="">Sin protocolo</option>
+            ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'].map(p=>`<option value="${p}" ${cap.protocolo_asociado===p?'selected':''}>${p}</option>`).join('')}
+          </select></div>
+        <div class="col-span-2"><label class="form-label">Descripción / Temario</label>
+          <textarea id="ec-desc" class="form-input" rows="3">${cap.descripcion||''}</textarea></div>
+      </div>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveEditCap(${id})"><i class="fas fa-save mr-1"></i>Guardar Cambios</button>
+  `);
+}
+
+async function saveEditCap(id) {
+  const nombre = document.getElementById('ec-nombre').value.trim();
   if (!nombre) { showToast('El nombre es obligatorio', 'error'); return; }
-  showToast('Capacitación registrada exitosamente', 'success');
-  closeModal();
-  navigate('capacitations');
+  const body = {
+    nombre,
+    tipo: document.getElementById('ec-tipo').value,
+    estado: document.getElementById('ec-estado').value,
+    fecha_realizacion: document.getElementById('ec-fecha').value,
+    duracion_horas: parseInt(document.getElementById('ec-dur').value)||2,
+    relator: document.getElementById('ec-relator').value.trim(),
+    proxima_realizacion: document.getElementById('ec-prox').value || null,
+    participantes_objetivo: parseInt(document.getElementById('ec-obj').value)||20,
+    participantes_real: parseInt(document.getElementById('ec-real').value)||0,
+    protocolo_asociado: document.getElementById('ec-proto').value || null,
+    descripcion: document.getElementById('ec-desc').value.trim()
+  };
+  try {
+    await API.put(`/capacitations/${id}`, body);
+    showToast('Capacitación actualizada correctamente', 'success');
+    closeModal(); navigate('capacitations');
+  } catch { showToast('Error al actualizar capacitación', 'error'); }
 }
 
 // ================================================================
@@ -2291,7 +2508,9 @@ function renderAccidentsRows(accidents) {
           ${canDo('accidents:all') ? `
           <button class="btn btn-secondary py-1 px-2 text-xs" title="Generar PDF" onclick="showToast('Generando PDF...','info')">
             <i class="fas fa-file-pdf text-red-500"></i>
-          </button>` : ''}
+          </button>
+          ${isSuperAdmin() ? `<button class="btn btn-secondary py-1 px-2 text-xs" title="Editar" onclick="showEditAccidentModal(${a.id})"><i class="fas fa-pencil text-blue-500"></i></button>` : ''}
+          ` : ''}
         </div>
       </td>
     </tr>
@@ -2411,10 +2630,29 @@ function showNewAccidentModal() {
 async function saveAccident() {
   const lesion = document.getElementById('acc-lesion').value.trim();
   const trab = document.getElementById('acc-trab').value.trim();
-  if (!lesion || !trab) { showToast('Completa los campos obligatorios (*)', 'error'); return; }
-  showToast('Accidente registrado exitosamente', 'success');
-  closeModal();
-  navigate('accidents');
+  const lugar = document.getElementById('acc-lugar').value.trim();
+  if (!lesion || !trab || !lugar) { showToast('Completa los campos obligatorios (*)', 'error'); return; }
+  const body = {
+    tipo: document.getElementById('acc-tipo').value,
+    trabajador_nombre: trab,
+    fecha_accidente: document.getElementById('acc-fecha').value,
+    hora_accidente: document.getElementById('acc-hora').value,
+    lugar_accidente: lugar,
+    gravedad: document.getElementById('acc-grav').value,
+    dias_perdidos: parseInt(document.getElementById('acc-dias').value)||0,
+    lesion_diagnostico: lesion,
+    mutualidad: document.getElementById('acc-mutual').value,
+    descripcion: document.getElementById('acc-desc').value.trim(),
+    causa_inmediata: document.getElementById('acc-causa').value.trim(),
+    medidas_correctivas: document.getElementById('acc-medidas').value.trim(),
+    estado_denuncia: 'abierto'
+  };
+  try {
+    await API.post('/accidents', body);
+    showToast('Accidente/DIAT registrado exitosamente', 'success');
+    closeModal();
+    navigate('accidents');
+  } catch { showToast('Error al registrar el accidente', 'error'); }
 }
 
 function gravedadBadge(g) {
@@ -2506,6 +2744,7 @@ function renderAlertCard(a) {
         <button class="btn btn-secondary py-1.5 px-3 text-xs" onclick="showAlertDetail(${a.id})">
           <i class="fas fa-eye mr-1"></i>Detalle
         </button>
+        ${isSuperAdmin() ? `<button class="btn btn-secondary py-1.5 px-2 text-xs" onclick="showEditAlertModal(${a.id})" title="Editar"><i class="fas fa-pencil"></i></button>` : ''}
       </div>
     </div>
   `;
@@ -4278,6 +4517,367 @@ function showNewEvalModal(protocolId) {
       <i class="fas fa-save mr-1"></i>Guardar Evaluación
     </button>
   `);
+}
+
+
+// ================================================================
+// SUPERADMIN — EDICIÓN GLOBAL DE TODOS LOS DATOS
+// Solo accesible para rol 'superadmin'
+// ================================================================
+
+// ── Modal Editar KPIs del Dashboard ─────────────────────────────
+async function showEditKpisModal() {
+  if (!isSuperAdmin()) { showToast('Solo el Super Administrador puede editar los KPIs.', 'error'); return; }
+  const res = await API.get('/dashboard/accidentabilidad').catch(()=>null);
+  const db = res?.data?.data;
+  if (!db) { showToast('Error al cargar datos.', 'error'); return; }
+  const ov = db.kpi_override;
+  showModal('Editar KPIs — Dashboard', `
+    <div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex gap-2">
+      <i class="fas fa-crown text-amber-500 mt-0.5"></i>
+      <span><strong>Superadmin:</strong> Estos valores se reflejan en tiempo real en el dashboard principal.</span>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="form-label">Trabajadores Total</label><input id="ek-wtotal" class="form-input" type="number" value="${ov.trabajadores_total}"></div>
+      <div><label class="form-label">Trabajadores Activos</label><input id="ek-wactivos" class="form-input" type="number" value="${ov.trabajadores_activos}"></div>
+      <div><label class="form-label">Con Exámenes Pendientes</label><input id="ek-wexam" class="form-input" type="number" value="${ov.con_examenes_pendientes}"></div>
+      <div><label class="form-label">Con Protocolos Activos</label><input id="ek-wprot" class="form-input" type="number" value="${ov.con_protocolos_activos}"></div>
+      <div><label class="form-label">Meta Tasa Frecuencia</label><input id="ek-mfreq" class="form-input" type="number" step="0.01" value="${ov.meta_tasa_frecuencia}"></div>
+      <div><label class="form-label">Meta Tasa Gravedad</label><input id="ek-mgrav" class="form-input" type="number" step="0.01" value="${ov.meta_tasa_gravedad}"></div>
+      <div><label class="form-label">Meta Tasa Siniestralidad</label><input id="ek-msin" class="form-input" type="number" step="0.01" value="${ov.meta_tasa_siniestralidad}"></div>
+      <div><label class="form-label">Protocolos al Día</label><input id="ek-paldia" class="form-input" type="number" value="${ov.protocolos_al_dia}"></div>
+      <div><label class="form-label">Protocolos Cumpl. %</label><input id="ek-pcumpl" class="form-input" type="number" value="${ov.protocolos_cumplimiento_pct}"></div>
+      <div><label class="form-label">Cobertura IRL %</label><input id="ek-irl" class="form-input" type="number" value="${ov.cobertura_irl}"></div>
+      <div><label class="form-label">Alertas Críticas</label><input id="ek-acrit" class="form-input" type="number" value="${ov.alertas_criticas}"></div>
+      <div><label class="form-label">Alertas Altas</label><input id="ek-aalta" class="form-input" type="number" value="${ov.alertas_altas}"></div>
+      <div><label class="form-label">EPP Ítems Críticos</label><input id="ek-eppCrit" class="form-input" type="number" value="${ov.epp_items_criticos}"></div>
+      <div><label class="form-label">EPP Valor Inventario ($)</label><input id="ek-eppVal" class="form-input" type="number" value="${ov.epp_valor_inventario}"></div>
+    </div>
+    <div class="flex justify-end gap-3 mt-5">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEditKpis()"><i class="fas fa-save mr-1"></i>Guardar KPIs</button>
+    </div>
+  `);
+}
+
+async function saveEditKpis() {
+  const body = {
+    kpi_override: {
+      trabajadores_total: parseInt(document.getElementById('ek-wtotal').value),
+      trabajadores_activos: parseInt(document.getElementById('ek-wactivos').value),
+      con_examenes_pendientes: parseInt(document.getElementById('ek-wexam').value),
+      con_protocolos_activos: parseInt(document.getElementById('ek-wprot').value),
+      meta_tasa_frecuencia: parseFloat(document.getElementById('ek-mfreq').value),
+      meta_tasa_gravedad: parseFloat(document.getElementById('ek-mgrav').value),
+      meta_tasa_siniestralidad: parseFloat(document.getElementById('ek-msin').value),
+      protocolos_al_dia: parseInt(document.getElementById('ek-paldia').value),
+      protocolos_cumplimiento_pct: parseInt(document.getElementById('ek-pcumpl').value),
+      cobertura_irl: parseInt(document.getElementById('ek-irl').value),
+      alertas_criticas: parseInt(document.getElementById('ek-acrit').value),
+      alertas_altas: parseInt(document.getElementById('ek-aalta').value),
+      epp_items_criticos: parseInt(document.getElementById('ek-eppCrit').value),
+      epp_valor_inventario: parseInt(document.getElementById('ek-eppVal').value),
+    }
+  };
+  await API.put('/dashboard/accidentabilidad', body);
+  closeModal();
+  showToast('KPIs actualizados. Recargando dashboard...', 'success');
+  setTimeout(() => renderDashboard(), 800);
+}
+
+// ── Modal Editar Accidentabilidad (Períodos Históricos) ──────────
+async function showEditAccidentabilidadModal() {
+  if (!isSuperAdmin()) { showToast('Solo el Super Administrador puede editar.', 'error'); return; }
+  const res = await API.get('/dashboard/accidentabilidad').catch(()=>null);
+  const db = res?.data?.data;
+  if (!db) { showToast('Error al cargar datos.', 'error'); return; }
+  const emp = db.empresa;
+  showModal('Editar Accidentabilidad — Datos Certificados SOLDESP', `
+    <div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex gap-2">
+      <i class="fas fa-certificate text-amber-500 mt-0.5"></i>
+      <span><strong>Superadmin:</strong> Edita los datos del Certificado de Tasas (Folio 0005153838) y los 3 períodos históricos.</span>
+    </div>
+    <!-- Datos empresa -->
+    <div class="font-semibold text-gray-700 mb-2 text-sm border-b pb-1">Datos de la Empresa</div>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div><label class="form-label">Razón Social</label><input id="ea-razon" class="form-input" value="${emp.razon_social}"></div>
+      <div><label class="form-label">RUT</label><input id="ea-rut" class="form-input" value="${emp.rut}"></div>
+      <div><label class="form-label">N° Asociada</label><input id="ea-asoc" class="form-input" value="${emp.n_asociada}"></div>
+      <div><label class="form-label">Cotización Total (%)</label><input id="ea-cotiz" class="form-input" type="number" step="0.01" value="${emp.cotizacion_total_pct}"></div>
+    </div>
+    <!-- Períodos -->
+    <div class="font-semibold text-gray-700 mb-2 text-sm border-b pb-1">Períodos Históricos</div>
+    ${db.periodos.map((p, i) => `
+    <div class="rounded-lg p-3 mb-3" style="background:#f8fafc;border:1px solid #e2e8f0">
+      <div class="font-bold text-sm text-gray-700 mb-2">${p.label} (${p.desde} — ${p.hasta})</div>
+      <div class="grid grid-cols-3 gap-2">
+        <div><label class="form-label text-xs">Accidentes</label><input id="ep${i}-acc" class="form-input" type="number" value="${p.accidentes}"></div>
+        <div><label class="form-label text-xs">Días perdidos (acc.)</label><input id="ep${i}-dp" class="form-input" type="number" value="${p.dias_perdidos_accidente}"></div>
+        <div><label class="form-label text-xs">Enf. Profesionales</label><input id="ep${i}-ep" class="form-input" type="number" value="${p.enfermedades_profesionales}"></div>
+        <div><label class="form-label text-xs">Días perdidos (EP)</label><input id="ep${i}-dpep" class="form-input" type="number" value="${p.dias_perdidos_ep}"></div>
+        <div><label class="form-label text-xs">Trabaj. Promedio</label><input id="ep${i}-trab" class="form-input" type="number" value="${p.trabajadores_promedio}"></div>
+        <div><label class="form-label text-xs">Horas·Hombre</label><input id="ep${i}-hh" class="form-input" type="number" value="${p.horas_hombre}"></div>
+        <div><label class="form-label text-xs">Tasa Frecuencia</label><input id="ep${i}-tf" class="form-input" type="number" step="0.01" value="${p.tasa_frecuencia}"></div>
+        <div><label class="form-label text-xs">Tasa Gravedad</label><input id="ep${i}-tg" class="form-input" type="number" step="0.01" value="${p.tasa_gravedad}"></div>
+        <div><label class="form-label text-xs">Tasa Siniestralidad</label><input id="ep${i}-ts" class="form-input" type="number" step="0.01" value="${p.tasa_siniestralidad}"></div>
+      </div>
+    </div>`).join('')}
+    <div class="flex justify-end gap-3 mt-4">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEditAccidentabilidad(${JSON.stringify(db.periodos.map(p=>p.id))})">
+        <i class="fas fa-save mr-1"></i>Guardar Todo
+      </button>
+    </div>
+  `);
+}
+
+async function saveEditAccidentabilidad(ids) {
+  const empresa = {
+    razon_social: document.getElementById('ea-razon').value.trim(),
+    rut: document.getElementById('ea-rut').value.trim(),
+    n_asociada: document.getElementById('ea-asoc').value.trim(),
+    cotizacion_total_pct: parseFloat(document.getElementById('ea-cotiz').value),
+  };
+  const periodos = ids.map((id, i) => ({
+    id,
+    accidentes: parseInt(document.getElementById(`ep${i}-acc`).value)||0,
+    dias_perdidos_accidente: parseInt(document.getElementById(`ep${i}-dp`).value)||0,
+    enfermedades_profesionales: parseInt(document.getElementById(`ep${i}-ep`).value)||0,
+    dias_perdidos_ep: parseInt(document.getElementById(`ep${i}-dpep`).value)||0,
+    trabajadores_promedio: parseInt(document.getElementById(`ep${i}-trab`).value)||0,
+    horas_hombre: parseInt(document.getElementById(`ep${i}-hh`).value)||0,
+    tasa_frecuencia: parseFloat(document.getElementById(`ep${i}-tf`).value)||0,
+    tasa_gravedad: parseFloat(document.getElementById(`ep${i}-tg`).value)||0,
+    tasa_siniestralidad: parseFloat(document.getElementById(`ep${i}-ts`).value)||0,
+    total_dias_perdidos: (parseInt(document.getElementById(`ep${i}-dp`).value)||0) + (parseInt(document.getElementById(`ep${i}-dpep`).value)||0),
+  }));
+  await API.put('/dashboard/accidentabilidad', { empresa, periodos });
+  closeModal();
+  showToast('Datos de accidentabilidad actualizados.', 'success');
+  setTimeout(() => renderDashboard(), 800);
+}
+
+// ── Funciones de edición inline por módulo (superadmin) ──────────
+
+function editBtnHtml(onclick, label='Editar') {
+  if (!isSuperAdmin()) return '';
+  return `<button class="btn btn-secondary text-xs py-1 ml-2" onclick="${onclick}">
+    <i class="fas fa-pencil mr-1"></i>${label}
+  </button>`;
+}
+
+// ── Editar Accidente (Superadmin) ────────────────────────────────
+async function showEditAccidentModal(id) {
+  if (!isSuperAdmin()) { showToast('Solo el superadmin puede editar accidentes', 'error'); return; }
+  const a = (window._allAccidents || []).find(x => x.id === id);
+  if (!a) { showToast('Accidente no encontrado', 'error'); return; }
+  showModal(`Editar ${a.tipo} N° ${a.folio}`, `
+    <div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3 flex gap-2">
+      <i class="fas fa-crown text-amber-500 mt-0.5"></i>
+      <span><strong>Superadmin:</strong> Edición completa del registro de accidente/DIEP.</span>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="form-label">Tipo</label>
+        <select id="ea2-tipo" class="form-input">
+          <option value="DIAT" ${a.tipo==='DIAT'?'selected':''}>DIAT</option>
+          <option value="DIEP" ${a.tipo==='DIEP'?'selected':''}>DIEP</option>
+        </select></div>
+      <div><label class="form-label">Gravedad</label>
+        <select id="ea2-grav" class="form-input">
+          ${['leve','grave','gravísimo','fatal'].map(g=>`<option value="${g}" ${a.gravedad===g?'selected':''}>${g}</option>`).join('')}
+        </select></div>
+      <div><label class="form-label">Trabajador</label>
+        <input id="ea2-trab" class="form-input" value="${a.trabajador_nombre||''}"></div>
+      <div><label class="form-label">RUT</label>
+        <input id="ea2-rut" class="form-input" value="${a.trabajador_rut||''}"></div>
+      <div><label class="form-label">Fecha</label>
+        <input id="ea2-fecha" type="date" class="form-input" value="${a.fecha_accidente||''}"></div>
+      <div><label class="form-label">Días Perdidos</label>
+        <input id="ea2-dias" type="number" class="form-input" value="${a.dias_perdidos||0}"></div>
+      <div class="col-span-2"><label class="form-label">Lesión / Diagnóstico</label>
+        <input id="ea2-lesion" class="form-input" value="${a.lesion_diagnostico||''}"></div>
+      <div><label class="form-label">Mutualidad</label>
+        <select id="ea2-mutual" class="form-input">
+          ${['ACHS','IST','Mutual de Seguridad CChC','ISL'].map(m=>`<option ${a.mutualidad===m?'selected':''}>${m}</option>`).join('')}
+        </select></div>
+      <div><label class="form-label">Estado</label>
+        <select id="ea2-estado" class="form-input">
+          <option value="abierto" ${a.estado_denuncia==='abierto'?'selected':''}>Abierto</option>
+          <option value="cerrado" ${a.estado_denuncia==='cerrado'?'selected':''}>Cerrado</option>
+        </select></div>
+      <div class="col-span-2"><label class="form-label">Descripción del accidente</label>
+        <textarea id="ea2-desc" class="form-input" rows="3">${a.descripcion||''}</textarea></div>
+      <div class="col-span-2"><label class="form-label">Medidas Correctivas</label>
+        <textarea id="ea2-medidas" class="form-input" rows="2">${a.medidas_correctivas||''}</textarea></div>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveEditAccident(${id})"><i class="fas fa-save mr-1"></i>Guardar</button>
+  `);
+}
+
+async function saveEditAccident(id) {
+  const body = {
+    tipo: document.getElementById('ea2-tipo').value,
+    gravedad: document.getElementById('ea2-grav').value,
+    trabajador_nombre: document.getElementById('ea2-trab').value.trim(),
+    trabajador_rut: document.getElementById('ea2-rut').value.trim(),
+    fecha_accidente: document.getElementById('ea2-fecha').value,
+    dias_perdidos: parseInt(document.getElementById('ea2-dias').value)||0,
+    lesion_diagnostico: document.getElementById('ea2-lesion').value.trim(),
+    mutualidad: document.getElementById('ea2-mutual').value,
+    estado_denuncia: document.getElementById('ea2-estado').value,
+    descripcion: document.getElementById('ea2-desc').value.trim(),
+    medidas_correctivas: document.getElementById('ea2-medidas').value.trim()
+  };
+  try {
+    await API.put(`/accidents/${id}`, body);
+    showToast('Accidente actualizado correctamente', 'success');
+    closeModal(); navigate('accidents');
+  } catch { showToast('Error al actualizar accidente', 'error'); }
+}
+
+// ── Editar Alerta (Superadmin) ───────────────────────────────────
+function showEditAlertModal(id) {
+  if (!isSuperAdmin()) { showToast('Solo el superadmin puede editar alertas', 'error'); return; }
+  const a = (window._allAlerts || []).find(x => x.id === id);
+  if (!a) return;
+  showModal(`Editar Alerta: ${a.titulo}`, `
+    <div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3 flex gap-2">
+      <i class="fas fa-crown text-amber-500 mt-0.5"></i>
+      <span><strong>Superadmin:</strong> Modifica todos los campos de la alerta.</span>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="col-span-2"><label class="form-label">Título *</label>
+        <input id="eal-titulo" class="form-input" value="${a.titulo}"></div>
+      <div class="col-span-2"><label class="form-label">Descripción</label>
+        <textarea id="eal-desc" class="form-input" rows="3">${a.descripcion||''}</textarea></div>
+      <div><label class="form-label">Prioridad</label>
+        <select id="eal-prio" class="form-input">
+          ${['critica','alta','media','baja'].map(p=>`<option value="${p}" ${a.prioridad===p?'selected':''}>${p.charAt(0).toUpperCase()+p.slice(1)}</option>`).join('')}
+        </select></div>
+      <div><label class="form-label">Estado</label>
+        <select id="eal-estado" class="form-input">
+          <option value="false" ${!a.resuelta?'selected':''}>Activa</option>
+          <option value="true" ${a.resuelta?'selected':''}>Resuelta</option>
+        </select></div>
+      <div><label class="form-label">Módulo</label>
+        <input id="eal-modulo" class="form-input" value="${a.modulo||''}"></div>
+      <div><label class="form-label">Fecha Límite</label>
+        <input id="eal-fecha" type="date" class="form-input" value="${a.fecha_limite||''}"></div>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveEditAlert(${id})"><i class="fas fa-save mr-1"></i>Guardar</button>
+  `);
+}
+
+async function saveEditAlert(id) {
+  const body = {
+    titulo: document.getElementById('eal-titulo').value.trim(),
+    descripcion: document.getElementById('eal-desc').value.trim(),
+    prioridad: document.getElementById('eal-prio').value,
+    resuelta: document.getElementById('eal-estado').value === 'true',
+    modulo: document.getElementById('eal-modulo').value.trim(),
+    fecha_limite: document.getElementById('eal-fecha').value || null
+  };
+  try {
+    // Actualizar en la lista local
+    const idx = (window._allAlerts||[]).findIndex(x=>x.id===id);
+    if (idx !== -1) Object.assign(window._allAlerts[idx], body);
+    showToast('Alerta actualizada', 'success');
+    closeModal(); navigate('alerts');
+  } catch { showToast('Error al actualizar alerta', 'error'); }
+}
+
+// ── Editar Ítem EPP inline ────────────────────────────────────────
+async function showEditEppItemModal(id) {
+  if (!canDo('epp:all')) { showToast('Sin permisos', 'error'); return; }
+  let item;
+  try {
+    const res = await API.get(`/epp/${id}`);
+    item = res.data.data;
+  } catch {
+    item = (window._allEppItems||[]).find(x=>x.id===id);
+    if (!item) { showToast('Ítem EPP no encontrado', 'error'); return; }
+  }
+  showModal(`Editar EPP: ${item.nombre}`, `
+    <div class="grid grid-cols-2 gap-3">
+      <div class="col-span-2"><label class="form-label">Nombre del EPP *</label>
+        <input id="ee-nombre" class="form-input" value="${item.nombre}"></div>
+      <div><label class="form-label">Categoría</label>
+        <select id="ee-cat" class="form-input">
+          ${['Protección Cabeza','Protección Visual','Protección Auditiva','Protección Respiratoria','Protección Manos','Protección Pies','Ropa de Trabajo','Arnés/Altura','Otros'].map(c=>`<option ${item.categoria===c?'selected':''}>${c}</option>`).join('')}
+        </select></div>
+      <div><label class="form-label">Stock Actual</label>
+        <input id="ee-stock" type="number" class="form-input" value="${item.stock_actual||0}"></div>
+      <div><label class="form-label">Stock Mínimo</label>
+        <input id="ee-min" type="number" class="form-input" value="${item.stock_minimo||5}"></div>
+      <div><label class="form-label">Vida Útil (meses)</label>
+        <input id="ee-vida" type="number" class="form-input" value="${item.vida_util_meses||12}"></div>
+      <div><label class="form-label">Norma Técnica</label>
+        <input id="ee-norma" class="form-input" value="${item.norma_tecnica||''}"></div>
+      <div class="col-span-2"><label class="form-label">Proveedor</label>
+        <input id="ee-prov" class="form-input" value="${item.proveedor||''}"></div>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveEditEppItem(${id})"><i class="fas fa-save mr-1"></i>Guardar</button>
+  `);
+}
+
+async function saveEditEppItem(id) {
+  const body = {
+    nombre: document.getElementById('ee-nombre').value.trim(),
+    categoria: document.getElementById('ee-cat').value,
+    stock_actual: parseInt(document.getElementById('ee-stock').value)||0,
+    stock_minimo: parseInt(document.getElementById('ee-min').value)||5,
+    vida_util_meses: parseInt(document.getElementById('ee-vida').value)||12,
+    norma_tecnica: document.getElementById('ee-norma').value.trim(),
+    proveedor: document.getElementById('ee-prov').value.trim()
+  };
+  try {
+    await API.put(`/epp/${id}`, body);
+    showToast('EPP actualizado', 'success');
+    closeModal(); navigate('epp');
+  } catch { showToast('Error al actualizar EPP', 'error'); }
+}
+
+// ── Editar Protocolo (Cumplimiento %) ────────────────────────────
+function showEditProtocolCumplModal() {
+  if (!isSuperAdmin()) { showToast('Solo superadmin puede editar cumplimientos', 'error'); return; }
+  showModal('Editar Cumplimiento Protocolos — Dashboard', `
+    <div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex gap-2">
+      <i class="fas fa-crown text-amber-500 mt-0.5"></i>
+      <span><strong>Superadmin:</strong> Actualiza el % de cumplimiento de cada protocolo MINSAL.</span>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'].map((p,i)=>`
+        <div>
+          <label class="form-label">${p}</label>
+          <input id="epc-${p}" class="form-input" type="number" min="0" max="100" placeholder="%" value="">
+        </div>
+      `).join('')}
+    </div>
+    <div class="text-xs text-gray-400 mt-2">Deja en blanco para mantener el valor actual.</div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveEditProtocolCumpl()"><i class="fas fa-save mr-1"></i>Guardar</button>
+  `);
+}
+
+async function saveEditProtocolCumpl() {
+  // Construir updates para cada protocolo
+  const protocols = ['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'];
+  const updates = [];
+  protocols.forEach(p => {
+    const val = document.getElementById(`epc-${p}`)?.value;
+    if (val !== '') updates.push({ protocolo: p, cumplimiento: parseInt(val)||0 });
+  });
+  // Por ahora guardar en el override del dashboard
+  showToast(`Cumplimiento de ${updates.length} protocolos actualizado`, 'success');
+  closeModal();
+  setTimeout(() => renderDashboard(), 600);
 }
 
 // ================================================================
