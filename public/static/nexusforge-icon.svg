@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 76" fill="none">
+  <!-- Hexagon/house outer shell -->
+  <path d="M30 40 L18 22 L36 6 L54 6 L66 22 L58 40" stroke="#1e2d7d" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M58 40 L58 56 L44 68 L28 56 L28 40" stroke="#252f82" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- N letter inside -->
+  <path d="M32 56 L32 24 L54 56 L54 24" stroke="#1a2570" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- F strokes (partial, right side) -->
+  <path d="M46 38 L59 38" stroke="#2d3896" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+  <path d="M46 28 L59 28" stroke="#2d3896" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+  <!-- Circuit line LEFT -->
+  <line x1="4"  y1="32" x2="28" y2="32" stroke="#00b4d8" stroke-width="2.8" stroke-linecap="round"/>
+  <!-- Circuit line RIGHT -->
+  <line x1="58" y1="32" x2="76" y2="32" stroke="#00b4d8" stroke-width="2.8" stroke-linecap="round"/>
+
+  <!-- Node LEFT outer -->
+  <circle cx="4"  cy="32" r="4" fill="none" stroke="#00b4d8" stroke-width="2.5"/>
+  <circle cx="4"  cy="32" r="1.5" fill="#00b4d8"/>
+  <!-- Node LEFT inner -->
+  <circle cx="28" cy="32" r="3.5" fill="none" stroke="#00b4d8" stroke-width="2.2"/>
+  <circle cx="28" cy="32" r="1.2" fill="#00b4d8"/>
+
+  <!-- Node RIGHT inner -->
+  <circle cx="58" cy="32" r="3.5" fill="none" stroke="#00b4d8" stroke-width="2.2"/>
+  <circle cx="58" cy="32" r="1.2" fill="#00b4d8"/>
+  <!-- Node RIGHT outer -->
+  <circle cx="76" cy="32" r="4" fill="none" stroke="#00b4d8" stroke-width="2.5"/>
+  <circle cx="76" cy="32" r="1.5" fill="#00b4d8"/>
+
+  <!-- Bottom-left circuit node -->
+  <line x1="10" y1="56" x2="28" y2="56" stroke="#00b4d8" stroke-width="2.2" stroke-linecap="round"/>
+  <circle cx="7"  cy="56" r="3.5" fill="none" stroke="#00b4d8" stroke-width="2"/>
+  <circle cx="7"  cy="56" r="1.2" fill="#00b4d8"/>
+</svg>

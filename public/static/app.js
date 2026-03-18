@@ -65,83 +65,157 @@ function canDo(perm) {
 // ================================================================
 // LOGIN SCREEN
 // ================================================================
+function nfIconSVG(size, lightMode) {
+  const s = lightMode
+    ? { hex:'#1a237e', mid:'#2d3896', nf:'#0d1b5e', f:'#1e2d7d', c:'#00b4d8' }
+    : { hex:'#93c5fd', mid:'#bfdbfe', nf:'#dbeafe', f:'#93c5fd', c:'#22d3ee' };
+  return `<svg width="${size}" height="${Math.round(size*0.95)}" viewBox="0 0 80 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M30 40 L18 22 L36 6 L54 6 L66 22 L58 40" stroke="${s.hex}" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M58 40 L58 56 L44 68 L28 56 L28 40" stroke="${s.mid}" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M32 56 L32 24 L54 56 L54 24" stroke="${s.nf}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M46 38 L59 38" stroke="${s.f}" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M46 28 L59 28" stroke="${s.f}" stroke-width="5" stroke-linecap="round"/>
+    <line x1="4" y1="32" x2="28" y2="32" stroke="${s.c}" stroke-width="2.8" stroke-linecap="round"/>
+    <line x1="58" y1="32" x2="76" y2="32" stroke="${s.c}" stroke-width="2.8" stroke-linecap="round"/>
+    <circle cx="4" cy="32" r="4" fill="none" stroke="${s.c}" stroke-width="2.5"/>
+    <circle cx="4" cy="32" r="1.5" fill="${s.c}"/>
+    <circle cx="28" cy="32" r="3.5" fill="none" stroke="${s.c}" stroke-width="2.2"/>
+    <circle cx="28" cy="32" r="1.2" fill="${s.c}"/>
+    <circle cx="58" cy="32" r="3.5" fill="none" stroke="${s.c}" stroke-width="2.2"/>
+    <circle cx="58" cy="32" r="1.2" fill="${s.c}"/>
+    <circle cx="76" cy="32" r="4" fill="none" stroke="${s.c}" stroke-width="2.5"/>
+    <circle cx="76" cy="32" r="1.5" fill="${s.c}"/>
+    <line x1="10" y1="56" x2="28" y2="56" stroke="${s.c}" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="7" cy="56" r="3.5" fill="none" stroke="${s.c}" stroke-width="2"/>
+    <circle cx="7" cy="56" r="1.2" fill="${s.c}"/>
+  </svg>`;
+}
+
 function renderLogin() {
   document.getElementById('app').innerHTML = `
-    <div class="login-page">
-      <div class="login-card fade-in">
-        <div class="text-center mb-6">
-          <div class="login-logo"><span>360</span></div>
-          <h1 class="text-2xl font-bold text-gray-900 tracking-tight">HSE 360</h1>
-          <p class="text-sm text-gray-500 mt-1">Plataforma Integral de Gestión HSE</p>
-          <div class="flex items-center justify-center gap-2 mt-2">
-            <span class="text-xs text-gray-400">Ley 16.744 · DS 594 · MINSAL</span>
-          </div>
-        </div>
+    <div class="login-page" style="min-height:100vh;display:flex;">
 
-        <div id="login-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center gap-2">
-          <i class="fas fa-circle-exclamation"></i><span id="login-error-msg"></span>
-        </div>
+      <!-- Panel izquierdo — NexusForge Brand -->
+      <div class="login-left-panel" style="flex:1;background:linear-gradient(160deg,#0d1b5e 0%,#1a237e 40%,#2d3896 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 50px;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:36px 36px;"></div>
+        <div style="position:absolute;bottom:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:rgba(0,180,216,0.1);"></div>
+        <div style="position:absolute;top:-60px;left:-60px;width:200px;height:200px;border-radius:50%;background:rgba(26,35,126,0.3);"></div>
 
-        <div class="space-y-4">
-          <div>
-            <label class="form-label">Correo electrónico</label>
-            <input id="login-email" type="email" class="form-input" placeholder="usuario@empresa.cl"
-              value="" onkeydown="if(event.key==='Enter')doLogin()">
-          </div>
-          <div>
-            <label class="form-label">Contraseña</label>
-            <div class="relative">
-              <input id="login-pass" type="password" class="form-input pr-10" placeholder="••••••••"
-                onkeydown="if(event.key==='Enter')doLogin()">
-              <button type="button" onclick="togglePassVis()" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
-                <i class="fas fa-eye text-sm"></i>
-              </button>
+        <div style="position:relative;z-index:1;text-align:center;max-width:360px;">
+          <!-- NexusForge logo grande -->
+          <div style="margin-bottom:28px;">${nfIconSVG(80, false)}</div>
+          <div style="font-size:32px;font-weight:900;color:white;letter-spacing:-0.8px;line-height:1;margin-bottom:6px;">NexusForge</div>
+          <div style="font-size:13px;color:rgba(0,180,216,0.9);font-weight:500;letter-spacing:0.5px;margin-bottom:40px;">Connecting Innovation with Power</div>
+
+          <!-- Divisor -->
+          <div style="width:48px;height:3px;background:linear-gradient(90deg,#00b4d8,rgba(0,180,216,0));border-radius:2px;margin:0 auto 40px;"></div>
+
+          <!-- Producto -->
+          <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;">
+            <div style="width:40px;height:40px;background:linear-gradient(135deg,#16a34a,#14532d);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:white;box-shadow:0 4px 14px rgba(22,163,74,0.35);">360</div>
+            <div style="text-align:left;">
+              <div style="font-size:18px;font-weight:800;color:white;letter-spacing:-0.3px;">HSE 360</div>
+              <div style="font-size:10px;color:rgba(134,239,172,0.75);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Plataforma Integral HSE · Chile</div>
             </div>
           </div>
-          <button onclick="doLogin()" id="login-btn" class="btn btn-primary w-full justify-center py-3 text-base">
-            <i class="fas fa-right-to-bracket"></i> Ingresar al Sistema
-          </button>
-        </div>
+          <p style="font-size:12px;color:rgba(255,255,255,0.45);line-height:1.7;max-width:280px;margin:0 auto;">
+            Sistema profesional de gestión de Seguridad, Salud Ocupacional y Medio Ambiente conforme a Ley 16.744 · DS 594 · Protocolos MINSAL
+          </p>
 
-        <div class="mt-6 p-4 bg-gray-50 rounded-xl text-xs text-gray-500">
-          <div class="font-semibold text-gray-600 mb-2"><i class="fas fa-circle-info mr-1"></i> Accesos de demostración</div>
-          <div class="space-y-1.5">
-            <div class="flex justify-between cursor-pointer hover:text-gray-700" onclick="fillLogin('raul.diaz@hse360.cl','HSE360admin!')">
-              <span><i class="fas fa-crown text-yellow-500 mr-1"></i>Super Admin</span>
-              <span class="font-mono">raul.diaz@hse360.cl</span>
-            </div>
-            <div class="flex justify-between cursor-pointer hover:text-gray-700" onclick="fillLogin('claudia.torres@hse360.cl','Prev2026!')">
-              <span><i class="fas fa-shield-halved text-blue-500 mr-1"></i>Prevencionista</span>
-              <span class="font-mono">claudia.torres@hse360.cl</span>
-            </div>
-            <div class="flex justify-between cursor-pointer hover:text-gray-700" onclick="fillLogin('dr.morales@hse360.cl','Med2026!')">
-              <span><i class="fas fa-stethoscope text-green-600 mr-1"></i>Médico</span>
-              <span class="font-mono">dr.morales@hse360.cl</span>
-            </div>
+          <!-- Features -->
+          <div style="margin-top:36px;display:flex;flex-direction:column;gap:10px;text-align:left;">
+            ${[
+              ['fa-shield-check','Gestión integral de cumplimiento normativo'],
+              ['fa-chart-line','KPIs y reportería en tiempo real'],
+              ['fa-users','Control de trabajadores y protocolos'],
+              ['fa-lock','Seguridad por roles y permisos'],
+            ].map(([ic,txt]) => `
+              <div style="display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.75);font-size:12.5px;">
+                <div style="width:28px;height:28px;border-radius:7px;background:rgba(0,180,216,0.15);border:1px solid rgba(0,180,216,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <i class="fas ${ic}" style="color:#00b4d8;font-size:11px;"></i>
+                </div>
+                ${txt}
+              </div>
+            `).join('')}
           </div>
         </div>
+      </div>
 
-        <div class="mt-4 text-center text-xs text-gray-400">
-          © 2026 HSE 360 · Cumplimiento Ley 19.628
-        </div>
+      <!-- Panel derecho — Formulario de acceso -->
+      <div style="width:460px;background:white;display:flex;flex-direction:column;justify-content:center;padding:50px 44px;overflow-y:auto;box-shadow:-20px 0 60px rgba(0,0,0,0.12);">
+        <div class="fade-in">
+          <!-- Header del form -->
+          <div class="text-center mb-8">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:linear-gradient(135deg,#16a34a,#14532d);border-radius:14px;margin-bottom:14px;box-shadow:0 6px 20px rgba(22,163,74,0.3);">
+              <span style="font-size:18px;font-weight:900;color:white;letter-spacing:-0.5px;">360</span>
+            </div>
+            <h1 style="font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.4px;margin-bottom:4px;">Bienvenido/a</h1>
+            <p style="font-size:13.5px;color:#64748b;">Ingresa tus credenciales para acceder a HSE 360</p>
+          </div>
 
-        <div class="mt-5 pt-4 border-t border-gray-100 flex flex-col items-center gap-1">
-          <div class="text-xs text-gray-400 mb-1">Desarrollado por</div>
-          <div class="nexusforge-badge">
-            <svg width="22" height="22" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="nf-grad-login" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stop-color="#6366f1"/>
-                  <stop offset="100%" stop-color="#0ea5e9"/>
-                </linearGradient>
-              </defs>
-              <rect width="40" height="40" rx="9" fill="url(#nf-grad-login)"/>
-              <path d="M8 28 L8 12 L16 12 L24 24 L24 12 L32 12 L32 28 L24 28 L16 16 L16 28 Z" fill="white" opacity="0.95"/>
-              <circle cx="32" cy="28" r="4" fill="#22d3ee" opacity="0.9"/>
-            </svg>
-            <div class="nexusforge-text">
-              <span class="nf-name">NexusForge</span>
-              <span class="nf-tagline">Software &amp; Apps</span>
+          <div id="login-error" class="hidden mb-4" style="padding:12px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;font-size:13px;color:#dc2626;display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-circle-exclamation"></i><span id="login-error-msg"></span>
+          </div>
+
+          <div class="space-y-5">
+            <div>
+              <label class="form-label">Correo electrónico</label>
+              <div style="position:relative;">
+                <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;"><i class="fas fa-envelope text-sm"></i></span>
+                <input id="login-email" type="email" class="form-input" style="padding-left:38px;" placeholder="usuario@empresa.cl"
+                  onkeydown="if(event.key==='Enter')doLogin()">
+              </div>
+            </div>
+            <div>
+              <label class="form-label">Contraseña</label>
+              <div style="position:relative;">
+                <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;"><i class="fas fa-lock text-sm"></i></span>
+                <input id="login-pass" type="password" class="form-input" style="padding-left:38px;padding-right:42px;" placeholder="••••••••"
+                  onkeydown="if(event.key==='Enter')doLogin()">
+                <button type="button" onclick="togglePassVis()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;padding:4px;">
+                  <i class="fas fa-eye text-sm"></i>
+                </button>
+              </div>
+            </div>
+            <button onclick="doLogin()" id="login-btn" class="btn btn-primary w-full justify-center" style="padding:12px;font-size:15px;font-weight:700;border-radius:10px;margin-top:4px;">
+              <i class="fas fa-right-to-bracket"></i> Ingresar al Sistema
+            </button>
+          </div>
+
+          <!-- Demo credentials -->
+          <div style="margin-top:24px;padding:16px;background:#f8fafc;border:1px solid #edf0f5;border-radius:12px;">
+            <div style="font-size:11.5px;font-weight:700;color:#475569;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+              <i class="fas fa-circle-info" style="color:#94a3b8;"></i> Accesos de demostración
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              ${[
+                ['fa-crown','#f59e0b','Super Admin','raul.diaz@hse360.cl','HSE360admin!'],
+                ['fa-shield-halved','#3b82f6','Prevencionista','claudia.torres@hse360.cl','Prev2026!'],
+                ['fa-stethoscope','#16a34a','Médico','dr.morales@hse360.cl','Med2026!'],
+              ].map(([ic,cl,rol,em,pw]) => `
+                <button onclick="fillLogin('${em}','${pw}')" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:white;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:12px;transition:all 0.2s;text-align:left;" onmouseover="this.style.borderColor='#16a34a';this.style.background='#f0fdf4'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='white'">
+                  <span style="display:flex;align-items:center;gap:7px;color:#374151;font-weight:600;">
+                    <i class="fas ${ic}" style="color:${cl};"></i>${rol}
+                  </span>
+                  <span style="font-family:monospace;font-size:11px;color:#64748b;">${em}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Legal -->
+          <div style="margin-top:20px;text-align:center;font-size:11px;color:#94a3b8;">
+            © 2026 HSE 360 · Ley 19.628 Protección de Datos · Chile
+          </div>
+
+          <!-- NexusForge branding -->
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:center;gap:10px;">
+            <div class="nexusforge-badge">
+              ${nfIconSVG(32, true)}
+              <div class="nexusforge-text">
+                <span class="nf-name">NexusForge</span>
+                <span class="nf-tagline">Connecting Innovation with Power</span>
+              </div>
             </div>
           </div>
         </div>
@@ -344,18 +418,8 @@ function buildLayout() {
           <i class="fas fa-right-from-bracket"></i> Cerrar Sesión
         </button>
         <div class="text-center mt-2 text-xs" style="color:rgba(255,255,255,0.25)">v2.0 · HSE 360 · 2026</div>
-        <div class="nexusforge-sidebar-footer" onclick="navigate('reports')" title="NexusForge — Desarrollos y Arquitectura de Software & Apps">
-          <svg width="16" height="16" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="nf-grad-sb" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#818cf8"/>
-                <stop offset="100%" stop-color="#38bdf8"/>
-              </linearGradient>
-            </defs>
-            <rect width="40" height="40" rx="9" fill="url(#nf-grad-sb)"/>
-            <path d="M8 28 L8 12 L16 12 L24 24 L24 12 L32 12 L32 28 L24 28 L16 16 L16 28 Z" fill="white" opacity="0.95"/>
-            <circle cx="32" cy="28" r="4" fill="#22d3ee" opacity="0.9"/>
-          </svg>
+        <div class="nexusforge-sidebar-footer" onclick="navigate('reports')" title="NexusForge — Connecting Innovation with Power">
+          ${nfIconSVG(22, false)}
           <span class="nf-sb-text">NexusForge</span>
         </div>
       </div>
@@ -1272,18 +1336,8 @@ async function renderDashboard() {
     <!-- NexusForge mini brand footer -->
     <div class="mt-5 flex items-center justify-between px-1 pb-1">
       <div class="text-xs text-gray-400">HSE 360 v2.0 · Sistema de Gestión Integral de Seguridad y Salud · Chile 2026</div>
-      <div class="nexusforge-badge-mini" onclick="navigate('reports')" title="NexusForge — Desarrollos y Arquitectura de Software & Apps">
-        <svg width="18" height="18" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="nf-grad-dash" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#6366f1"/>
-              <stop offset="100%" stop-color="#0ea5e9"/>
-            </linearGradient>
-          </defs>
-          <rect width="40" height="40" rx="9" fill="url(#nf-grad-dash)"/>
-          <path d="M8 28 L8 12 L16 12 L24 24 L24 12 L32 12 L32 28 L24 28 L16 16 L16 28 Z" fill="white" opacity="0.95"/>
-          <circle cx="32" cy="28" r="4" fill="#22d3ee" opacity="0.9"/>
-        </svg>
+      <div class="nexusforge-badge-mini" onclick="navigate('reports')" title="NexusForge — Connecting Innovation with Power">
+        ${nfIconSVG(20, true)}
         <span class="nf-mini-text">Desarrollado por <strong>NexusForge</strong></span>
       </div>
     </div>
@@ -3335,20 +3389,10 @@ async function renderReports() {
       <div class="nf-banner-glow"></div>
       <div class="nf-banner-inner">
         <div class="nf-banner-left">
-          <svg width="52" height="52" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="nf-banner-svg">
-            <defs>
-              <linearGradient id="nf-grad-banner" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#6366f1"/>
-                <stop offset="100%" stop-color="#0ea5e9"/>
-              </linearGradient>
-            </defs>
-            <rect width="40" height="40" rx="9" fill="url(#nf-grad-banner)"/>
-            <path d="M8 28 L8 12 L16 12 L24 24 L24 12 L32 12 L32 28 L24 28 L16 16 L16 28 Z" fill="white" opacity="0.95"/>
-            <circle cx="32" cy="28" r="4" fill="#22d3ee" opacity="0.9"/>
-          </svg>
+          <div class="nf-banner-svg">${nfIconSVG(64, false)}</div>
           <div>
             <div class="nf-banner-title">NexusForge</div>
-            <div class="nf-banner-sub">Desarrollos y Arquitectura de Software &amp; Apps</div>
+            <div class="nf-banner-sub">Connecting Innovation with Power</div>
           </div>
         </div>
         <div class="nf-banner-right">
