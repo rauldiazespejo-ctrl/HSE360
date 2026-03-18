@@ -1,161 +1,203 @@
-# HSE 360 — Plataforma Integral de Seguridad, Salud y Medio Ambiente
-
-## Sistema Integral de Salud Ocupacional y Prevención de Riesgos
-
-Plataforma web SaaS para la gestión completa de salud ocupacional, cumplimiento de Protocolos MINSAL y prevención de riesgos laborales bajo la **Ley 16.744** y el **D.S. N°44** (vigente 01/02/2025).
+# HSE 360 Pro — Sistema Integral de Gestión HSE
+## SOLDESP S.A. · RUT 76.841.820-9 · N° Asociada 2000143137
 
 ---
 
-## 🚀 URL de Acceso (Desarrollo)
-
-**URL:** `https://3000-i2egfquicvepdt9e6ipkl-2e77fc33.sandbox.novita.ai`
-
----
-
-## ⚖️ Marco Normativo Actualizado — DS 44 (01/02/2025)
-
-| Cambio normativo | Antes (derogado) | Ahora (DS 44 vigente) |
-|---|---|---|
-| Información de riesgos al trabajador | ODI — Obligación de Informar (D.S. N°40 Art.21) | **IRL — Informe de Riesgos Laborales (DS 44 Art.15)** |
-| Instrumento psicosocial | ISTAS21 | **CEAL-SM/SUSESO** |
-| Firma del documento | Firma simple | **Firma ológrafa + huella digital** |
-| Marco de gestión | D.S. N°40 / D.S. N°54 (1969) | **D.S. N°44 (2024)** |
-
-> **IRL (Informe de Riesgos Laborales):** reemplaza a la ODI (D.S. N°40/1969) desde el 1 de febrero de 2025. Debe entregarse a cada trabajador con firma ológrafa y huella digital, informando los riesgos específicos de su puesto, las medidas preventivas y los EPP requeridos.
+## Descripción del Proyecto
+Plataforma integral de Seguridad, Salud y Medio Ambiente (HSE) para SOLDESP S.A., implementada con Hono + Cloudflare Workers/Pages. Cubre gestión de protocolos MINSAL, accidentabilidad, EPP, capacitaciones, MIPER y vigilancia de salud ocupacional.
 
 ---
 
-## ✅ Funcionalidades Implementadas (MVP)
+## URLs
+- **Desarrollo (Sandbox)**: https://3000-i2egfquicvepdt9e6ipkl-2e77fc33.sandbox.novita.ai
+- **Producción (Cloudflare)**: ⏳ Pendiente configuración API key Cloudflare (ver sección Deploy)
+- **Referencia Netlify**: https://hsec360-pro-soldesp.netlify.app/
 
-### 🏠 Dashboard Ejecutivo
-- KPIs en tiempo real: Tasa de accidentabilidad, siniestralidad, protocolos, exámenes, EPP
-- Cobertura IRL (DS 44) en KPI de capacitaciones
-- Gráficos interactivos: Accidentabilidad mensual comparativa y cumplimiento de protocolos
-- Alertas prioritarias en pantalla principal
+---
 
-### 👥 Gestión de Trabajadores
-- Ficha integral con datos personales, cargo, área, mutualidad
-- Búsqueda y filtrado por nombre, RUT, área, mutualidad
-- Vista detallada con historial de exámenes
-- Indicadores de protocolos activos y exámenes pendientes
+## Funcionalidades Implementadas
 
-### 📋 Protocolos MINSAL — 7 protocolos — DS 44
+### ✅ Dashboard
+- Datos reales certificados por Mutualidad (Folio 0005153838)
+- **3 períodos históricos SOLDESP S.A.:**
+  - 2023 (Feb/23–Feb/24): TF=0.56, TG=7.82, TS=48 — 1 accidente, 286 días perdidos
+  - 2024 (Feb/24–Feb/25): TF=0.50, TG=7.51, TS=2 — 1 accidente, 15 días perdidos
+  - 2025 (Feb/25–Feb/26): TF=0.00, TG=0.00, TS=0 — **0 accidentes, 0 días perdidos**
+- Banner con cotización total: 0,93%
+- Gráfico de tasas históricas certificadas (frecuencia, gravedad, siniestralidad)
+- Superadmin puede editar KPIs, períodos históricos y cumplimiento de protocolos
 
-| Protocolo | Riesgo | Norma principal | IRL requerido |
-|-----------|--------|-----------------|---------------|
-| PREXOR | Ruido ocupacional ≥ 82 dB(A) | DS 594 Art.74-83 | Sí, Art.15 DS 44 |
-| PLANESI | Polvo de sílice | DS 594 Art.61-67 | Sí, Art.15 DS 44 |
-| TMERT | Trastornos músculo-esqueléticos | Circ. MINSAL 3E/170 | Sí, Art.15 DS 44 |
-| PSICOSOCIAL | Riesgos psicosociales (CEAL-SM/SUSESO) | Circ. MINSAL 3E/187 | Sí, Art.15 DS 44 |
-| UV | Radiación ultravioleta solar | Ley 20.096 · DS 594 | Sí, Art.15 DS 44 |
-| MMC | Manejo manual de cargas | DS 63/2005 MINTRAB | Sí, Art.15 DS 44 |
-| VOZ | Trastornos de voz ocupacionales | Circ. MINSAL 3E/186 | Sí, Art.15 DS 44 |
+### ✅ Protocolos MINSAL (8 protocolos — sin VOZ)
+1. **PREXOR** — Exposición Ocupacional al Ruido (DS 594, DS 44/2025)
+2. **PLANESI** — Plan Nacional de Erradicación de Silicosis
+3. **TMERT** — Trastornos Músculo-Esqueléticos (MINSAL)
+4. **PSICOSOCIAL** — Riesgos Psicosociales CEAL-SM
+5. **UV** — Radiación UV de Origen Solar
+6. **MMC** — Manejo Manual de Cargas (Ley 20.949)
+7. **HIC** — Hipobaria Intermitente Crónica (Guía MINSAL 2013, DS 594, Circ. SUSESO 3838/2024, DS 44/2025)
+8. **HUMOS** — Metales, Metaloides y Humos de Soldadura (Res. Exenta N°606/2023, DS 594 Art.59-65, NCh 3358)
 
-#### Funcionalidades por protocolo:
-- **Tarjetas** con % cumplimiento, estado y acceso rápido
-- **Carta Gantt interactiva DS 44**: cronograma anual con mes actual destacado, estados por actividad (Realizado / En curso / Atrasado / Pendiente), filtro por protocolo, exportar Excel/PDF
-- **Paso a Paso DS 44**: guía por fases con evidencias, marco legal, selector de cumplimiento por ítem y fecha
-- **IRL modal**: formulario completo con firma ológrafa + huella digital conforme DS 44 Art.15
-- Vista de detalle con mini Carta Gantt integrada
+### ✅ Gestión de Trabajadores
+- CRUD completo (crear, editar, eliminar, reactivar)
+- Filtros por área, estado, protocolo, mutualidad
+- Ficha integral con exámenes y protocolos activos
+- Superadmin: edición completa de todos los campos
 
-### 📚 Capacitaciones — IRL (DS 44)
-- **IRL (Informe de Riesgos Laborales)** — reemplaza ODI (D.S. N°40/1969) desde 01/02/2025
-- Registro de sesiones IRL con cobertura por trabajadores
-- Tipo "IRL (DS 44)" en el formulario de nueva capacitación
-- KPI de cobertura IRL en dashboard y reportes
-- Registro por tipo de protocolo con vigencia y estado
+### ✅ EPP — Equipos de Protección Personal
+- Inventario con estado de stock (ok/bajo/crítico)
+- Registro de entregas con firma digital
+- POST /epp para crear nuevos ítems (antes faltaba)
+- GET /epp/:id para obtener ítem específico
+- Superadmin: edición real de stock, norma técnica, vencimiento de lote
 
-### ⚠️ DIAT / DIEP
-- Registro de accidentes del trabajo y enfermedades profesionales
-- KPIs: Tasa accidentabilidad, siniestralidad, mortalidad
-- Análisis de causas y acciones correctivas
+### ✅ Capacitaciones IRL (DS 44 Art. 15)
+- 10 capacitaciones registradas incluyendo HIC y HUMOS
+- showEditCapModal: edición completa con llamada API real
+- saveNewCap: registro con llamada API real (antes solo toast)
+- Tipos disponibles: IRL, PREXOR, PLANESI, TMERT, PSICOSOCIAL, UV, MMC, HIC, HUMOS, Emergencias, EPP, Primeros Auxilios, Altura, Manejo Defensivo, Inducción
 
-### 🦺 Control de EPP
-- Inventario con stock actual vs. mínimo, alertas críticas
-- Registro de entregas con control de firma digital
-- Normas técnicas asociadas
+### ✅ Accidentes / DIAT / DIEP
+- Registro DIAT y DIEP (Ley 16.744)
+- saveAccident: registro con llamada API real (antes solo toast)
+- showEditAccidentModal: edición completa para superadmin
+- Campos: tipo, trabajador, gravedad, días perdidos, mutualidad, descripción, medidas correctivas
 
-### 📊 Matriz MIPER
-- Identificación de peligros por área y puesto
+### ✅ MIPER — Matriz de Identificación de Peligros
+- CRUD completo (crear, editar, eliminar)
 - Niveles: Trivial, Tolerable, Moderado, Importante, Intolerable
-- Vinculación con protocolos MINSAL
+- Vinculado a protocolos HIC y HUMOS (eliminado VOZ)
 
-### 📈 Reportería
-- Informes: Accidentabilidad, Protocolos MINSAL, Exámenes, EPP, IRL (DS 44), Ficha Individual
-- KPI cobertura IRL en resumen ejecutivo
-- Base legal actualizada: DS 44 Art.15 en lugar de DS 40 Art.21
+### ✅ Alertas del Sistema
+- Filtros por prioridad (crítica, alta, media, baja)
+- showEditAlertModal: edición completa para superadmin
+- Botón editar inline visible solo para superadmin
 
----
+### ✅ Centros de Trabajo
+- CRUD completo
+- Protocolos activos actualizados (HIC en lugar de VOZ)
 
-## 🗺️ Rutas API
+### ✅ Usuarios
+- 6 roles: superadmin, prevencionista, médico, RRHH, trabajador
+- Crear, editar, restablecer contraseña, desactivar
+- Creación de nuevo superadmin bloqueada (solo 1 permitido)
 
-| Endpoint | Descripción |
-|----------|-------------|
-| `GET /api/workers` | Lista trabajadores con filtros |
-| `GET /api/workers/:id` | Ficha completa trabajador |
-| `GET /api/protocols` | Lista todos los protocolos |
-| `GET /api/protocols/:id` | Detalle protocolo con evaluaciones |
-| `GET /api/accidents` | DIAT/DIEP registrados |
-| `GET /api/accidents/stats` | Estadísticas de accidentabilidad |
-| `GET /api/epp` | Inventario EPP |
-| `GET /api/epp/entregas` | Registro de entregas EPP |
-| `GET /api/capacitations` | Lista capacitaciones (tipo IRL, DS 44) |
-| `GET /api/capacitations/stats` | Stats con `cobertura_irl_pct` |
-| `GET /api/dashboard/kpis` | KPIs ejecutivos (incluye `cobertura_irl`) |
-| `GET /api/dashboard/chart-accidentes` | Datos gráfico accidentes |
-| `GET /api/dashboard/chart-protocolos` | Datos gráfico protocolos |
-| `GET /api/alerts` | Alertas activas |
+### ✅ Reportes
+- 8 tipos de informes (PDF/Excel/Vista previa)
+- Resumen ejecutivo con KPIs en tiempo real
 
 ---
 
-## 🏗️ Arquitectura y Stack
+## SuperAdministrador — Acceso Completo (Sin Demo)
 
-- **Backend**: Hono 4.x + TypeScript (Cloudflare Workers)
-- **Frontend**: SPA Vanilla JS + TailwindCSS CDN + Chart.js
-- **Build**: Vite 6 + @hono/vite-cloudflare-pages
-- **Deploy**: Cloudflare Pages
-- **Auth**: JWT simulado (roles: SuperAdmin, Prevencionista, Médico, RRHH, Trabajador)
+**Credenciales:**
+- Email: `raul.diaz@hse360.cl`
+- Password: `HSE360admin!`
 
----
-
-## 📅 Plan de Desarrollo
-
-### Fase 1 — MVP ← ACTUAL ✅
-- [x] Dashboard ejecutivo con KPIs (DS 44 cobertura IRL)
-- [x] Gestión de trabajadores con ficha integral
-- [x] 7 Protocolos MINSAL con Carta Gantt DS 44 y Paso a Paso
-- [x] IRL (DS 44 Art.15) — reemplaza ODI — en todos los módulos
-- [x] CEAL-SM/SUSESO (reemplaza ISTAS21) en módulo psicosocial
-- [x] Registro DIAT/DIEP
-- [x] Control EPP con firma
-- [x] Capacitaciones IRL con cobertura
-- [x] Alertas automáticas
-- [x] Matriz MIPER
-
-### Fase 2
-- [ ] Firma digital real de IRL (biométrica + ológrafa)
-- [ ] Módulo CEAL-SM encuestas online
-- [ ] Importación masiva Excel (Carta Gantt y Paso a Paso)
-- [ ] App móvil (React Native)
-- [ ] Notificaciones email/SMS automatizadas
-
-### Fase 3 — SaaS
-- [ ] Multiempresa
-- [ ] Integración directa OAL (ACHS, IST, Mutual, ISL)
-- [ ] BI y analítica avanzada
-- [ ] Cumplimiento Ley 19.628
+**Permisos de edición activos:**
+| Módulo | Acciones disponibles |
+|--------|---------------------|
+| Dashboard | Editar KPIs, períodos históricos, cumplimiento protocolos |
+| Trabajadores | Crear, editar, eliminar, reactivar |
+| EPP | Crear ítems, editar stock/normas, registrar entregas |
+| Capacitaciones | Crear, editar completo (todos los campos) |
+| Accidentes | Registrar DIAT/DIEP, editar completo |
+| MIPER | Crear peligros, editar, eliminar |
+| Alertas | Editar título, descripción, prioridad, estado |
+| Protocolos | Editar evaluaciones, registrar actividades Gantt |
+| Centros | Crear, editar, desactivar centros de trabajo |
+| Usuarios | CRUD completo de usuarios y roles |
 
 ---
 
-## ⚖️ Cumplimiento Legal
-- **D.S. N°44** (2024): Marco de prevención de riesgos — vigente 01/02/2025
-- **Ley 16.744**: Seguro Social contra Accidentes del Trabajo y Enfermedades Profesionales
-- **DS 594**: Condiciones sanitarias y ambientales básicas
-- **Ley 20.949**: Manejo manual de cargas
-- **Ley 20.096**: Radiación UV
-- **Ley 21.645**: Acoso laboral y sexual (módulo psicosocial)
+## Datos de Accidentabilidad — Certificado Mutualidad
+
+**Empresa:** SOLDESP S.A.  
+**RUT:** 76.841.820-9  
+**N° Asociada:** 2000143137  
+**Folio Certificado:** 0005153838  
+**Cotización Total:** 0,93% (básica 0,93% + adicional 0,00%)
+
+| Período | Acc. | Días Perdidos | Trab. Prom. | HH | TF | TG | TS |
+|---------|------|---------------|-------------|-----|-----|-----|-----|
+| Feb/23–Feb/24 | 1 | 286 (14 acc + 272 EP) | 589 | 1.791.153 | 0,56 | 7,82 | 48 |
+| Feb/24–Feb/25 | 1 | 15 | 712 | 1.997.352 | 0,50 | 7,51 | 2 |
+| Feb/25–Feb/26 | 0 | 0 | 551 | 1.338.309 | 0,00 | 0,00 | 0 |
 
 ---
 
-## Última Actualización
-Marzo 2026 · Stack: Hono 4.x + TypeScript + TailwindCSS · Estado: ✅ MVP DS 44 Actualizado
+## Arquitectura
+
+```
+webapp/
+├── src/
+│   ├── index.tsx              # Hono app principal + routing
+│   └── routes/
+│       ├── auth.ts            # Login / logout / sesión
+│       ├── dashboard.ts       # KPIs, accidentabilidad SOLDESP (datos reales)
+│       ├── workers.ts         # Trabajadores + exámenes
+│       ├── protocols.ts       # 8 protocolos MINSAL
+│       ├── capacitations.ts   # Capacitaciones IRL
+│       ├── accidents.ts       # DIAT / DIEP
+│       ├── epp.ts             # Inventario + entregas EPP
+│       ├── miper.ts           # Matriz de peligros
+│       ├── alerts.ts          # Sistema de alertas
+│       ├── centros.ts         # Centros de trabajo
+│       └── users.ts           # Gestión de usuarios
+├── public/static/
+│   ├── app.js                 # SPA frontend completo
+│   └── styles.css             # Estilos HSE 360
+├── dist/                      # Build Cloudflare Pages
+└── wrangler.jsonc             # Configuración Cloudflare
+```
+
+---
+
+## Stack Tecnológico
+- **Backend:** Hono Framework + TypeScript → Cloudflare Workers
+- **Frontend:** Vanilla JS SPA + Tailwind CSS (CDN) + Chart.js + Axios
+- **Deploy:** Cloudflare Pages (edge global)
+- **Íconos:** Font Awesome 6
+- **Base Legal:** Ley 16.744, DS 594, DS 44/2025, DS 109, Res. 606/2023 MINSAL
+
+---
+
+## Deploy a Producción
+
+### Pre-requisitos
+1. Configurar API key Cloudflare en el tab **Deploy** del panel lateral
+2. Ejecutar: `setup_cloudflare_api_key`
+3. Verificar: `npx wrangler whoami`
+
+### Comandos
+```bash
+# Build
+npm run build
+
+# Crear proyecto (primera vez)
+npx wrangler pages project create hse360-pro-soldesp --production-branch main
+
+# Deploy
+npx wrangler pages deploy dist --project-name hse360-pro-soldesp
+```
+
+---
+
+## Versión y Cambios Recientes
+
+### v2.1.0 (2026-03-18)
+- ✅ Eliminado protocolo VOZ de todos los módulos
+- ✅ Incorporado HIC (Hipobaria Intermitente Crónica) con documentación completa
+- ✅ Incorporado HUMOS (Metales y Humos de Soldadura) con documentación completa
+- ✅ Dashboard actualizado con datos reales certificados SOLDESP (Folio 0005153838)
+- ✅ SuperAdmin: showEditCapModal funcional con API real
+- ✅ SuperAdmin: saveNewCap/saveAccident/saveAddEPP con llamadas API reales
+- ✅ SuperAdmin: showEditAccidentModal (edición completa accidentes)
+- ✅ SuperAdmin: showEditAlertModal (edición completa alertas)
+- ✅ SuperAdmin: saveEditEPP con API real + POST /epp para crear ítems
+- ✅ SuperAdmin: botón "Editar %" en gráfico de cumplimiento de protocolos
+- ✅ Contadores actualizados a /8 protocolos
+
+---
+
+*Desarrollado por NexusForge · Connecting Innovation with Power*  
+*HSE 360 v2.1 · Sistema de Gestión Integral · Chile 2026*
