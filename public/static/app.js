@@ -3768,12 +3768,20 @@ async function renderProtocols() {
 
   // Construir mapa de cumplimiento desde API o defaults
   const cumplMap = {};
-  apiData.forEach(p => { if(p.id) cumplMap[p.id] = p.cumplimiento_pct || 0; });
+  apiData.forEach(p => { 
+    if(p.id) {
+      // Primero intenta cumplimiento_pct directo (ya expuesto por la API), luego estadisticas
+      cumplMap[p.id] = p.cumplimiento_pct ?? p.estadisticas?.cumplimiento_pct ?? 0;
+    }
+  });
   const defaults = { PREXOR:72, PLANESI:55, TMERT:88, PSICOSOCIAL:65, UV:91, MMC:80, HIC:60, HUMOS:45 };
 
   const protIds = Object.keys(PROTOCOL_META);
   const cumplimiento = {};
   protIds.forEach(id => { cumplimiento[id] = cumplMap[id] ?? defaults[id]; });
+
+  // Guardar en caché global para que otras vistas (Paso a Paso, Gantt) usen valores actualizados
+  window._protCumpl = cumplimiento;
 
   // ── KPI global ──
   const totalActivos = protIds.filter(id=>id!=='').length;
@@ -4128,7 +4136,8 @@ function renderPasoAPasoView() {
           </div>
           ${protIds.map(pid => {
             const p = PROTOCOL_META[pid];
-            const pct = ({PREXOR:72,PLANESI:55,TMERT:88,PSICOSOCIAL:65,UV:91,MMC:80,HIC:60,HUMOS:45})[pid]||0;
+            const defaults2 = {PREXOR:72,PLANESI:55,TMERT:88,PSICOSOCIAL:65,UV:91,MMC:80,HIC:60,HUMOS:45};
+            const pct = (window._protCumpl && window._protCumpl[pid] !== undefined) ? window._protCumpl[pid] : (defaults2[pid]||0);
             const pc = pct>=80?'#059669':pct>=60?'#d97706':'#dc2626';
             return `
               <button id="paso-sel-${pid}" onclick="showPasoProtocol('${pid}')"
@@ -4342,7 +4351,7 @@ function renderPasoContent(pid) {
 
     <!-- Acciones -->
     <div class="flex flex-wrap gap-3 mt-2 mb-6">
-      <button class="btn btn-primary text-sm" onclick="showToast('Avance de ${pid} guardado exitosamente','success')">
+      <button class="btn btn-primary text-sm" onclick="guardarAvanceProtocolo('${pid}')">
         <i class="fas fa-save mr-1"></i>Guardar Avance
       </button>
       <button class="btn btn-secondary text-sm" onclick="showToast('Generando informe PDF de ${pid}…','info')">
@@ -4364,6 +4373,88 @@ function toggleFase(id) {
   el.classList.toggle('hidden');
   const chev = document.getElementById(id.replace('fase-','chevron-'));
   if(chev) chev.style.transform = el.classList.contains('hidden') ? 'rotate(-90deg)' : '';
+}
+
+// ──────────────────────────────────────────────────────────────────
+// GUARDAR AVANCE DE PROTOCOLO (fases + % calculado automáticamente)
+// ──────────────────────────────────────────────────────────────────
+async function guardarAvanceProtocolo(pid) {
+  // 1. Recopilar todos los selects de cumplimiento de la página
+  const selects = document.querySelectorAll(`select[data-fase][data-item]`);
+  const fechaInputs = document.querySelectorAll(`input[type="date"][data-fase][data-item]`);
+
+  // Si no tienen atributos data, usamos una estrategia más genérica:
+  // Buscar todas las tablas de fases y sus selects
+  const allSelects = document.querySelectorAll('.fase-table select, table select');
+  const allDates   = document.querySelectorAll('.fase-table input[type="date"], table input[type="date"]');
+
+  // Calcular cumplimiento_pct basado en los selects actuales
+  let total = 0, cumplidos = 0;
+  allSelects.forEach(sel => {
+    total++;
+    const v = sel.value;
+    if (v === 'Si') cumplidos++;
+    else if (v === 'En proceso') cumplidos += 0.5;
+  });
+
+  const pctCalculado = total > 0 ? Math.round((cumplidos / total) * 100) : null;
+
+  // 2. Confirmar con el usuario y permitir ajuste manual
+  const pctActual = pctCalculado !== null ? pctCalculado : 0;
+
+  showModal(`Guardar Avance — Protocolo ${pid}`, `
+    <div class="p-3 rounded-lg mb-4 flex items-start gap-2" style="background:#ecfdf5;border:1px solid #a7f3d0">
+      <i class="fas fa-calculator text-green-600 mt-0.5"></i>
+      <div>
+        <div class="text-sm font-bold text-green-800">Porcentaje calculado automáticamente</div>
+        <div class="text-xs text-green-700 mt-0.5">
+          Basado en ${total} ítems evaluados: ${Math.round(cumplidos)} completados (incluyendo "En proceso" como 50%).
+        </div>
+      </div>
+    </div>
+    <div class="mb-4">
+      <label class="form-label text-sm font-bold">% de Cumplimiento a guardar</label>
+      <div class="flex items-center gap-3 mt-1">
+        <input type="range" id="avance-range-${pid}" min="0" max="100" value="${pctActual}"
+          class="flex-1" oninput="document.getElementById('avance-num-${pid}').value=this.value;document.getElementById('avance-bar-${pid}').style.width=this.value+'%'">
+        <input type="number" id="avance-num-${pid}" min="0" max="100" value="${pctActual}"
+          class="form-input w-20 text-center text-lg font-black"
+          oninput="document.getElementById('avance-range-${pid}').value=this.value;document.getElementById('avance-bar-${pid}').style.width=this.value+'%'">
+        <span class="text-gray-500 font-semibold">%</span>
+      </div>
+      <div class="progress-bar mt-2">
+        <div id="avance-bar-${pid}" class="progress-fill" style="width:${pctActual}%;background:${pctActual>=80?'#059669':pctActual>=60?'#d97706':'#dc2626'}"></div>
+      </div>
+    </div>
+    <div class="text-xs text-gray-500">
+      <i class="fas fa-info-circle mr-1"></i>
+      Puedes ajustar manualmente el porcentaje. Se reflejará en el dashboard, tarjetas y carta Gantt.
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="confirmarGuardarAvance('${pid}')">
+      <i class="fas fa-save mr-1"></i>Guardar
+    </button>
+  `);
+}
+
+async function confirmarGuardarAvance(pid) {
+  const numInput = document.getElementById(`avance-num-${pid}`);
+  const pct = parseInt(numInput?.value ?? 0) || 0;
+  try {
+    const res = await API.put(`/protocols/${pid}/cumplimiento`, { cumplimiento_pct: pct });
+    if (res.data?.success) {
+      showToast(`✅ Avance de ${pid} guardado: ${pct}%`, 'success');
+      closeModal();
+      // Recargar la vista actual
+      setTimeout(() => renderProtocolDetail(pid), 400);
+    } else {
+      showToast('Error al guardar avance', 'error');
+    }
+  } catch(e) {
+    console.error('confirmarGuardarAvance error:', e);
+    showToast('Error de conexión al guardar avance', 'error');
+  }
 }
 
 function showIRLModal(pid) {
@@ -4593,6 +4684,9 @@ function renderHumosDetail(p, proto, pct, content) {
             </button>
             <button class="btn btn-secondary justify-start text-xs" onclick="showHumosMuestreoModal()">
               <i class="fas fa-vials mr-1"></i>Registrar Muestreo Ambiental
+            </button>
+            <button class="btn btn-secondary justify-start text-xs" onclick="guardarAvanceProtocolo('HUMOS')" style="border-color:#78350f;color:#78350f">
+              <i class="fas fa-save mr-1"></i>Guardar Avance / % Cumplimiento
             </button>
             <button class="btn btn-secondary justify-start text-xs" onclick="navigate('epp')">
               <i class="fas fa-hard-hat mr-1"></i>Gestionar EPR / Respiradores
@@ -5036,7 +5130,9 @@ async function renderProtocolDetail(id) {
   const content = document.getElementById('page-content');
   const res = await API.get('/protocols/' + id).catch(()=>({data:{data:{}}}));
   const proto = res.data?.data || {};
-  const pct = proto.cumplimiento_pct || ({PREXOR:72,PLANESI:55,TMERT:88,PSICOSOCIAL:65,UV:91,MMC:80,HIC:60,HUMOS:45}[id] || 0);
+  // Leer pct desde estadisticas.cumplimiento_pct o desde el campo raíz (si ya fue actualizado)
+  const defaults = {PREXOR:72,PLANESI:55,TMERT:88,PSICOSOCIAL:65,UV:91,MMC:80,HIC:60,HUMOS:45};
+  const pct = proto.estadisticas?.cumplimiento_pct ?? proto.cumplimiento_pct ?? defaults[id] ?? 0;
 
   // ── Vista especializada para HUMOS ──────────────────────────────
   if (id === 'HUMOS') { renderHumosDetail(p, proto, pct, content); return; }
@@ -5590,22 +5686,44 @@ async function saveEditEppItem(id) {
 }
 
 // ── Editar Protocolo (Cumplimiento %) ────────────────────────────
-function showEditProtocolCumplModal() {
+async function showEditProtocolCumplModal() {
   if (!isSuperAdmin()) { showToast('Solo superadmin puede editar cumplimientos', 'error'); return; }
+
+  // Cargar valores actuales desde la API
+  let currentVals = { PREXOR:72, PLANESI:55, TMERT:88, PSICOSOCIAL:65, UV:91, MMC:80, HIC:60, HUMOS:45 };
+  try {
+    const res = await API.get('/protocols');
+    const apiData = res.data?.data || [];
+    apiData.forEach(p => {
+      if (p.id) currentVals[p.id] = p.cumplimiento_pct ?? p.estadisticas?.cumplimiento_pct ?? currentVals[p.id] ?? 0;
+    });
+  } catch(e) {}
+
+  const protocols = ['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'];
+  const labels = { PREXOR:'Ruido (PREXOR)', PLANESI:'Sílice (PLANESI)', TMERT:'Ergonomía (TMERT)', PSICOSOCIAL:'Psicosocial', UV:'Radiación UV', MMC:'Manual Cargas', HIC:'Hipobaria (HIC)', HUMOS:'Humos Metálicos' };
+
   showModal('Editar Cumplimiento Protocolos — Dashboard', `
     <div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex gap-2">
       <i class="fas fa-crown text-amber-500 mt-0.5"></i>
-      <span><strong>Superadmin:</strong> Actualiza el % de cumplimiento de cada protocolo MINSAL.</span>
+      <span><strong>Superadmin:</strong> Actualiza el % de cumplimiento de cada protocolo MINSAL. Los cambios se guardan en el servidor.</span>
     </div>
     <div class="grid grid-cols-2 gap-3">
-      ${['PREXOR','PLANESI','TMERT','PSICOSOCIAL','UV','MMC','HIC','HUMOS'].map((p,i)=>`
+      ${protocols.map(p => `
         <div>
-          <label class="form-label">${p}</label>
-          <input id="epc-${p}" class="form-input" type="number" min="0" max="100" placeholder="%" value="">
+          <label class="form-label text-xs">${labels[p]}</label>
+          <div class="flex items-center gap-2">
+            <input id="epc-${p}" class="form-input" type="number" min="0" max="100"
+              value="${currentVals[p] ?? ''}"
+              oninput="document.getElementById('epc-bar-${p}').style.width=this.value+'%';document.getElementById('epc-pct-${p}').textContent=this.value+'%'">
+            <span id="epc-pct-${p}" class="text-xs font-bold w-8 flex-shrink-0" style="color:${(currentVals[p]??0)>=80?'#059669':(currentVals[p]??0)>=60?'#d97706':'#dc2626'}">${currentVals[p] ?? 0}%</span>
+          </div>
+          <div class="progress-bar mt-1" style="height:4px">
+            <div id="epc-bar-${p}" class="progress-fill" style="width:${currentVals[p] ?? 0}%;height:4px;background:${(currentVals[p]??0)>=80?'#059669':(currentVals[p]??0)>=60?'#d97706':'#dc2626'}"></div>
+          </div>
         </div>
       `).join('')}
     </div>
-    <div class="text-xs text-gray-400 mt-2">Deja en blanco para mantener el valor actual.</div>
+    <div class="text-xs text-gray-400 mt-3"><i class="fas fa-info-circle mr-1"></i>Los valores se guardan en el servidor y se reflejan en todas las vistas.</div>
   `, `
     <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
     <button class="btn btn-primary" onclick="saveEditProtocolCumpl()"><i class="fas fa-save mr-1"></i>Guardar</button>
@@ -5618,12 +5736,28 @@ async function saveEditProtocolCumpl() {
   const updates = [];
   protocols.forEach(p => {
     const val = document.getElementById(`epc-${p}`)?.value;
-    if (val !== '') updates.push({ protocolo: p, cumplimiento: parseInt(val)||0 });
+    if (val !== '' && val !== null && val !== undefined) {
+      updates.push({ id: p, cumplimiento_pct: parseInt(val) || 0 });
+    }
   });
-  // Por ahora guardar en el override del dashboard
-  showToast(`Cumplimiento de ${updates.length} protocolos actualizado`, 'success');
-  closeModal();
-  setTimeout(() => renderDashboard(), 600);
+  if (updates.length === 0) { showToast('No hay cambios para guardar', 'warning'); return; }
+  try {
+    // Llamar al endpoint batch para actualizar todos a la vez
+    const res = await API.put('/protocols/batch/cumplimiento', { updates });
+    if (res.data?.success) {
+      showToast(`✅ Cumplimiento de ${updates.length} protocolos guardado correctamente`, 'success');
+      closeModal();
+      setTimeout(() => {
+        if (App.currentView === 'protocols') renderProtocols();
+        else renderDashboard();
+      }, 400);
+    } else {
+      showToast('Error al guardar cumplimientos', 'error');
+    }
+  } catch(e) {
+    console.error('saveEditProtocolCumpl error:', e);
+    showToast('Error de conexión al guardar', 'error');
+  }
 }
 
 // ================================================================

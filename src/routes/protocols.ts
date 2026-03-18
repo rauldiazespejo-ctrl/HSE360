@@ -562,12 +562,32 @@ export const protocolsDB: Record<string, any> = {
 
 // GET /api/protocols
 app.get('/', (c) => {
-  const summary = Object.values(protocolsDB).map(p => ({
+  const summary = Object.values(protocolsDB).map((p: any) => ({
     id: p.id, nombre: p.nombre, color: p.color, icon: p.icon,
     norma_tecnica: p.norma_tecnica, base_legal: p.base_legal,
+    cumplimiento_pct: p.estadisticas?.cumplimiento_pct ?? 0,
     estadisticas: p.estadisticas
   }))
   return c.json({ success: true, data: summary })
+})
+
+// PUT /api/protocols/batch/cumplimiento — Actualiza múltiples protocolos a la vez
+// IMPORTANTE: este endpoint DEBE ir ANTES de /:id para que Hono no lo capture como parámetro
+app.put('/batch/cumplimiento', async (c) => {
+  const body = await c.req.json()
+  // body.updates = [{ id: 'PREXOR', cumplimiento_pct: 80 }, ...]
+  const updates = body.updates || []
+  const results: any[] = []
+  updates.forEach((u: any) => {
+    const id = (u.id || '').toUpperCase()
+    const p = (protocolsDB as any)[id]
+    if (p) {
+      p.estadisticas = p.estadisticas || {}
+      p.estadisticas.cumplimiento_pct = parseInt(u.cumplimiento_pct) || 0
+      results.push({ id, cumplimiento_pct: p.estadisticas.cumplimiento_pct })
+    }
+  })
+  return c.json({ success: true, data: results, message: `${results.length} protocolos actualizados` })
 })
 
 // GET /api/protocols/:id
@@ -576,6 +596,39 @@ app.get('/:id', (c) => {
   const p = protocolsDB[id]
   if (!p) return c.json({ success: false, error: 'Protocolo no encontrado' }, 404)
   return c.json({ success: true, data: p })
+})
+
+// PUT /api/protocols/:id/cumplimiento  — Actualiza % de cumplimiento y fases
+app.put('/:id/cumplimiento', async (c) => {
+  const id = c.req.param('id').toUpperCase()
+  const p = (protocolsDB as any)[id]
+  if (!p) return c.json({ success: false, error: 'Protocolo no encontrado' }, 404)
+  const body = await c.req.json()
+  // Actualizar cumplimiento_pct en estadísticas
+  if (body.cumplimiento_pct !== undefined) {
+    p.estadisticas = p.estadisticas || {}
+    p.estadisticas.cumplimiento_pct = parseInt(body.cumplimiento_pct) || 0
+  }
+  // Actualizar fases si se envían
+  if (body.fases && Array.isArray(body.fases)) {
+    body.fases.forEach((faseUpdate: any) => {
+      const fase = p.fases?.find((f: any) => f.nombre === faseUpdate.nombre || f.fase === faseUpdate.fase)
+      if (fase && faseUpdate.items) {
+        faseUpdate.items.forEach((itemUpdate: any) => {
+          const item = fase.items?.find((i: any) => i.id === itemUpdate.id)
+          if (item) {
+            if (itemUpdate.cumplimiento) item.cumplimiento = itemUpdate.cumplimiento
+            if (itemUpdate.fecha) item.fecha = itemUpdate.fecha
+          }
+        })
+      }
+    })
+  }
+  return c.json({ 
+    success: true, 
+    data: { id, cumplimiento_pct: p.estadisticas.cumplimiento_pct },
+    message: `Cumplimiento de ${id} actualizado a ${p.estadisticas.cumplimiento_pct}%`
+  })
 })
 
 // PUT /api/protocols/:id/evaluaciones/:evalId
