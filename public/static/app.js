@@ -1,5 +1,5 @@
 // ================================================================
-// HSE 360 — Plataforma Integral de Seguridad, Salud y Medio Ambiente
+// HSE 360 · Módulo de Salud Ocupacional
 // Sistema de Gestión HSE — Chile 2026
 // Ley 16.744 · DS 594 · Protocolos MINSAL · Ley 19.628
 // ================================================================
@@ -115,11 +115,11 @@ function renderLogin() {
             <div style="width:40px;height:40px;background:linear-gradient(135deg,#0d1b5e,#1a237e);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:white;box-shadow:0 4px 14px rgba(26,35,126,0.35);">360</div>
             <div style="text-align:left;">
               <div style="font-size:18px;font-weight:800;color:white;letter-spacing:-0.3px;">HSE 360</div>
-              <div style="font-size:10px;color:rgba(0,180,216,0.8);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Plataforma Integral HSE · Chile</div>
+              <div style="font-size:10px;color:rgba(0,180,216,0.8);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Módulo de Salud Ocupacional · Chile</div>
             </div>
           </div>
           <p style="font-size:12px;color:rgba(255,255,255,0.45);line-height:1.7;max-width:280px;margin:0 auto;">
-            Sistema profesional de gestión de Seguridad, Salud Ocupacional y Medio Ambiente conforme a Ley 16.744 · DS 594 · Protocolos MINSAL
+            HSE 360 · Módulo de Salud Ocupacional · Gestión conforme a Ley 16.744 · DS 594 · Protocolos MINSAL
           </p>
 
           <!-- Features -->
@@ -150,7 +150,7 @@ function renderLogin() {
               <span style="font-size:18px;font-weight:900;color:white;letter-spacing:-0.5px;">360</span>
             </div>
             <h1 style="font-size:24px;font-weight:800;color:#0f172a;letter-spacing:-0.4px;margin-bottom:4px;">Bienvenido/a</h1>
-            <p style="font-size:13.5px;color:#64748b;">Ingresa tus credenciales para acceder a HSE 360</p>
+            <p style="font-size:13.5px;color:#64748b;">Ingresa tus credenciales para acceder al Módulo de Salud Ocupacional</p>
           </div>
 
           <div id="login-error" class="hidden mb-4" style="padding:12px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;font-size:13px;color:#dc2626;display:flex;align-items:center;gap:8px;">
@@ -190,7 +190,7 @@ function renderLogin() {
 
           <!-- Legal -->
           <div style="margin-top:20px;text-align:center;font-size:11px;color:#94a3b8;">
-            © 2026 HSE 360 · Ley 19.628 Protección de Datos · Chile
+            © 2026 HSE 360 · Módulo de Salud Ocupacional · Ley 19.628 · Chile
           </div>
 
           <!-- NexusForge branding -->
@@ -333,7 +333,7 @@ function buildLayout() {
           <div class="hse360-logo-box">360</div>
           <div>
             <div class="hse360-title">HSE 360</div>
-            <div class="hse360-subtitle">Gestión HSE · Chile 2026</div>
+            <div class="hse360-subtitle">Salud Ocupacional · Chile 2026</div>
           </div>
         </div>
         <div class="sidebar-user-card flex items-center gap-2">
@@ -419,7 +419,7 @@ function buildLayout() {
         <button onclick="doLogout()" class="btn btn-outline-green w-full justify-center text-xs py-2">
           <i class="fas fa-right-from-bracket"></i> Cerrar Sesión
         </button>
-        <div class="text-center mt-2 text-xs" style="color:rgba(255,255,255,0.25)">v2.0 · HSE 360 · 2026</div>
+        <div class="text-center mt-2 text-xs" style="color:rgba(255,255,255,0.25)">v2.0 · HSE 360 · Salud Ocupacional · 2026</div>
         <div class="nexusforge-sidebar-footer" onclick="navigate('reports')" title="NexusForge — Connecting Innovation with Power">
           ${nfIconSVG(22, false)}
           <span class="nf-sb-text">NexusForge</span>
@@ -435,7 +435,7 @@ function buildLayout() {
           </button>
           <div>
             <div id="page-title" class="font-bold text-gray-800 text-lg leading-tight">Dashboard</div>
-            <div id="page-subtitle" class="text-xs text-gray-400">HSE 360 · Gestión Integral de Seguridad y Salud</div>
+            <div id="page-subtitle" class="text-xs text-gray-400">HSE 360 · Módulo de Salud Ocupacional</div>
           </div>
         </div>
         <div class="flex items-center gap-3">
@@ -562,7 +562,7 @@ function setPageTitle(title, subtitle) {
   const t = document.getElementById('page-title');
   const s = document.getElementById('page-subtitle');
   if (t) t.textContent = title;
-  if (s) s.textContent = subtitle || 'HSE 360 · Gestión Integral de Seguridad y Salud';
+  if (s) s.textContent = subtitle || 'HSE 360 · Módulo de Salud Ocupacional';
 }
 
 // ================================================================
@@ -1444,7 +1444,7 @@ async function renderDashboard() {
 
     <!-- NexusForge mini brand footer -->
     <div class="mt-5 flex items-center justify-between px-1 pb-1">
-      <div class="text-xs text-gray-400">HSE 360 v2.0 · Sistema de Gestión Integral de Seguridad y Salud · Chile 2026</div>
+      <div class="text-xs text-gray-400">HSE 360 v2.0 · Módulo de Salud Ocupacional · Chile 2026</div>
       <div class="nexusforge-badge-mini" onclick="navigate('reports')" title="NexusForge — Connecting Innovation with Power">
         ${nfIconSVG(20, true)}
         <span class="nf-mini-text">Desarrollado por <strong>NexusForge</strong></span>
@@ -3829,6 +3829,14 @@ async function renderProtocols() {
   const cumplimiento = {};
   protIds.forEach(id => { cumplimiento[id] = cumplMap[id] ?? defaults[id]; });
 
+  // Cargar estado guardado del Gantt (asíncrono, no bloquea el render)
+  loadGanttState().then(() => {
+    // Si la vista Gantt ya está visible, refrescar
+    if (!document.getElementById('view-gantt')?.classList.contains('hidden')) {
+      document.getElementById('view-gantt').innerHTML = renderGanttView(window._protCumpl || cumplimiento);
+    }
+  });
+
   // Guardar en caché global para que otras vistas (Paso a Paso, Gantt) usen valores actualizados
   window._protCumpl = cumplimiento;
 
@@ -3964,6 +3972,13 @@ function switchProtocolView(view) {
     document.getElementById('view-'+v)?.classList.toggle('hidden', v!==view);
     document.getElementById('tab-'+v)?.classList.toggle('active', v===view);
   });
+  // Al abrir Gantt, asegurar que tiene el estado más reciente
+  if (view === 'gantt') {
+    loadGanttState().then(() => {
+      const ganttDiv = document.getElementById('view-gantt');
+      if (ganttDiv) ganttDiv.innerHTML = renderGanttView(window._protCumpl || {});
+    });
+  }
 }
 
 function renderGanttView(cumplimiento) {
@@ -3982,7 +3997,7 @@ function renderGanttView(cumplimiento) {
 
   // Calcula meses activos según periodicidad
   function getMesesActivos(periodo, idx) {
-    const lp = periodo.toLowerCase();
+    const lp = (periodo||'').toLowerCase();
     if(lp.includes('mensual') || lp.includes('1 vez al mes')) return [0,1,2,3,4,5,6,7,8,9,10,11];
     if(lp.includes('2 veces'))  return [0,6];
     if(lp.includes('3 veces'))  return [0,4,8];
@@ -3993,14 +4008,18 @@ function renderGanttView(cumplimiento) {
     return [idx % 12];
   }
 
-  // Determina estado real de la celda (mes, mesesActivos, indiceActividad)
-  function getEstadoCelda(mes, mesesActivos, actIdx) {
+  // Determina estado real de la celda usando estado guardado o lógica automática
+  function getEstadoCelda(mes, mesesActivos, actIdx, estadoGuardado) {
     if(!mesesActivos.includes(mes)) return null;
-    // Simulación DS44: los meses ya pasados se marcan según avance
+    if(estadoGuardado && estadoGuardado !== 'auto') return estadoGuardado;
+    // Lógica automática por defecto
     if(mes < mesActual) return actIdx < 3 ? 'completado' : actIdx < 5 ? 'atrasado' : 'pendiente';
     if(mes === mesActual) return actIdx < 4 ? 'completado' : 'en_ejecucion';
     return 'pendiente';
   }
+
+  // Estado global del Gantt (se carga asíncronamente)
+  const ganttState = window._ganttState || {};
 
   return `
     <div class="card p-5">
@@ -4012,7 +4031,7 @@ function renderGanttView(cumplimiento) {
             Carta Gantt — Protocolos MINSAL ${year}
           </h3>
           <p class="text-xs text-gray-500 mt-0.5">
-            Cronograma DS 44 vigente 01/02/2025 · IRL obligatorio Art.15 · Todas las actividades MINSAL
+            Cronograma DS 44 vigente 01/02/2025 · IRL obligatorio Art.15 · Editable por actividad
           </p>
         </div>
         <div class="flex gap-2 flex-shrink-0">
@@ -4050,6 +4069,7 @@ function renderGanttView(cumplimiento) {
           const p   = PROTOCOL_META[pid];
           const pct = cumplimiento[pid] ?? 0;
           const pctColor = pct>=80?'#059669':pct>=60?'#d97706':'#dc2626';
+          const stateForProto = ganttState[pid] || {};
           return `
           <div class="gantt-proto-bloque mb-7" data-proto="${pid}">
             <!-- Cabecera protocolo -->
@@ -4076,64 +4096,81 @@ function renderGanttView(cumplimiento) {
 
             <!-- Tabla Gantt -->
             <div class="overflow-x-auto rounded-xl border" style="border-color:#e2e8f0">
-              <table class="w-full border-collapse text-xs" style="min-width:820px">
+              <table class="w-full border-collapse text-xs" style="min-width:900px">
                 <thead>
                   <tr style="background:#f0f2f8">
-                    <th class="text-left px-3 py-2 font-semibold text-gray-600 border-r border-gray-200" style="width:28%;min-width:180px">
-                      Actividad
-                    </th>
-                    <th class="px-2 py-2 text-center font-semibold text-gray-500 border-r border-gray-200" style="width:9%">Dirigido a</th>
-                    <th class="px-2 py-2 text-center font-semibold text-gray-500 border-r border-gray-200" style="width:9%">Responsable</th>
-                    <th class="px-2 py-2 text-center font-semibold text-gray-500 border-r border-gray-200" style="width:9%">Período</th>
+                    <th class="text-left px-3 py-2 font-semibold text-gray-600 border-r border-gray-200" style="width:25%;min-width:170px">Actividad</th>
+                    <th class="px-2 py-2 text-center font-semibold text-gray-500 border-r border-gray-200" style="width:8%">Dirigido a</th>
+                    <th class="px-2 py-2 text-center font-semibold text-gray-500 border-r border-gray-200" style="width:8%">Responsable</th>
+                    <th class="px-2 py-2 text-center font-semibold text-gray-500 border-r border-gray-200" style="width:8%">Período</th>
                     ${MESES.map((m,mi)=>`
                       <th class="px-1 py-2 text-center font-semibold border-r border-gray-100 last:border-r-0"
-                          style="width:3.5%;${mi===mesActual?'background:#eff2ff;color:#1a237e;font-weight:900':'color:#94a3b8'}">
+                          style="width:3.2%;${mi===mesActual?'background:#eff2ff;color:#1a237e;font-weight:900':'color:#94a3b8'}">
                         ${m}
                       </th>
                     `).join('')}
-                    <th class="px-2 py-2 text-center font-semibold text-gray-500" style="width:8%">Estado</th>
+                    <th class="px-2 py-2 text-center font-semibold text-gray-500 border-r border-gray-200" style="width:7%">Estado</th>
+                    <th class="px-2 py-2 text-center font-semibold text-gray-500" style="width:4%">
+                      <i class="fas fa-edit text-gray-400" title="Editar actividad"></i>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   ${p.ganttActividades.map((act,ai)=>{
-                    const mesesActivos = getMesesActivos(act.periodo, ai);
-                    // Estado general de la actividad (para badge final)
+                    const savedAct = stateForProto[ai] || {};
+                    const periodoEfectivo = savedAct.periodo || act.periodo;
+                    const mesesActivos = savedAct.meses_activos || getMesesActivos(periodoEfectivo, ai);
+                    const responEfect  = savedAct.responsable || act.por;
+                    const estadoGlobal = savedAct.estado_global;
                     const mesesPasadosActivos = mesesActivos.filter(m=>m<=mesActual);
                     let estadoGeneral = 'pendiente';
-                    if(mesesActivos.length===0) estadoGeneral='no_aplica';
+                    if(estadoGlobal) estadoGeneral = estadoGlobal;
+                    else if(mesesActivos.length===0) estadoGeneral='no_aplica';
                     else if(ai<3) estadoGeneral='completado';
                     else if(ai<5) estadoGeneral='en_ejecucion';
-                    const cfg = ESTADO_CONFIG[estadoGeneral];
+                    const cfg = ESTADO_CONFIG[estadoGeneral] || ESTADO_CONFIG.pendiente;
+                    const hasEdits = Object.keys(savedAct).length > 0;
                     return `
-                      <tr class="hover:bg-blue-50/20 transition-colors" style="${ai%2===0?'':'background:#fafbfd'}">
+                      <tr class="hover:bg-blue-50/20 transition-colors gantt-row-${pid}-${ai}" style="${ai%2===0?'':'background:#fafbfd'}">
                         <td class="px-3 py-2 font-medium text-gray-700 border-r border-gray-100">
-                          <span class="inline-block w-5 h-5 rounded-full text-center text-white font-bold text-xs leading-5 mr-1 flex-shrink-0"
-                                style="background:${p.color};display:inline-flex;align-items:center;justify-content:center">${act.n}</span>
+                          <span class="inline-flex w-5 h-5 rounded-full text-center text-white font-bold text-xs mr-1 flex-shrink-0 items-center justify-center"
+                                style="background:${p.color}">${act.n}</span>
                           ${act.actividad}
+                          ${hasEdits ? '<span class="ml-1 text-xs px-1 rounded" style="background:#dbeafe;color:#1d4ed8">editado</span>' : ''}
                         </td>
                         <td class="px-2 py-2 text-center text-gray-500 border-r border-gray-100">${act.dirigido}</td>
-                        <td class="px-2 py-2 text-center font-medium border-r border-gray-100" style="color:${p.color}">${act.por}</td>
-                        <td class="px-2 py-2 text-center text-gray-500 border-r border-gray-100 whitespace-nowrap">${act.periodo}</td>
+                        <td class="px-2 py-2 text-center font-medium border-r border-gray-100" style="color:${p.color}">${responEfect}</td>
+                        <td class="px-2 py-2 text-center text-gray-500 border-r border-gray-100 whitespace-nowrap">${periodoEfectivo}</td>
                         ${MESES.map((_,mi)=>{
-                          const estCelda = getEstadoCelda(mi, mesesActivos, ai);
+                          const estCeldaBase = savedAct.estado_celdas?.[mi] || null;
+                          const estCelda = estCeldaBase || getEstadoCelda(mi, mesesActivos, ai, null);
                           const esHoy = mi===mesActual;
                           if(!estCelda) return `<td class="px-1 py-2 text-center border-r border-gray-100 last:border-r-0"
                             style="${esHoy?'background:#eff2ff':''}">&nbsp;</td>`;
-                          const cc = ESTADO_CONFIG[estCelda];
+                          const cc = ESTADO_CONFIG[estCelda] || ESTADO_CONFIG.pendiente;
                           return `<td class="px-1 py-2 text-center border-r border-gray-100 last:border-r-0"
                             style="${esHoy?'background:#eff2ff':''}">
                             <div class="w-5 h-5 rounded-full mx-auto flex items-center justify-center cursor-pointer"
                                  title="${cc.label} · ${MESES[mi]}"
+                                 onclick="editGanttCell('${pid}',${ai},${mi})"
                                  style="background:${cc.bg};border:1.5px solid ${cc.border}">
                               <div class="w-2.5 h-2.5 rounded-full" style="background:${cc.color}"></div>
                             </div>
                           </td>`;
                         }).join('')}
-                        <td class="px-2 py-2 text-center">
+                        <td class="px-2 py-2 text-center border-r border-gray-100">
                           <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap"
                                 style="background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border}">
                             ${cfg.label}
                           </span>
+                        </td>
+                        <td class="px-2 py-2 text-center">
+                          <button class="w-7 h-7 rounded-lg flex items-center justify-center mx-auto transition-colors"
+                                  style="background:#eff2ff;border:1px solid #c7d2fe"
+                                  onclick="showEditGanttActivityModal('${pid}',${ai})"
+                                  title="Editar actividad">
+                            <i class="fas fa-edit text-xs" style="color:#4338ca"></i>
+                          </button>
                         </td>
                       </tr>
                     `;
@@ -4164,6 +4201,389 @@ function renderGanttView(cumplimiento) {
       </div>
     </div>
   `;
+}
+
+// ─────────────────────────────────────────────────────────────
+// EDICIÓN DE LA CARTA GANTT
+// ─────────────────────────────────────────────────────────────
+
+// Carga el estado guardado del Gantt desde la API para todos los protocolos
+async function loadGanttState() {
+  const protIds = Object.keys(PROTOCOL_META);
+  window._ganttState = window._ganttState || {};
+  try {
+    await Promise.all(protIds.map(async pid => {
+      const res = await API.get(`/protocols/${pid}/gantt`);
+      window._ganttState[pid] = res.data.data || {};
+    }));
+  } catch(e) { /* silencioso */ }
+}
+
+// Modal de edición completo de una actividad Gantt
+function showEditGanttActivityModal(pid, actIdx) {
+  const p = PROTOCOL_META[pid];
+  if (!p) return;
+  const act = p.ganttActividades[actIdx];
+  const saved = (window._ganttState?.[pid]?.[actIdx]) || {};
+
+  const estadoOpts = [
+    { v:'auto',         l:'Automático (según mes)' },
+    { v:'completado',   l:'✓ Realizado / Completado' },
+    { v:'en_ejecucion', l:'▶ En ejecución / En curso' },
+    { v:'pendiente',    l:'○ Pendiente' },
+    { v:'atrasado',     l:'⚠ Atrasado' },
+    { v:'no_aplica',    l:'— No aplica' },
+  ];
+
+  const periodoOpts = [
+    'Mensual','2 veces al año','3 veces al año','Anual (1 vez al año)',
+    'Al ingreso / cambio de puesto','Verano (Oct–Mar)','Según requerimiento',
+    'Continuo / Permanente','Semestral','Trimestral','Bimensual','Según protocolo'
+  ];
+
+  const mesesCheck = (saved.meses_activos || getMesesActivosFromPeriodo(saved.periodo || act.periodo, actIdx));
+
+  showModal(`Editar Actividad Gantt — ${pid}`, `
+    <div class="space-y-4">
+      <!-- Info de la actividad -->
+      <div class="p-3 rounded-lg flex items-start gap-2" style="background:#f0f2f8;border:1px solid #dde3f0">
+        <span class="inline-flex w-6 h-6 rounded-full text-white font-bold text-xs items-center justify-center flex-shrink-0 mt-0.5"
+              style="background:${p.color}">${act.n}</span>
+        <div>
+          <div class="font-semibold text-gray-800 text-sm">${act.actividad}</div>
+          <div class="text-xs text-gray-500 mt-0.5">${p.titulo} · Dirigido a: ${act.dirigido}</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Estado general -->
+        <div>
+          <label class="form-label">Estado general de la actividad</label>
+          <select id="ge-estado" class="form-input">
+            ${estadoOpts.map(o=>`<option value="${o.v}" ${(saved.estado_global||'auto')===o.v?'selected':''}>${o.l}</option>`).join('')}
+          </select>
+        </div>
+
+        <!-- Periodicidad -->
+        <div>
+          <label class="form-label">Periodicidad / Período</label>
+          <select id="ge-periodo" class="form-input" onchange="updateGanttMesesPreview()">
+            ${periodoOpts.map(o=>`<option value="${o}" ${(saved.periodo||act.periodo)===o?'selected':''}>${o}</option>`).join('')}
+            <option value="__custom" ${!periodoOpts.includes(saved.periodo||act.periodo)?'selected':''}>Personalizado…</option>
+          </select>
+          <input id="ge-periodo-custom" class="form-input mt-1 text-xs ${periodoOpts.includes(saved.periodo||act.periodo)?'hidden':''}"
+                 placeholder="Escribir período personalizado"
+                 value="${!periodoOpts.includes(saved.periodo||act.periodo) ? (saved.periodo||act.periodo) : ''}">
+        </div>
+
+        <!-- Responsable -->
+        <div>
+          <label class="form-label">Responsable</label>
+          <input id="ge-responsable" class="form-input" placeholder="Nombre / cargo"
+                 value="${saved.responsable || act.por}">
+        </div>
+
+        <!-- Observaciones -->
+        <div>
+          <label class="form-label">Observaciones</label>
+          <input id="ge-obs" class="form-input" placeholder="Notas internas (opcional)"
+                 value="${saved.observaciones || ''}">
+        </div>
+      </div>
+
+      <!-- Meses activos (checkboxes) -->
+      <div>
+        <label class="form-label mb-2">Meses activos (marcar en cuáles aplica la actividad)</label>
+        <div class="grid grid-cols-6 gap-2" id="ge-meses-grid">
+          ${MESES.map((m,mi)=>`
+            <label class="flex items-center gap-1.5 cursor-pointer p-1.5 rounded-lg text-xs hover:bg-blue-50"
+                   style="border:1px solid #e5e7eb">
+              <input type="checkbox" class="ge-mes-cb" data-mi="${mi}"
+                     ${mesesCheck.includes(mi)?'checked':''}
+                     style="accent-color:#1a237e">
+              <span class="font-medium">${m}</span>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Estado por mes (celda individual) -->
+      <div>
+        <label class="form-label mb-2">Estado por mes (opcional — sobreescribe el estado automático)</label>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs border-collapse" style="min-width:620px">
+            <thead>
+              <tr>
+                ${MESES.map((m,mi)=>`<th class="px-2 py-1 text-center font-semibold text-gray-500"
+                  style="${mi===new Date().getMonth()?'color:#1a237e;font-weight:900':''}">${m}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                ${MESES.map((_,mi)=>{
+                  const cur = saved.estado_celdas?.[mi] || 'auto';
+                  return `<td class="px-1 py-1 text-center">
+                    <select class="ge-celda-sel text-xs rounded px-1 py-0.5 border border-gray-200" data-mi="${mi}"
+                            style="font-size:10px;max-width:90px">
+                      <option value="auto" ${cur==='auto'?'selected':''}>Auto</option>
+                      <option value="completado"   ${cur==='completado'?'selected':''}>✓</option>
+                      <option value="en_ejecucion" ${cur==='en_ejecucion'?'selected':''}>▶</option>
+                      <option value="pendiente"    ${cur==='pendiente'?'selected':''}>○</option>
+                      <option value="atrasado"     ${cur==='atrasado'?'selected':''}>⚠</option>
+                      <option value="no_aplica"    ${cur==='no_aplica'?'selected':''}>—</option>
+                    </select>
+                  </td>`;
+                }).join('')}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-danger text-xs" onclick="resetGanttActivity('${pid}',${actIdx})">
+      <i class="fas fa-rotate-left mr-1"></i>Restaurar por defecto
+    </button>
+    <button class="btn btn-primary" onclick="saveGanttActivity('${pid}',${actIdx})">
+      <i class="fas fa-save mr-1"></i>Guardar cambios
+    </button>
+  `);
+
+  // Mostrar/ocultar input personalizado al cambiar select
+  document.getElementById('ge-periodo')?.addEventListener('change', function() {
+    const ci = document.getElementById('ge-periodo-custom');
+    if (this.value === '__custom') ci?.classList.remove('hidden');
+    else ci?.classList.add('hidden');
+  });
+}
+
+// Edición rápida de una celda individual (click en el punto de color)
+async function editGanttCell(pid, actIdx, mes) {
+  const estados = ['auto','completado','en_ejecucion','pendiente','atrasado','no_aplica'];
+  const cur = window._ganttState?.[pid]?.[actIdx]?.estado_celdas?.[mes] || 'auto';
+  const next = estados[(estados.indexOf(cur)+1) % estados.length];
+
+  if (!window._ganttState) window._ganttState = {};
+  if (!window._ganttState[pid]) window._ganttState[pid] = {};
+  if (!window._ganttState[pid][actIdx]) window._ganttState[pid][actIdx] = {};
+  if (!window._ganttState[pid][actIdx].estado_celdas) window._ganttState[pid][actIdx].estado_celdas = {};
+  window._ganttState[pid][actIdx].estado_celdas[mes] = next;
+
+  try {
+    await API.put(`/protocols/${pid}/gantt`, {
+      actividades: [{ idx: actIdx, estado_celdas: window._ganttState[pid][actIdx].estado_celdas }]
+    });
+    // Refrescar fila visualmente
+    refreshGanttRow(pid, actIdx);
+    const ESTADO_CONFIG = {completado:{color:'#059669',bg:'#ecfdf5',border:'#a7f3d0'},en_ejecucion:{color:'#d97706',bg:'#fffbeb',border:'#fde68a'},pendiente:{color:'#6b7280',bg:'#f3f4f6',border:'#d1d5db'},no_aplica:{color:'#3b82f6',bg:'#eff6ff',border:'#bfdbfe'},atrasado:{color:'#dc2626',bg:'#fef2f2',border:'#fecaca'},auto:{color:'#94a3b8',bg:'#f1f5f9',border:'#e2e8f0'}};
+    const label = {auto:'Automático',completado:'✓ Realizado',en_ejecucion:'▶ En curso',pendiente:'○ Pendiente',atrasado:'⚠ Atrasado',no_aplica:'— No aplica'}[next]||next;
+    showToast(`${MESES[mes]}: ${label}`, 'success');
+  } catch(e) { showToast('Error al guardar','error'); }
+}
+
+// Guardar edición completa de una actividad
+async function saveGanttActivity(pid, actIdx) {
+  const estadoSel = document.getElementById('ge-estado')?.value;
+  const periodoSel = document.getElementById('ge-periodo')?.value;
+  const periodoCustom = document.getElementById('ge-periodo-custom')?.value?.trim();
+  const periodo = periodoSel === '__custom' ? (periodoCustom || periodoSel) : periodoSel;
+  const responsable = document.getElementById('ge-responsable')?.value?.trim();
+  const obs = document.getElementById('ge-obs')?.value?.trim();
+
+  // Meses activos seleccionados
+  const meses_activos = [];
+  document.querySelectorAll('.ge-mes-cb:checked').forEach(cb => {
+    meses_activos.push(parseInt(cb.dataset.mi));
+  });
+
+  // Estado por celda
+  const estado_celdas = {};
+  document.querySelectorAll('.ge-celda-sel').forEach(sel => {
+    const mi = parseInt(sel.dataset.mi);
+    if (sel.value !== 'auto') estado_celdas[mi] = sel.value;
+  });
+
+  const payload = {
+    idx: actIdx,
+    estado_global: estadoSel === 'auto' ? null : estadoSel,
+    periodo,
+    responsable,
+    observaciones: obs,
+    meses_activos,
+    estado_celdas
+  };
+
+  try {
+    await API.put(`/protocols/${pid}/gantt`, { actividades: [payload] });
+    if (!window._ganttState) window._ganttState = {};
+    if (!window._ganttState[pid]) window._ganttState[pid] = {};
+    window._ganttState[pid][actIdx] = payload;
+    showToast('Actividad actualizada correctamente', 'success');
+    closeModal();
+    // Refrescar fila en la tabla sin recargar toda la vista
+    refreshGanttRow(pid, actIdx);
+  } catch(e) { showToast('Error al guardar la actividad','error'); }
+}
+
+// Restaurar actividad a valores por defecto
+async function resetGanttActivity(pid, actIdx) {
+  try {
+    await API.put(`/protocols/${pid}/gantt`, { actividades: [{ idx: actIdx, _reset: true, estado_global: null, periodo: null, responsable: null, observaciones: null, meses_activos: null, estado_celdas: {} }] });
+    if (window._ganttState?.[pid]) delete window._ganttState[pid][actIdx];
+    showToast('Actividad restaurada a valores por defecto', 'success');
+    closeModal();
+    refreshGanttRow(pid, actIdx);
+  } catch(e) { showToast('Error al restaurar','error'); }
+}
+
+// Refresca una fila del Gantt sin recargar toda la vista
+function refreshGanttRow(pid, actIdx) {
+  // Reconstruir solo la tabla del protocolo afectado re-renderizando el bloque completo
+  const cumplimiento = window._protCumpl || {};
+  const bloque = document.querySelector(`.gantt-proto-bloque[data-proto="${pid}"]`);
+  if (!bloque) return;
+  // Re-render completo del bloque usando la misma función
+  const tempDiv = document.createElement('div');
+  // Solo renderizamos el bloque individualmente
+  const p = PROTOCOL_META[pid];
+  if (!p) return;
+  const pct = cumplimiento[pid] ?? 0;
+  const pctColor = pct>=80?'#059669':pct>=60?'#d97706':'#dc2626';
+  const stateForProto = window._ganttState?.[pid] || {};
+  const mesActual = new Date().getMonth();
+  const year = new Date().getFullYear();
+
+  const ESTADO_CONFIG = {
+    completado:  { color:'#059669', bg:'#ecfdf5', border:'#a7f3d0', label:'✓ Realizado' },
+    en_ejecucion:{ color:'#d97706', bg:'#fffbeb', border:'#fde68a', label:'▶ En curso' },
+    pendiente:   { color:'#6b7280', bg:'#f3f4f6', border:'#d1d5db', label:'○ Pendiente' },
+    no_aplica:   { color:'#3b82f6', bg:'#eff6ff', border:'#bfdbfe', label:'— No aplica' },
+    atrasado:    { color:'#dc2626', bg:'#fef2f2', border:'#fecaca', label:'⚠ Atrasado' },
+  };
+
+  function getMesesActivos2(periodo, idx) {
+    const lp = (periodo||'').toLowerCase();
+    if(lp.includes('mensual')||lp.includes('1 vez al mes')) return [0,1,2,3,4,5,6,7,8,9,10,11];
+    if(lp.includes('2 veces')) return [0,6];
+    if(lp.includes('3 veces')) return [0,4,8];
+    if(lp.includes('anual')||lp.includes('1 vez al año')) return [5];
+    if(lp.includes('cambio puesto')||lp.includes('según')) return [0];
+    if(lp.includes('verano')||lp.includes('oct')) return [9,10,11,0,1,2];
+    if(lp.includes('necesario')||lp.includes('requerimiento')) return [];
+    return [idx % 12];
+  }
+
+  tempDiv.innerHTML = `<div class="gantt-proto-bloque mb-7" data-proto="${pid}">
+    <div class="flex items-center gap-3 mb-2 p-3 rounded-xl" style="background:${p.color}0d;border:1px solid ${p.color}30">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:${p.color}20;border:1px solid ${p.color}50">
+        <i class="fas ${p.icon} text-sm" style="color:${p.color}"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="font-bold text-sm text-gray-800">${p.titulo} — ${p.subtitulo}</div>
+        <div class="text-xs text-gray-400 truncate">${p.norma}</div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <div class="hidden sm:block w-24 h-2 rounded-full bg-gray-100 overflow-hidden">
+          <div class="h-full rounded-full" style="width:${pct}%;background:${pctColor}"></div>
+        </div>
+        <span class="text-sm font-black" style="color:${pctColor}">${pct}%</span>
+        <button class="btn btn-secondary text-xs py-1 px-2" onclick="showIRLModal('${pid}')">
+          <i class="fas fa-file-signature mr-1" style="color:#1a237e"></i>IRL
+        </button>
+      </div>
+    </div>
+    <div class="overflow-x-auto rounded-xl border" style="border-color:#e2e8f0">
+      <table class="w-full border-collapse text-xs" style="min-width:900px">
+        <thead>
+          <tr style="background:#f0f2f8">
+            <th class="text-left px-3 py-2 font-semibold text-gray-600 border-r border-gray-200" style="width:25%;min-width:170px">Actividad</th>
+            <th class="px-2 py-2 text-center font-semibold text-gray-500 border-r border-gray-200" style="width:8%">Dirigido a</th>
+            <th class="px-2 py-2 text-center font-semibold text-gray-500 border-r border-gray-200" style="width:8%">Responsable</th>
+            <th class="px-2 py-2 text-center font-semibold text-gray-500 border-r border-gray-200" style="width:8%">Período</th>
+            ${MESES.map((m,mi)=>`<th class="px-1 py-2 text-center font-semibold border-r border-gray-100 last:border-r-0" style="width:3.2%;${mi===mesActual?'background:#eff2ff;color:#1a237e;font-weight:900':'color:#94a3b8'}">${m}</th>`).join('')}
+            <th class="px-2 py-2 text-center font-semibold text-gray-500 border-r border-gray-200" style="width:7%">Estado</th>
+            <th class="px-2 py-2 text-center font-semibold text-gray-500" style="width:4%"><i class="fas fa-edit text-gray-400"></i></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${p.ganttActividades.map((act,ai)=>{
+            const savedAct = stateForProto[ai] || {};
+            const periodoEfectivo = savedAct.periodo || act.periodo;
+            const mesesActivos = savedAct.meses_activos || getMesesActivos2(periodoEfectivo, ai);
+            const responEfect = savedAct.responsable || act.por;
+            const estadoGlobal = savedAct.estado_global;
+            let estadoGeneral = 'pendiente';
+            if(estadoGlobal) estadoGeneral = estadoGlobal;
+            else if(mesesActivos.length===0) estadoGeneral='no_aplica';
+            else if(ai<3) estadoGeneral='completado';
+            else if(ai<5) estadoGeneral='en_ejecucion';
+            const cfg = ESTADO_CONFIG[estadoGeneral] || ESTADO_CONFIG.pendiente;
+            const hasEdits = Object.keys(savedAct).length > 0;
+            return `<tr class="hover:bg-blue-50/20 transition-colors gantt-row-${pid}-${ai}" style="${ai%2===0?'':'background:#fafbfd'}">
+              <td class="px-3 py-2 font-medium text-gray-700 border-r border-gray-100">
+                <span class="inline-flex w-5 h-5 rounded-full text-white font-bold text-xs mr-1 flex-shrink-0 items-center justify-center" style="background:${p.color}">${act.n}</span>
+                ${act.actividad}
+                ${hasEdits?'<span class="ml-1 text-xs px-1 rounded" style="background:#dbeafe;color:#1d4ed8">editado</span>':''}
+              </td>
+              <td class="px-2 py-2 text-center text-gray-500 border-r border-gray-100">${act.dirigido}</td>
+              <td class="px-2 py-2 text-center font-medium border-r border-gray-100" style="color:${p.color}">${responEfect}</td>
+              <td class="px-2 py-2 text-center text-gray-500 border-r border-gray-100 whitespace-nowrap">${periodoEfectivo}</td>
+              ${MESES.map((_,mi)=>{
+                const estCeldaBase = savedAct.estado_celdas?.[mi] || null;
+                let estCelda = estCeldaBase;
+                if(!estCelda) {
+                  if(!mesesActivos.includes(mi)) estCelda = null;
+                  else if(mi < mesActual) estCelda = ai<3?'completado':ai<5?'atrasado':'pendiente';
+                  else if(mi===mesActual) estCelda = ai<4?'completado':'en_ejecucion';
+                  else estCelda = 'pendiente';
+                }
+                const esHoy = mi===mesActual;
+                if(!estCelda) return `<td class="px-1 py-2 text-center border-r border-gray-100" style="${esHoy?'background:#eff2ff':''}">&nbsp;</td>`;
+                const cc = ESTADO_CONFIG[estCelda] || ESTADO_CONFIG.pendiente;
+                return `<td class="px-1 py-2 text-center border-r border-gray-100" style="${esHoy?'background:#eff2ff':''}">
+                  <div class="w-5 h-5 rounded-full mx-auto flex items-center justify-center cursor-pointer"
+                       title="${cc.label} · ${MESES[mi]}"
+                       onclick="editGanttCell('${pid}',${ai},${mi})"
+                       style="background:${cc.bg};border:1.5px solid ${cc.border}">
+                    <div class="w-2.5 h-2.5 rounded-full" style="background:${cc.color}"></div>
+                  </div></td>`;
+              }).join('')}
+              <td class="px-2 py-2 text-center border-r border-gray-100">
+                <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap" style="background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border}">${cfg.label}</span>
+              </td>
+              <td class="px-2 py-2 text-center">
+                <button class="w-7 h-7 rounded-lg flex items-center justify-center mx-auto transition-colors"
+                        style="background:#eff2ff;border:1px solid #c7d2fe"
+                        onclick="showEditGanttActivityModal('${pid}',${ai})" title="Editar actividad">
+                  <i class="fas fa-edit text-xs" style="color:#4338ca"></i>
+                </button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+
+  bloque.replaceWith(tempDiv.firstElementChild);
+}
+
+// Helper: obtener meses activos desde string de período (versión global para el modal)
+function getMesesActivosFromPeriodo(periodo, idx) {
+  const lp = (periodo||'').toLowerCase();
+  if(lp.includes('mensual')||lp.includes('1 vez al mes')) return [0,1,2,3,4,5,6,7,8,9,10,11];
+  if(lp.includes('2 veces')) return [0,6];
+  if(lp.includes('3 veces')) return [0,4,8];
+  if(lp.includes('anual')||lp.includes('1 vez al año')) return [5];
+  if(lp.includes('cambio puesto')||lp.includes('según')) return [0];
+  if(lp.includes('verano')||lp.includes('oct')) return [9,10,11,0,1,2];
+  if(lp.includes('necesario')||lp.includes('requerimiento')) return [];
+  if(lp.includes('semestral')) return [0,6];
+  if(lp.includes('trimestral')) return [0,3,6,9];
+  if(lp.includes('bimensual')) return [0,2,4,6,8,10];
+  if(lp.includes('continuo')||lp.includes('permanente')) return [0,1,2,3,4,5,6,7,8,9,10,11];
+  return [idx % 12];
 }
 
 function ganttFiltrarProtocolo(valor) {
@@ -6001,7 +6421,7 @@ async function renderReports() {
             <span class="nf-chip"><i class="fas fa-shield-halved mr-1"></i>Edge Security</span>
             <span class="nf-chip"><i class="fas fa-bolt mr-1"></i>Edge Computing</span>
           </div>
-          <div class="nf-banner-meta">HSE 360 v2.0 · Plataforma Integral de Seguridad y Salud · Chile 2026</div>
+          <div class="nf-banner-meta">HSE 360 v2.0 · Módulo de Salud Ocupacional · Chile 2026</div>
         </div>
       </div>
     </div>
@@ -6032,7 +6452,7 @@ async function generateReport(type, format) {
           </div>
         </div>
         <div class="p-4 bg-gray-50 rounded-xl text-sm text-gray-600">
-          <p class="font-bold text-gray-800 mb-2">HSE 360 — Plataforma Integral de Seguridad y Salud</p>
+          <p class="font-bold text-gray-800 mb-2">HSE 360 — Módulo de Salud Ocupacional</p>
           <p class="text-xs">Este informe contiene información confidencial según Ley 19.628. Su distribución debe ser autorizada por el Super Administrador.</p>
           <div class="mt-3 p-3 border rounded-lg bg-white">
             <div class="text-xs font-bold text-gray-500 mb-2">CONTENIDO DEL INFORME:</div>

@@ -655,4 +655,44 @@ app.post('/:id/evaluaciones', async (c) => {
   return c.json({ success: true, data: newEval }, 201)
 })
 
+// ================================================================
+// GANTT — Estado de actividades por protocolo
+// Persiste ediciones del usuario (estado, responsable, período, etc.)
+// ================================================================
+
+// Store en memoria: ganttStateDB[protocolId][actividadIdx] = { estado, responsable, periodo, observaciones, fechas_personalizadas }
+export const ganttStateDB: Record<string, Record<number, any>> = {}
+
+// GET /api/protocols/:id/gantt — Obtener estado actual del Gantt de un protocolo
+app.get('/:id/gantt', (c) => {
+  const id = c.req.param('id').toUpperCase()
+  if (!protocolsDB[id]) return c.json({ success: false, error: 'Protocolo no encontrado' }, 404)
+  return c.json({ success: true, data: ganttStateDB[id] || {} })
+})
+
+// PUT /api/protocols/:id/gantt — Actualizar estado de actividades del Gantt
+// body: { actividades: [{ idx: 0, estado: 'completado', responsable: '...', periodo: '...', meses_activos: [0,3,6,9], observaciones: '...' }] }
+app.put('/:id/gantt', async (c) => {
+  const id = c.req.param('id').toUpperCase()
+  if (!protocolsDB[id]) return c.json({ success: false, error: 'Protocolo no encontrado' }, 404)
+  const body = await c.req.json()
+  if (!ganttStateDB[id]) ganttStateDB[id] = {}
+  const actividades: any[] = body.actividades || []
+  actividades.forEach((act: any) => {
+    const idx = act.idx
+    if (idx !== undefined) {
+      ganttStateDB[id][idx] = {
+        ...(ganttStateDB[id][idx] || {}),
+        ...act,
+        updated_at: new Date().toISOString()
+      }
+    }
+  })
+  return c.json({
+    success: true,
+    data: ganttStateDB[id],
+    message: `Gantt ${id} actualizado: ${actividades.length} actividad(es) modificada(s)`
+  })
+})
+
 export default app
