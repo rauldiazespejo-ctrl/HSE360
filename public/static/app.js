@@ -955,7 +955,7 @@ async function renderUsers() {
 }
 
 function renderUsersRows(users) {
-  const centrosMap = window._centrosMap || { 1: 'Planta Norte', 2: 'Bodega Sur', 3: 'Oficinas Admin.' };
+  const centrosMap = window._centrosMap || {};
   return users.map(u => `
     <tr id="user-row-${u.id}">
       <td>
@@ -998,9 +998,12 @@ function renderUsersRows(users) {
             <i class="fas fa-key"></i>
           </button>
           ${u.activo
-            ? `<button class="btn btn-danger py-1 px-2 text-xs" onclick="toggleUserStatus(${u.id},false)" title="Desactivar"><i class="fas fa-ban"></i></button>`
+            ? `<button class="btn btn-secondary py-1 px-2 text-xs" style="color:#b45309;border-color:#fbbf24" onclick="toggleUserStatus(${u.id},false)" title="Desactivar usuario"><i class="fas fa-ban"></i></button>`
             : `<button class="btn btn-success py-1 px-2 text-xs" onclick="toggleUserStatus(${u.id},true)" title="Reactivar"><i class="fas fa-check"></i></button>`
           }
+          <button class="btn btn-danger py-1 px-2 text-xs" onclick="confirmDeleteUser(${u.id},'${u.nombres} ${u.apellidos}')" title="Eliminar definitivamente">
+            <i class="fas fa-trash"></i>
+          </button>
         </div>` : `<span class="text-xs text-gray-300 italic">Protegido</span>`}
       </td>
     </tr>
@@ -1187,13 +1190,59 @@ async function toggleUserStatus(id, activate) {
   try {
     if (activate) {
       await API.patch(`/users/${id}/reactivar`);
-      showToast('Usuario reactivado', 'success');
+      showToast('Usuario reactivado correctamente', 'success');
     } else {
-      await API.delete(`/users/${id}`);
+      await API.put(`/users/${id}`, { activo: false });
       showToast('Usuario desactivado', 'success');
     }
     navigate('users');
   } catch(err) { showToast(err.response?.data?.error || 'Error','error'); }
+}
+
+function confirmDeleteUser(id, nombre) {
+  showModal('Eliminar Usuario Definitivamente', `
+    <div class="space-y-4">
+      <div class="p-4 rounded-lg" style="background:#fef2f2;border:1.5px solid #fca5a5">
+        <div class="flex items-start gap-3">
+          <i class="fas fa-exclamation-triangle text-red-500 text-xl mt-0.5 flex-shrink-0"></i>
+          <div>
+            <div class="font-bold text-red-800">¡Acción Irreversible!</div>
+            <div class="text-sm text-red-700 mt-1">Estás a punto de eliminar definitivamente al usuario <strong>${nombre}</strong> del sistema.</div>
+            <div class="text-sm text-red-700 mt-1">Esta acción <strong>no se puede deshacer</strong>. El usuario perderá todo acceso inmediatamente.</div>
+          </div>
+        </div>
+      </div>
+      <div class="text-sm text-gray-600">Para confirmar, escribe <strong>ELIMINAR</strong> en el campo:</div>
+      <input id="confirm-delete-input" class="form-input" placeholder="Escribe ELIMINAR para confirmar" oninput="checkDeleteConfirm()">
+    </div>
+  `, `
+    <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+    <button id="btn-confirm-delete" class="btn btn-danger" style="opacity:0.4;cursor:not-allowed" disabled onclick="executeDeleteUser(${id})"><i class="fas fa-trash mr-1"></i>Eliminar Definitivamente</button>
+  `);
+}
+
+function checkDeleteConfirm() {
+  const val = document.getElementById('confirm-delete-input')?.value || '';
+  const btn = document.getElementById('btn-confirm-delete');
+  if (!btn) return;
+  if (val === 'ELIMINAR') {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '0.4';
+    btn.style.cursor = 'not-allowed';
+  }
+}
+
+async function executeDeleteUser(id) {
+  try {
+    await API.delete(`/users/${id}`);
+    showToast('Usuario eliminado definitivamente', 'success');
+    closeModal();
+    navigate('users');
+  } catch(err) { showToast(err.response?.data?.error || 'Error al eliminar','error'); }
 }
 
 

@@ -17,16 +17,8 @@ export let eppStockDB: any[] = [
   { id: 12, codigo: 'ALT-001', nombre: 'Chaleco Reflectante Clase 2', categoria: 'Alta Visibilidad', marca: 'Steelpro', modelo: 'Clase 2 ANSI 107', nrr_db: null, norma_tecnica: 'ANSI/ISEA 107-2015 Clase 2', stock_actual: 42, stock_minimo: 30, unidad: 'unidades', ubicacion: 'Bodega EPP — Estante G1', fecha_vencimiento_lote: null, costo_unitario: 6500, estado_stock: 'ok', protocolo_asociado: null },
 ]
 
-export let entregasDB: any[] = [
-  { id: 1, worker_id: 1, trabajador_nombre: 'Carlos González Muñoz', trabajador_rut: '12.345.678-9', epp_id: 1, epp_nombre: 'Tapones Auditivos 3M 1100', cantidad: 2, fecha_entrega: '2026-01-15', proxima_renovacion: '2026-07-15', firma_digital: true, estado_registro: 'vigente', observaciones: 'NSE III. Renovación semestral.', protocolo: 'PREXOR' },
-  { id: 2, worker_id: 1, trabajador_nombre: 'Carlos González Muñoz', trabajador_rut: '12.345.678-9', epp_id: 2, epp_nombre: 'Orejera 3M Peltor H9A', cantidad: 1, fecha_entrega: '2026-01-15', proxima_renovacion: '2027-01-15', firma_digital: true, estado_registro: 'vigente', observaciones: 'Uso alternado con tapones', protocolo: 'PREXOR' },
-  { id: 3, worker_id: 1, trabajador_nombre: 'Carlos González Muñoz', trabajador_rut: '12.345.678-9', epp_id: 5, epp_nombre: 'Protector Solar FPS 50+', cantidad: 1, fecha_entrega: '2026-03-01', proxima_renovacion: '2026-06-01', firma_digital: true, estado_registro: 'vigente', observaciones: 'Temporada UV', protocolo: 'UV' },
-  { id: 4, worker_id: 3, trabajador_nombre: 'Jorge Martínez Pérez', trabajador_rut: '9.876.543-1', epp_id: 3, epp_nombre: 'Respirador 3M 7502', cantidad: 1, fecha_entrega: '2026-01-20', proxima_renovacion: '2027-01-20', firma_digital: true, estado_registro: 'vigente', observaciones: 'Fit Test realizado 15/01/2026', protocolo: 'PLANESI' },
-  { id: 5, worker_id: 3, trabajador_nombre: 'Jorge Martínez Pérez', trabajador_rut: '9.876.543-1', epp_id: 4, epp_nombre: 'Filtros P100 3M 2097', cantidad: 2, fecha_entrega: '2026-01-20', proxima_renovacion: '2026-07-20', firma_digital: true, estado_registro: 'vigente', observaciones: 'Renovación filtros cada 6 meses o según indicador de saturación', protocolo: 'PLANESI' },
-  { id: 6, worker_id: 5, trabajador_nombre: 'Pedro Sánchez Rojas', trabajador_rut: '11.111.111-1', epp_id: 11, epp_nombre: 'Careta de Soldar Lincoln VIKING', cantidad: 1, fecha_entrega: '2025-11-15', proxima_renovacion: '2027-11-15', firma_digital: false, estado_registro: 'vigente', observaciones: '⚠️ PENDIENTE FIRMA DIGITAL', protocolo: 'HUMOS' },
-  { id: 7, worker_id: 5, trabajador_nombre: 'Pedro Sánchez Rojas', trabajador_rut: '11.111.111-1', epp_id: 3, epp_nombre: 'Respirador 3M 7502', cantidad: 1, fecha_entrega: '2025-09-01', proxima_renovacion: '2026-09-01', firma_digital: true, estado_registro: 'vigente', observaciones: 'NSE IV. Uso obligatorio. Sistema doble con tapones.', protocolo: 'PLANESI' },
-  { id: 8, worker_id: 8, trabajador_nombre: 'Valeria Herrera Díaz', trabajador_rut: '17.890.123-4', epp_id: 5, epp_nombre: 'Protector Solar FPS 50+', cantidad: 1, fecha_entrega: '2026-03-01', proxima_renovacion: '2026-06-01', firma_digital: true, estado_registro: 'vigente', observaciones: 'Trabajo exterior bodega', protocolo: 'UV' },
-]
+// Entregas de EPP — se registran en producción al ingresar trabajadores reales
+export let entregasDB: any[] = []
 
 // Helper: calcula estado_stock
 function calcEstado(actual: number, minimo: number): string {

@@ -77,16 +77,16 @@ app.put('/:id', async (c) => {
   return c.json({ success: true, data: { ...userSafe, rol_info: rolesInfo[users[idx].rol] }, message: 'Usuario actualizado correctamente' })
 })
 
-// DELETE /api/users/:id — Solo superadmin
+// DELETE /api/users/:id — Elimina definitivamente al usuario (Solo superadmin)
 app.delete('/:id', (c) => {
   const id = parseInt(c.req.param('id'))
   const idx = users.findIndex(u => u.id === id)
   if (idx === -1) return c.json({ success: false, error: 'Usuario no encontrado' }, 404)
   if (users[idx].rol === 'superadmin') {
-    return c.json({ success: false, error: 'No se puede desactivar al Super Administrador.' }, 403)
+    return c.json({ success: false, error: 'No se puede eliminar al Super Administrador.' }, 403)
   }
-  users[idx].activo = false
-  return c.json({ success: true, message: 'Usuario desactivado correctamente' })
+  users.splice(idx, 1)
+  return c.json({ success: true, message: 'Usuario eliminado definitivamente' })
 })
 
 // PATCH /api/users/:id/reactivar — Solo superadmin
